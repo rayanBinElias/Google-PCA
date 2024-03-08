@@ -1,0 +1,481 @@
+Google Cloud Fundamentals: Core Infrastructure
+
+
+Learning objectives
+	1. Identify the purpose and value of Google Cloud products and services
+	2. Define how infrastructure is organized and controlled in Google Cloud
+	3. Explain how to create a basic infrastructure in google Cloud
+	4. Select and use Google Cloud storage options
+	5. Describe the purpose and value of Google Kubernetes Engine
+	6. Identify the use cases for serverless Google Cloud services
+	
+
+Week 1 Course Introduction
+
+Learning Objectives
+	1. Welcome learners to the course.
+
+Week 2 Introducing Google Cloud
+
+Learning objectives
+	1. Identify the benefits of Google Cloud.
+	2. Define the components of the Google network infrastructure, including points of presence, data centers, regions, and zones.
+	3. Identify the difference between infrastructure as a service (IaaS) and platform as a service (PaaS).
+
+Cloud Computing Overview
+	- way of using IT that has 5 equal important traits
+		1. On demand and self service
+		2. Access those resources from anywhere over the internet
+		3. Provider allocates resources to users out of the pool
+		4. Resources are elastic means flexible
+		5. Pay what you use/reserver as they go
+
+Why in demand nowadays?
+	History
+		First wave
+			colocation
+				- users rents physical space of the DC provider without investing own data center
+		
+		Second wave
+			virtualized data center
+				- uses virtual devices, match physical building blocks(CPUs, Disks, network) of hosted computing resources
+				- enterprieses still maintain infra and user controleed/user-config env
+				- not fast enough cuz not automated
+
+		Third wave
+			Container-based architecture
+				- fully automated elastic(auto scale) means automated service and scalable data
+				- auto provision and config infra used to run app
+
+		Future wave
+			Data Company
+				- great software based on high quality data
+
+
+IaaS and PaaS
+	IaaS
+	 	- cloud manage:
+	 		raw compute/server/virtualization
+	 		storage
+	 		newtork
+	 	- you:
+	 		app
+	 		data
+	 		runtime
+	 		middleware
+	 		OS
+
+	 	Sample
+	 		Compute Enigine
+
+	PaaS
+		- cloud manage:
+	 		everything
+	 	- you:
+	 		app
+	 		data
+	 	Sample
+	 		App engine
+
+	 Serverless/Function as a service
+	 	AWS/GCP run containers for you based on CPU/RAM you need
+	 	you don't manage/provision servers so you can concentrate on code
+	 	lambda/cloud function
+	 		even-drivent driven code
+	 			pay as you go
+	 	cloud run/ECS-Fargate
+
+	 SaaS
+	 	- cloud manage all
+	 	app run in the cloud as a service
+	 	Sample
+	 		gmail
+	 		docs
+	 		drive
+
+The Google Cloud network
+	Region(40)/AWS Region(33)
+		singapore
+
+	Zone(121)/Availability-zone(105)
+		asia-souteast1a-c
+
+	Network Edge locations(187)/Edge Locations(400)
+
+	Sample
+		Multi region archi sample
+		Cloud Spanbner/aurora
+
+Environment Impact
+	ISO 14001
+	carbon neutral/carbon free
+
+Security
+	Hardware infra layer
+		own design  chips/own network hardware design
+		Secure boot stack
+			ensures correct booting correct software stack
+				crypto sign over BIOS
+					bridge bet OS and hardware during startup process
+					startup guide
+				bootloader
+					manage flow bet software and  hardware during starup process
+					traffic cop
+				kernel
+					boss
+					core component of OSmake sures sys resources, comm bet  hardware and software, and process runs smoothly
+				OS of image
+
+		Premises security
+
+	Service deployment layer
+		Encryption of inter-service communication
+			provides crypto privacya nd remote procedure call(RPC) data on network
+
+			RPC
+				used when one comp talks to other comp over internet
+				protocol use to enable program to exec code of another computer
+				remote control
+
+	User Identity layer
+		User Identity
+			google central identity service utilizes U2F
+
+	Storage services layer
+		Encyption at rest
+			centrally managed keys
+			SSD/hard drives
+				support hardware encryption
+
+	Internet Communication layer
+		Google front end
+			support perfect forward secrecy
+				uses one time only session key
+			support TLS uses public private key pair
+			uses X.509 cert from CA
+
+		DoS protection with cloud armor in Global external LB
+
+	Operational security layer
+		Intrusion detection
+			ueses machine intel
+			test penetration with red team exercises
+		Reducing insider risk
+			continuous limit employee access and montiors them
+		Employee universal second factor(U2F) use
+			U2F
+				2 factor authentication like MFA
+				prevents phishing attacks
+		Software development practices
+			practices
+				central souce control
+				two party cid review
+				lib that prevent code class security bugs
+				runs vulnerability rewards programs
+					pay anyone who can discover nugs in the infra
+
+Open source ecosystems
+	can collaborate with many open sources like kb8, mongodb, tensorflow
+
+	TensorFow
+		open source library for ML
+
+	Operations suits
+		can monitor workloads across multiple cloud providers
+
+Pricing and billing
+	kb8s
+		per seconnd billing
+
+	Instance run more than 25% of a ,onth
+		discount for every incremental min use fot that inca
+
+		POnline pricing calculator
+
+	Cloud Billing is AWS budget
+		can create alert with budget limit met
+		can be set with 50,90,100
+
+	Cloud quotas
+		 manage qoutas fir each cloud services
+		 prevent sover consumption of resource
+
+		Rate quotas
+			project level
+
+		Allocation qoutas
+			project leve
+
+
+Quiz
+1. What is the primary benefit to a Google Cloud customer of using resources in several zones within a region?
+	- For improved fault tolerance/availability
+
+2.What type of cloud computing service lets you bind your application code to libraries that give access to the infrastructure your application needs?
+	- PaaS(cloud run/build/app engine)
+
+3.Why might a Google Cloud customer use resources in several regions around the world?
+	- To bring their applications closer to users around the world, and for improved fault tolerance
+
+
+Week 3 Resources and Access in the cloud
+
+Learning Objectives
+	1. Define the purpose of and use cases for IAM.
+	2. List the methods of interaction with Google Cloud.
+	3. Use Cloud Marketplace to interact with Google Cloud.
+	4. Identify the purpose of projects on Google Cloud.
+
+Google CLoud resource hierachy
+	- directly relates to how policies are managed and applioed when you google cloud
+	- policies are inherited downward
+	- policies defined in
+		org node
+		folder
+		project
+Four level hierarchy
+	1. resources
+		VM in GCE
+		buckets in GCS
+		tables in bigquery
+
+	2. Projects
+		org in folders or subfolders
+		policy here can enbale and use 
+			services, 
+			api, 
+			billing, 
+			add/rmeove collaborator
+		can have diff owners and users
+			billed and managed serpately
+
+		attributes
+			project id
+				globally unique and can't be changed
+				immutable
+					used by google of exact project to work with
+			proj name
+				user created
+				can be changed anythime
+			proj number
+				unique proj number 
+				used by google to keep track resources
+
+	3. Folders
+		- allows can be used to group different department
+		give team allow delgate admin rights for wokring independelty
+
+	4. Org node that encompasses all three above
+
+Cloud resource manager
+	manage projets
+	API that can gather list of all projects associateds with an an coount
+	create new proj
+	update exist project
+	delete projects
+	can recover deleted prokects
+	- can be access through RPC and REST API
+
+Project creator role
+	conrol who can create projects means who can spend money
+
+Workspace domain/org node
+	projects will belong to this domain
+
+Creating org node
+	workspace domain
+	cloud identity
+	google identity
+	acceess
+	application
+	endpoint mngmt platform
+
+Identity and Access Management(IAM)
+	power to restrict authorizations/access
+
+	IAM policy
+		set by admin
+		a set of rules who can access resources
+		
+		who
+			account
+			group
+			service account
+			cloud identity domain
+			- principal
+				email add
+		can do whaat
+			role
+				contains permissions
+				
+				Three kinds 
+					1. basic
+						affect all resources in the project
+
+						proj viewer
+							can accesss without edit
+						prok owner
+							can access and edit
+							can manage broles and permission and set up billing
+						proj editor
+							can access and edit
+						proj bill admin
+							contorl billing of project and change resource in project
+					2. predefined
+						like instanceAdmin in GCE
+					3. custom
+						assign role that has specific permission
+						can only be applied to project or org level
+			why
+				easier to mange
+
+		principle
+			zero trust security or least privilege permission
+
+
+Service accounts
+	-non human account withou human login that can access resources on behalf of syst/app
+
+	Use case
+		want only GCE VM to access cloud storage
+
+
+Cloud Identity
+	centrally managed users account like disabling them/removing from the group access to team's resources with google admin console
+
+	- already abailbe to google workspace customer
+
+	Active Director/LDAP(lightweight dir access protocol) sys
+		a phone book that track who's who and their access bet computers and apps over a network
+
+
+Interacting with Google Cloud
+Four ways to access resources
+	1. Google cloud console/web browser
+	2. Cloud SDK and CLoud Shell
+		Cloud SDK
+			cli in local machine
+			 like gcloud and bq/bigquery
+			- can manage google cloud resources
+		Cloud Shell
+			ClI in cloud console
+			5 gb home dir
+			debian VM
+			cloud sdk gcloud pre installed
+	3. APis
+		allow code to be written to conrol services
+		GOogle APis explorer
+			shows what APis available in a resources
+	4. Google Cloud app
+		provides up to date bill info and alerts if budget is met
+		can setup costom graphs of cpu, network/request per sercond
+
+Coursera: Getting started with Google cloud platform and Qwiklabs
+Lab
+	Console and Cloud shell
+
+Getting Started with Cloud marketplace
+	sudo sh -c 'echo "<?php phpinfo(); ?>" > apache2/htdocs/phpinfo.php'
+
+Quiz
+1. Choose the correct completion: Services and APIs are enabled on a per-__________ basis.
+- projects
+
+2. Order these IAM role types from broadest to finest-grained.
+- Basic roles, predefined roles, custom roles
+
+3. Which of these values is globally unique, permanent, and unchangeable, but can be modified by the customer during creation?
+- The project ID
+
+
+Week 4 Virtual Machines and Networks in the Cloud
+
+Learning Objectives
+	1. Deploy a basic infrastructure to Google Cloud.
+	2. Explore how Cloud Load Balancing functions in Google Cloud.
+	3. Detail important VPC compatibilities including routing tables, firewalls and VPC peering.
+	4. Identify the purpose of and use cases for Google Compute Engine.
+	5. Explore the basics of networking in Google Cloud.
+	6. Outline how Google Compute Engine can scale.
+
+
+VPC Networking
+	- secure indiv private cloud compute model hosted within public cloud
+	- connect google cloud resources to internet
+	- segment networks
+
+	Main goal
+		DR
+
+Compute Engine
+	- config like physical server
+	- billed by second with one minute minimum
+	- discound by the longer they run minimum of 25% of a month, discount every add minute
+
+	Predetermine workloads/stable
+		upto 57% discount
+		min contract of 1 year or 3 years
+
+	premptible/spot VM
+		90% price
+		okay for VM to be terminated
+		use case
+			finish batch job analysizng large data set
+
+
+Scaling virtual Machines
+	scale out
+		horizontal scaling
+
+	sacle up
+		vertical scaling
+
+	machine type
+
+Important VPC compatibilities
+	Firewall defined through tag
+		is VM level
+		Security group(VM level) and NACL(subnet level) in AWS
+
+	VPC peering
+		comm two VPC
+
+	Shared VPC
+		where you can configure who and what in one project to interact with other VPC
+
+
+Cloud Load Balancing
+Types
+	1. Global HTTP(S)
+		- cross regional load balancing web app
+
+	2. Global SSL pRoxy
+		secure socket layer traffic
+
+	3. Global TCP proxy
+		TCP wiht no SSL
+
+	4. Regional External passthorugh netwokr load balancer	
+		UDP traffic or taffic on any  port number across region
+
+	5. Regional internal load balancer (proxy network LB/ Pasthrough network LB and Application load balancer)
+		Load balance inside  bet presentation and busines layer of app
+
+	6.Cross-region internal load balancer
+		- layer 7 load balancer  traffic to backend services
+
+
+Cloud DNS and CDN
+	Cloud DNS
+		- set url name like AWS route 53 
+
+	Edge caching(Cloud CDN)/Edge locations in AWS
+
+	- can be enable with External LB service
+
+COnnecting networks to Google VPC
+	Cloud router
+
+Getting started with VPC networking and GCE
+
+Quiz

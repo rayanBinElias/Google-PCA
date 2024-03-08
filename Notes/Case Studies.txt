@@ -1,0 +1,18 @@
+Case Studies
+
+1. EHR Healthcare
+	- a leading provider of electronic health record software to the medical
+industry. EHR Healthcare provides their software as a service to multi-national medical
+offices, hospitals, and insurance providers. 
+
+Solution Concept
+	- growing exponentialy year over year.
+		- need scale, DR plan, CD to update service at a fast pace.
+	- GCP to replace colocation facilities
+
+Existing technical environment
+	- hosted multiple colocation facilities. One Data center is about to expire.
+	- Web app on a container run on kubernetes clusters
+	- DB are MySQl,MS SQL server, Redis and MongoDB
+	- On premise hosting several legacy file and APi based integration with insurance providers, no plan to move these sys at the current time, maybe in next several years
+	- 
