@@ -473,9 +473,464 @@ Cloud DNS and CDN
 
 	- can be enable with External LB service
 
-COnnecting networks to Google VPC
-	Cloud router
+Connecting networks to Google VPC
+Ways to  conenc on premise to Google cloud
+	1 . Cloud VPN/ AWS VPN
+		- a tunnel connection between on-premise or AWS/Azure network to GCP VPC securely over internet using 
+		 	- IPsec
+		 	- cloud router 
+				uses border gateway protocol to exchange route information over VPN
+
+		Limitation
+			- Security concerns
+			- BW reliability
+
+	2. Peering
+		- putting router in the same public data center/colocation Data center as a google PoP adn not on public internet
+			Point of Presence(PoP)
+				- loc where different networks can connect and share data on internet service provider infra
+					- reduces latency to google cloud services and resources
+		
+		2.1 Direct Peering
+			When to use
+				- connect on premise network to google cloud network
+
+		2.2 Carrier Peering
+			When to use
+				- customer not covers in google PoP connect through GCP with partner ISP
+
+		Limitation
+			- Not covered by Google Service Level Agreement
+		
+	3. Dedicated Interconnect
+		- allows for one or more direc, private connections to google
+		- if met with google specs, SLA upto 99.99%
+		- connection backed up by VPN
+		
+		When to use
+			- getting highest uptimes for interconnection
+		
+	4. Partner Interconnect
+		- provides connectivity between onprimes and VPC network through supported ISP
+		When to use
+			- on premise DC can't connect to colocation DC
+			- dat dont neet an entire 10 GB per second conenction
+			- support critical services or app that can tolerate downtime
+		
+	5. Cross Cloud Interconnect
+		- establish high BW dedicated connectivity bet google cloud and another cloud service provider
+		- available in 10GbpS or 100Gbps
+
+		- Cloud interconnect/AWS Direct connect
+			- a private hallway comm between onpremise or google cloud
+				- on premise  and google cloud connects through colocation facility using BGP bet Cloud router and onpremise router
+		 
 
 Getting started with VPC networking and GCE
+Objectives
+	- Explore the default VPC network
+	- Create an auto mode network with firewall rules
+	- Create VM instances using Compute Engine
+	- Explore the connectivity for VM instances
+
+Firewall Priority
+	- higher number indicates lower priorities
+
+Test network
+	ping -c 3 <Enter mynet-eu-vm's internal IP here>
+		allow-custom
+	ping -c 3 <Enter mynet-eu-vm's external IP here>
+		allow-icmp
+
+Which firewall rule allows the ping to mynet-eu-vm's external IP address?
+	allow-icmp
 
 Quiz
+1. In Google Cloud VPCs, what scope do subnets have?
+	- Regional
+
+2. What is the main reason customers choose Preemptible/Spot VMs?
+	- To reduce cost
+
+3. For which of these interconnect options is a Service Level Agreement available?
+	- Dedicated Interconnect
+
+4. How does Cloud Load Balancing allow you to balance HTTP-based traffic?
+	- Across multiple Compute Engine regions.
+
+
+Week 5 Storage in the Cloud
+
+Learning Objectives	
+	1. Deploy an application that uses Cloud SQL and Cloud Storage
+	2. Distinguish between Google Cloud's Database storage options
+	3. Distinguish between Cloud Storage Classes
+	4. Identify the purpose of and use cases for Cloud Storage
+
+Google Cloud storage options:
+
+1.Cloud Storage/S3 contains
+	 - Object Storage/Bucjets
+	 	- manage data as an objects/binary form and not file storage or block/disk storage
+
+	 - metadata
+	 	- global unique ID
+	 	- date created, author, resource type and permission
+	 	- all unique keys in the form of URLs
+
+	 Retrieval
+	 	- URL via direct download
+	 
+	 Note
+	 	- Storage objects are  immutable
+	 	- select end user nearest location for minimize latency 
+
+	 Feautures
+	 	- versioning
+
+	 Security best pracitices
+	 	- IAM roles
+	 	- Access Control lists(ACL)
+	 		- who can access and perform an action 
+	 			- can be specific to user or group of users
+	 		- permission
+	 			- what actions can be performed like read and write
+	 	- Lifecycle Management policies
+	 		- dekete objects older than 365 days
+
+	 Use cases
+	 	- Binary large-object(Blob) Storage
+	 		- website content
+	 		-backup and archiving
+	 	- static web hosting
+	 	- direct download
+
+
+
+Cloud Storage: Storage classes and data transfer
+Classes
+	1. Standard Storage
+		- hot data/frequently access data
+		When
+			- stored for only brief periods of time
+	2. Nearline Storage
+		- once a month/infrequetly access data
+		When
+			- reading/modifying data on onec a month
+			- data backups
+			- long term multimedia content
+			- data archiving
+		
+
+	3. Coldline Storage
+		- once every 90 days
+		- low cost for infrequent access data
+
+	4. Archive Storage
+		- once a year
+		- cheapest but has higher cost for data access
+		- min 465 min storage duration
+		Wgen
+			- online backup and DR
+
+	5. Auto class/Intelligient Tiering
+		- ideal for unknown/changin access patterns
+
+Ways to import
+	- cloud sdk
+		#list bucket lists
+			gcloud storage buckets list 
+
+		#upload file in a bucket
+		gsutil cp index.html gs://rayan_bucket-1
+
+		#list files in bucket
+		gsutil ls gs://rayan_bucket-1
+	- google cloud flatform
+		-
+Storage Transfer Serices
+	- import large amounts of online data into GCS quickly and cost effectively
+
+Transfer Appliance/Snowglobe
+	- data migration
+
+Import/export tables to and from 
+	- BigQuery
+	- Cloud SQL
+
+Others
+	- store app engine logs
+	- files for backups
+	- store VM startup scripts
+	- GCE images
+
+
+2. Cloud SQL
+	- Fully managed Relational DB
+		- MySQL
+		- PostgreSQL
+		- SQL Server
+
+	-supports
+		- scale up
+		- Master Slave auto replication
+		- backupos
+		- APP Engine
+			- Connector/J for Java
+			- MySQLdb for Python
+
+3. Cloud Spanner
+	- fullu managed Relational DB but better than cloud SQL
+		- tens of thjousands reads and writes per second
+	- supports
+		- scale out/horizontal
+
+4. Firestore
+	- noSQL key values
+	- supports
+		- mobile
+		- web
+		- server dev
+		- caches
+		- auto multi region data replication
+		- atomic batch operations
+		- real transaction support
+	- table is collection
+		- documents is key value pair
+	- charged at
+		- each doc read/write/delete
+		- doc read per query
+		- ingress is free
+		- 10GB free network egress per month between US region
+		- Per day quota
+			- 50,000 deoc reads
+			- 20,000 doc deletes
+			- 1 GB stored data
+
+5. Cloud Bigtable
+	- nosql big data DB
+
+	Who 
+		search
+		analtyics
+		maps
+		gmail
+
+	when
+		- operation and analytical app 
+			- IoT
+			- user anlaytics
+			- financial data analysis
+			- one TB of semi structured/sturctured data
+
+	Can collaborate with
+		Batch processes 
+			- Hadoop MapReduce
+			- Dataflow
+			- Spark
+
+Comparing storage options
+	Cloud Storage
+		Best for
+			- Storing immutable blobs larger than 10 MB
+
+		Capacity
+			PB
+			Max unit size: 5 TB per object
+
+	Cloud SQL
+		Best for
+			- full SQL support for an online transaction processing sys
+			- web frameworks and existing app
+
+		Capacity
+			Up to 64 TB
+
+	Spanner
+		Best for
+			- full SQL support for online transaction processing system
+			- hor scaling/scale out
+
+		Capacity
+			PB
+
+	Firestore
+		Best for
+			Massive scaling and predictability together w real time query results and offline query support
+		Capacity
+			TB
+			Max unit size: 1MB per entity
+
+	Cloud Big table
+		Best for
+			- storing large amt of structured objects
+			- not support SQL queries and multi-riow transactions
+			- analytical data with heavy read and write events
+		Capacity
+			Petabytes
+			Max unit size: 10MB p/cell, 100 MB p/row
+
+	Big Query
+		- On the edge between data storage and data processing
+
+Getting Started with Cloud Storage and Cloud SQL
+
+Objectives
+	- Create a Cloud Storage bucket and place an image into it.
+	- Create a Cloud SQL instance and configure it.
+	- Connect to the Cloud SQL instance from a web server.
+	- Use the image in the Cloud Storage bucket on a web page.
+
+GCE Auto start up Script
+	apt-get update
+	apt-get install apache2 php php-mysql -y
+	service apache2 restart
+
+GCS cloud shell
+	export LOCATION=ASIA
+
+	//Create bucket
+	gcloud storage buckets create -l $LOCATION gs://$DEVSHELL_PROJECT_ID
+	//Copt image to bucket
+	gcloud storage cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+	//Modify ACL to be readably by everyone
+	gcloud storage cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+
+
+qwiklabs-gcp-04-15d48010786c:us-central1:blog-db
+34.27.40.243
+
+
+Sample Web php MySQL connect code
+<html>
+<head><title>Welcome to my excellent blog</title></head>
+<body>
+<h1>Welcome to my excellent blog</h1>
+<?php
+ $dbserver = "CLOUDSQLIP";
+$dbuser = "blogdbuser";
+$dbpassword = "DBPASSWORD";
+// In a production blog, we would not store the MySQL
+// password in the document root. Instead, we would store it in a
+// configuration file elsewhere on the web server VM instance.
+
+$conn = new mysqli($dbserver, $dbuser, $dbpassword);
+
+if (mysqli_connect_error()) {
+        echo ("Database connection failed: " . mysqli_connect_error());
+} else {
+        echo ("Database connection succeeded.");
+}
+?>
+</body></html>
+
+Quiz
+1. What is the correct use case for Cloud Storage?
+	- Cloud Storage is well suited to providing durable and highly available object storage.
+
+2. Which database service can scale to higher database sizes?
+	- Cloud Spanner
+
+
+3. Why would a customer consider the Coldline storage class?
+	- To save money on storing infrequently accessed data.
+
+
+Week 6 Containers in the Cloud
+
+Learning Objectives	
+	1. Define the concept of a container and identify uses for containers.
+	2. Identify the purpose of and use cases for Kubernetes and Google Kubernetes Engine.
+
+Introduction to containers
+	- an isolated box around your code and its independencies
+	- limited access to its own partition of the fiel sys and hardware
+	- quick to start same as a process
+	- only need
+		- OS kernel 
+	- scale like PaaS but flexible as IaaS
+
+
+Kubernetes
+	- open source for managing and scaling containerized applications
+		- on many hosts
+		- scale them as microservices
+		- deployment
+		- rollouts
+		- roullbacks
+	- bootstrapped using google kubernetes engine
+
+	Cluster
+		- a set of nodes(compute instatnce) that run containers
+
+	Pod
+		- unit that contains containers
+
+Google Kubernetes Engine
+	- google hosted managed kubenetes service in the cloud
+
+	Advanced Cluster management feautures include:
+		- Google Cloud's load balancing for compute engine instances
+		- node pools to designate subsets of nodes within a cluster for additional flexibility
+		- automatic scaling of your cluster's node instance count
+		- automatic upgrades for your cluster's node software
+		- node auto-repair to maintain node health and availability
+		- logging and monitoring with Google Cloud's operation suite for visibility into your cluster.
+
+//Start up kubernete on a cluster in GKE
+	gcloud contsainer clusters create k1
+
+Quiz
+1. What is a Kubernetes pod?
+	- A group of containers
+		- containers in a pod are deployed/replicated as a group/together
+2. Where do the resources used to build Google Kubernetes Engine clusters come from?
+	- Compute Engine
+
+
+Week 7 Applications in the Cloud
+
+Learning Objectives	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
