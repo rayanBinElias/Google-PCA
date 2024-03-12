@@ -891,22 +891,213 @@ Quiz
 Week 7 Applications in the Cloud
 
 Learning Objectives	
+	1. Describe how Cloud Functions can support application development on Google Cloud.
+	2. Identify the purpose and use cases for Cloud Run.
+	3. Deploy a containerized application on Cloud Run.
+
+Cloud Run
+	- a serverless PaaS that runs stateless conatiners via web req or Hub sub events
+	- Built on Knative
+	- auto scale out and up
+
+	Ways/Deploy through
+		1. Source based workflows
+			- deploy through source code
+				- builpacks
+					- an open source that builds image from source code
+		2. Container-based workflow
+			- deploy through docker image
+
+	Pricing
+		1. handling req
+			- add fee per 1 million requests
+		2. startup
+		3. shutdown
+
+	Limitation
+		- only available for linux amd/64 and arm/64
+			- only in GKE can you deploy arm/64 
+
+Development in the Cloud
+
+Cloud Function
+	- a serverless/function as servuce that is event-driven.
+		- serverkless means no servers but you just don't worry to manage/provision them, GCP manage them.
+
+	Deploy through
+		1, Source code
+
+	Trigger
+		1. Cloud Storage
+			- async exec
+		2. PubSub
+			- async exec
+		3. HTTP invocation
+			- sync exec
+	
+	Usecases
+		1. Convert format
+		2. Convert thumbnail size
+		3. Store new files
+
+Hello Cloud Run
+Qwiklabs
+	https://googlecoursera.qwiklabs.com/focuses/34708884?parent=lti_session
+
+Objectives
+	1. Enable the Cloud Run API.
+	2. Create a simple Node.js application that can be deployed as a serverless, stateless container.
+	3. Containerize your application and upload to Container Registry (now called "Artifact Registry.")
+	4. Deploy a containerized application on Cloud Run.
+	5. Delete unneeded images to avoid incurring extra storage charges.
+
+SDK used command
+	//gcloud cheatsheet
+		https://cloud.google.com/sdk/docs/cheatsheet
+
+	//enable cloud run api
+		gcloud services enable run.googleapis.com
+
+	//set project
+		gcloud config set project
+
+	//set region
+		gcloud config set compute/region "REGION"
+
+	//list account name
+		gcloud auth list
+
+	//list project ID
+		gcloud config list project
+
+	//one liner with two command
+		mkdir helloworld && cd helloworld
+
+	//Build container image through gcloud command and store it ing Cloud Registry
+		gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
+
+	//list container images
+		gcloud container images list
+
+	//register gcloud as credential helper for all google supported docjer registry
+		gcloud auth configure-docker
+
+	//run container from cloud shell
+		docker run -d -p 8080:8080 gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
+
+	//Verify
+		curl localhost:8080
+
+	//Deploy to cloud run
+		Location=asia-southeast1
+		gcloud run deploy --image gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld --allow-unauthenticated --region=$LOCATION
+
+	//Delete container image
+		gcloud container images delete gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
+
+	//Delete cloud run service
+		gcloud run services delete helloworld --region="REGION"
 
 
+Sample Dockerfile
+	# Use the official lightweight Node.js 12 image.
+	# https://hub.docker.com/_/node
+	FROM node:12-slim
+
+	# Create and change to the app directory.
+	WORKDIR /usr/src/app
+
+	# Copy application dependency manifests to the container image.
+	# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
+	# Copying this first prevents re-running npm install on every code change.
+	COPY package*.json ./
+
+	# Install production dependencies.
+	# If you add a package-lock.json, speed your build by switching to 'npm ci'.
+	# RUN npm ci --only=production
+	RUN npm install --only=production
+
+	# Copy local code to the container image.
+	COPY . ./
+
+	# Run the web service on container startup.
+	CMD [ "npm", "start" ]
+
+Quiz
+1. Select the managed compute platform that lets you run stateless containers through web requests or Pub/Sub events.
+	- Cloud run
+
+2. Cloud Run can only pull images from (Select 2): 
+	- Artifact Registry
+	- Docker Hub
+
+3. Why might a Google Cloud customer choose to use Cloud Functions?
+	- app contains event-driven code that they don't want to provision compute resourcees for.
 
 
+Week 8 Course Summary
 
+Learning Objectives	
+	1. Review learning concepts from throughout the course.
 
+Course Summary
+Module 1 - Introducing to Google Cloud
+	- Google Cloud and Cloud Computing
+	- Managed Infrastructure and services with IaaS and PaaS
+	- The Google Cloud network
+	- Security throughout the infrastructure
+	- Pricing structure and billings tools
 
+Module 2 - Resources and Access in the Cloud
+	- Google Cloud Resource Hierarchy
+		- Org node
+			- Folders
+				- Projects
+					- Resources
+	- Policies
+	- Identity and Access Management(IAM)
+	- Ways to access and interact with Google Cloud
+		- Google Cloud console
+		- Cloud SDK and Cloud Shell
+		- APIs
+		- Google Cloud App
 
+Module 3 - VMs and Networks in the Cloud
+	- Google Compute Engine(GCE)
+	- Virtual Private Cloud(VPC)
+	- Compute Engine's Autoscaling feature
+	- Google Virtual Private Cloud compatibility features
+		- Routing tables
+		- Firewalls
+		- VPC peering
+		- Shared VPC
+	- Cloud Load Balancing
+	- Google Cloud Interconnect
 
+Module 4 - Storage in the Cloud
+	- Google Cloud's core storage options
+		- Cloud Storage
+		- Cloud Bigtable
+		- Cloud SQL
+		- Cloud Spanner
+		- Firestore
+	- Four Cloud Storage classes
+		- Standard
+		- Nearline
+		- Coldline
+		- Archive
 
+Module 5 - Containers in the Cloud
+	- Containers
+	- Kubernetes
+	- Google Kubernetes Engine(GKE)
 
+Module 6 - Applications in the Cloud
+	- Cloud Run
+	- Cloud Functions
 
-
-
-
-
+Course Resources links
+	https://d3c33hcgiwev3.cloudfront.net/-YEvkqp0Tk-ob7J6Uzzj_w_23424d3021424220856ea3ae03e9f5a1_T-GCPFCI-B-_-Course-Resources-_-Google-Cloud-Fundamentals_-Core-Infrastructure.pdf?Expires=1710374400&Signature=MCrrmJq5Nx9aHIrDS7-3EzaSTyIdjKPBveL6-Gw0B-WB4T1qoPnamIp4a3HCc0cBGMGD2oQB9PhlxtL3l7g~on4ocQIVJdoqdikIJn6llf7Zmr-9I5-jbQORoXcQhvcRkjsiqgukNP1Rh0HXejVZL0upmPeHrMod61yURguZutM_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A
 
 
 
