@@ -1,0 +1,218 @@
+Essential Google Cloud Infrastructure: Core Services
+
+Learning Objectives
+	1. Understand how to navigate the course
+	2. Understand how to download course resources
+
+Module 1 - Identity and Access Management(IAM)
+	- Administer Identity and Access Management for resources
+
+	Learning Objectives
+		1. Describe the IAM resource hierarchy
+		2. Explain the different types of IAM roles
+		3. Recall the different types of IAM members
+		4. Implement access control for resources using IAM
+
+	Identity and Access Management
+		- identiyfying who can do what on which resources
+		who
+			- IAM member
+		what
+			- roles
+				- permissions
+		resources
+			- Google cloud service
+
+	
+
+	Organization
+		- root node for google cloud hierarchy
+		- when workspace domain/identity accoun creates project, their domain name will be the name of their organization
+		Roles
+			Workspace/Cloud Identity super admin
+				- assign the organization admin role to some users
+				- be the point of contact in case of recovery issues
+				- control the lifecycle of the workspace or cloud identity accound and organization resource
+			- organization admin
+				- control over all cloud resources
+				- useful for auditing
+				- define IAM policies
+				- determine structure of the resource hierarchy
+				- delegate responsibility over critical components such as 
+					- networking
+					- billing
+					- resource hierarchy through IAM roles
+			- project creator
+				- controls project creation
+				- control over who can create projects
+	Folders
+		- where you can isolate department -> teams -> products  or shared Infrastructure
+		- allow delegation of adnmin rights
+
+	projects
+		- enabled: 
+			- services, 
+			- api, 
+			- billing, 
+			- add/remove collaborator
+	
+	Resource Manager Roles
+		Organization
+			- admin
+				- full control over all resources
+			- view access to all resources
+
+		Folders
+			- admin
+				- full control over folders
+			- creator
+				- browse hierarchy and create folders
+			- viewer
+				- view folders and projects below a resource
+		projects
+			creator
+				- create new projects(automatic owner) and migrate new projects into organization
+			deleter
+				- delete projects
+	roles
+	members
+	Service Accounts
+	Organization Restrictions
+	
+	IAM Best Practices
+
+	Qwiklabs - Exploring IAM
+		Objectives
+			In this lab, you learn how to perform the following tasks:
+
+				1. Use IAM to implement access control
+				2. Restrict access to specific features or resources
+				3 . Use the Service Account User role
+	
+	Quiz
+	1. What abstraction is primarily used to administer user access in IAM ?
+		-  Roles, an abstraction of job roles
+			- IAN uses predefined roles for giving user access
+			-	roles are define by more granukar permissios.
+			- permissions are not applied to users directly, only through the roles that are assigned to them
+	2. Which of the following is not a type of IAM role?
+		- Advanced
+		Type of IAM role:
+			1. Basic
+			2. Predefined
+			3. Custom
+
+	3. Which of the following is not a type of IAM member?
+		- Organization Account 	
+		Type of IAM member
+			1. GooCloud Identity domain
+			3. Service Account
+			4. Google Workspace domain
+			5. Google group
+			 
+	Review
+		- IAM builds on top of the Google Cloud services
+		- Wokspace Admin/Cloud Identity
+			- where creation of admin of corporate identities
+			- handled by a person seprate from Google CLoud Administrator
+		- Google Groups
+			- establish a roles to all members
+		- Wokspace admin
+			- administers membership in the group
+		- Service Accounts
+			- enable you to build IaaS through terraform
+
+Module 2 - Storage and Database Services
+	- Implement data storage services in Google Cloud
+
+	Learning Objectives
+		1. Differentiate between Cloud Storage, Cloud SQL, Cloud Spanner, Firestore and Cloud Bigtable
+		2. Choose a data storage service based on your requirements
+		3. Implement data storage services
+
+	Scope
+		Infrastructure Track
+			- Service differentiators
+			- When to consider using each service
+			- Set up and connect to a service
+		
+		Data Engineering Track
+			- How to use a database system
+			- Design, organization, structure, schema and use for an application
+			- Details about how a service stores and retrieves structured data
+
+	Cloud Storage
+
+	Cloud Storage features
+
+	Choosing a storage class
+
+	Filestore
+
+	Cloud SQL
+
+	Cloud Spanner
+
+	AlloyDB
+
+	Firestore
+
+	Cloud Bigtable
+
+	Memorystore
+
+	Quizes
+	1. What data storage service might you select if you just needed to migrate a standard relational database running on a single machine in a datacenter to the cloud?
+		- Cloud SQL
+	2. Which Google Cloud data storage service offers ACID transactions and can scale globally?
+		- Cloud Spanner
+	3. Which data storage service provides data warehouse services for storing data but also offers an interactive SQL interface for querying the data?
+		- BigQuery
+			- data warehousing service that allows storage of huge data sets while making them immediately processable w/o having to extract or run the processing in a separate service
+
+	Review
+		1. Cloud Storage
+			- fully managed object storage
+		2. Filestore
+			- fully managed file storage
+		3. Cloud SQL
+			- fully managed MySQL and PostgreSQL DB
+		4. Cloud Spanner
+			- relational DB service w/ transactional conistency, global cale and high availbility
+		6. AlloyDB
+			- fully managed postgreSQL compatible DB service
+		7. Firestore
+			- fully managed NoSQL document DB
+		8. Cloud Bigtable	
+			- fully managed noSQL wide column DB
+		9. Memorystore
+			- fully managed in-momemory data store servicefor Redis
+		
+
+Module 3 - Resource Management
+	- Manage and examine billing of Google Cloud resources
+
+Learning Objectives
+	1. Describe the cloud resource manager hierarchy
+	2. Recognize how quotas protect Google Cloud customers
+	3. Organize resources using labels
+	4. Explain the behavior of budget alerts in Google Cloud
+	5. Examine billing data with BigQuery
+
+Module 4 - Resource Monitoring
+	- Monitor resources using Google Cloud's operations suite
+
+Learning Objectives
+	1. Describe Google Cloud's operations suite for monitoring, logging, error reporting, tracing, and debugging
+	2. Create charts, alerts, and uptime checks for resources with Cloud Monitoring
+	3. Identify and fix errors using Cloud Debugger
+
+Essential Google Cloud Infrastructure: Scaling and Automation
+
+Module 1 - Interconnecting Networks
+
+Module 2 - Load Balancing and Autoscaling
+
+Module 3 - Infrastructure Automation
+
+Module 4 - Managed Services

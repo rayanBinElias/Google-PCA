@@ -612,15 +612,391 @@ Module 3: Virtual Machines
 			2. Create advanced VMs
 
 	Compute options
+		https://cloud.google.com/compute/docs/machine-resource
+
+		Machine type structure	
+			Machine Family -> machine series -> machine type
+		Four Compute Engine Machine Families
+			1. General-purpose
+				- used for standard and cloud native workloads
+				E2 machine series
+					- 2 to 32 vCPUS with ratio of 0.5GB-8GB of memory per vCPU
+					- no app dependencies on specific cpu architecture
+						- web servers
+						- app server
+						- back office apps
+						- small to medium DB
+						- microservices
+						- virtual desktops
+						- development and test environments
+					- shared-core
+						- 0.25-1 vCPUs w/ 0.5-8GB of memory
+				N2,N2D, N1
+					- most flexible VM 
+					When to use
+						- web servers
+						- app server
+						- back office apps
+						- medium to large DB
+						- cache
+						- media/streaming
+					- uses Intel CPU	
+						- 128 vCPUs and 0.5 to 7HN RAM per vCPU
+							- Cascade Lake CPU
+								- default CPU upto 80 vCPUs
+							- Ice Lake
+								- default CPu for >80 vCPUs
+					- EPYC milan and EPYC Rome processors
+						- upto 224 vCPUs per node
+
+				Tau T2d and Tau T2a VMs
+					- uses 3rd gen AMD EPYCTM processors
+					- scale out optimized
+
+					When to use
+						- scale out workloads
+						- web server
+						- containerized microservices
+						- media transcoding
+						- large-scale java applications
+						
+					T2d
+						- upto 60 vCpUs per Vm with 4GB RAM per vCPU
+					
+					T2a
+						- run on ARM processors
+							x64 Ampere Altra Processor with ARM instruction with 3GHz
+
+						- use GKE fo cost optimized
+
+			2. Compute-optimized
+				C2
+					When to use
+						- compute-bound workloads
+						- high-performance web server
+						- gaming(AAA game servers)
+						- Ad server
+						- High performance computing (HPC)
+						- Media transcoding
+						- AI/ML
+
+				C2D
+					When to use
+						- memory-bound workloads
+						- gaming(AAA game servers)
+						- High performance computing (HPC)
+						- High performance DB
+						- Electronic Design Automation(ADA)
+						- Media transcoding
+
+				H3
+					- High performance computing (HPC)
+					- Electronic Design Automation(ADA)
+
+			3. Memory-optimized
+				M1
+					When to use
+						- medium in-memory DB such as SAP HANA
+						- tasks that req intensive use of memory w/ higher memory to vCPU ratios than
+						general purpose high memory machine types
+						- in memory DB and in-memory analytics, business warehousing(BW) workloads,
+						genomic analysis, SQL analysis services.
+						- Microsoft SQL server amd similar DB
+				
+				M2
+					When to use
+						- large inmemory DB such as SAP HANA
+						- in memory DB and in-memory analytics, business warehousing(BW) workloads,
+						genomic analysis, SQL analysis services, etc.
+
+				M3
+					- OLAP and OLTP SAP workloads
+					- memory intense electronic design Automation
+
+			4. Accelerator-optimized
+				- optimized for HPC workloads
+
+				A2
+					When to use
+						- CUDA-enabled ML training and inference
+						- HPC
+						- Massive parallelized computation
+
+				G2
+					When to use
+						- video transcoding
+						- remote visualtzaiont workstation
+
+		Creating custom machine types
+			When to use	
+				- requirements doesn't fit between predefine types
+				- need more RAM or CPU
 
 	Compute pricing
-		External IP incur a small cost
+		- Per-second billing, w/ minimum of 1 minute means you will billed 1 minute even if your VM run for 30 sec/less than a minute
+			- vCPUs
+			- GPUs
+			- GB of Memory
+		- Resource-based pricing
+			- each vCPU and GB of memory is billed separately
+		- Discounts:
+			- Sustained use
+				- activated when VM run 25% of a month
+				- automatic discounts you get for running speific resources for a significant portion of the billing month
+				- 30% discount so create first day of the month cuz it reset at the beginning of each month
+				- discount every incremental minute you use that instace		
+				- N1(upto 30% net discount)
+				- N2/N2D(upto 20% discount)	
+			- Committed use
+				- 1 or 3 years
+				- upto 57% discounts for most machine types including custom one
+				- 70% discount for memory optimized machine types
+				When to use
+					- workload is stable and predictable
+			- Preemptible/Spot VM instance
+				- might terminate/preempt these instance if google requires to access those resources
+					- cuz they are excess capacity so availability varies w/ usage
+				- preemptible can run max of 24 hrs at a time but Spot do not have max run time
+		- Recommendation Engine
+			- Notifies you of underutilized instances
+		- Free usage limits
+
+		Note: External IP incur a small cost
 
 	Special compute configurations
+		Preemptible	VM
+			- max 24 hrs continuous live
+			- 30 sec notif before machine slows down
+			- no auto restart
+				- fixs is load balancers to monitor and keep restarting preemptible VM
+			- no live migrations
 
+			Usage	
+				- running batch processing jobs
+
+			Updated version
+				Spot VMs
+					- finite CE resources so not always available
+				
+		Sole tenants node
+			- physically isolate workloads
+
+			Usage
+				- physical isolation from other workloads or VM in order to meet compliance requirements
+				- all VM in the same project
+
+		Shielded VM
+			- offer verifiable integrity to your VM instance
+				- boot/kernel level malware/rootkits protection
+			- secure boot
+			- virtual trusted platform module(vTPM) shield/sealing
+				- prevent data exfilitration
+			- Integrity monitoring
+
+			How to use
+				- select shielded image
+			
+		Confidential VMs
+			- encrypt data while it's being processed.
+			- easy to use w/ no changes to code or performance compromise.
+			- N2D Compute Engine VM running on second generation AMD Epyc(ROME) processors
+				- uses AMD Secure Encrypted Virtualization(SED)
+				- Confidential Computing support
+				Usage	
+					- compute heavy workloads
+					- high memory capacity
+					- high throughput
+					- support for parallel workloads
+			Note
+				- google doesn't have access to encryption keys
+
+			How to use
+				- select Confidential VM service
+					- console
+					- API
+					- gcloud CLi
+		
 	Images
+		Public base images
+			- Google
+			- third party vendors
+			- premium images(p)
+			- Linux
+			- windows
+
+		Custom images
+			- create new image from VM: pre-configured and installed SW
+			- import from:
+				- on-premium
+				- workstation
+				- another cloud
+			- features	
+				- image sharing/family/deprecation
+
+		Machine Images
+			- stores all:
+					- config
+					- metadata
+					- permission
+					- data from one or more disks
+			- uses mainly in maintenance scenario such as instance cloning/replication/disk backups/recovery 
+
+		Note:
+			- Premium images(p) are charges per second after a 1 minute mon except SQL server images(charged after 10 min)
 
 	Disk options
+		Boot disk
+			- VM comes w/ single root persistent disk from base image
+				- avoid delete
+					- disable delete boot disk when instance is deleted
+
+		Persistent disks
+			- network storage appearing as a block device
+			- attached to VM through the network interface and not physically attached to the machine
+			- can survice VM terminate
+			- bootable means attach to VM and boot from it
+			- spnapshots
+			- scales with size
+			- HDD or SSD options
+			- disk rezising even running and attached
+			- can be attached in read only mode
+			- Zonal
+				- reliable block storage
+			- regional
+				Usecase
+				High availability/perfomance DB
+					- active active across two zones
+						- sync replication across zones
+			- types
+				1. pd-standard Disks
+					- uses HDD
+					- large data processing workloads uses sequential I/Os
+					- large capacity only needed
+				2. pd-SSD
+					- perfomance SSD
+					- enterprise app and high performance DB that req latency and more IOPS than pd-standard
+				3. pd-balanced
+						- uses SSD
+						- max IOPS nad lower IOpS per GB
+						- genearal purpose app bet pd-standard and pd-SSD
+				4. pd-extreme
+						- uses SSD
+						- zonal only
+						- highend DB workloads
+						- high perforamnce for:
+							- random access workloads an
+							- bulk throughput
+			Encrption keys
+				- Google-managed
+				- Cusotmer-managed
+					- use CLoud key Management service
+				- Customer-supplied
+					- Customer-supplied encryption keys
+
+		Local SSD
+			- very high IOPS, lower latency, and higher througput than persistent disk
+				- but ephemeral
+			- physically attached to a VM
+			- 375 GBdisk upto 24, totla of 9TB per instance
+			- Data services reset but not VM stop or terminate	
+			- w/o data redundancy
+				
+		RAM disk
+			- tmfs
+				- store data in memory 
+			- faster than local disk but slower than memory	
+				- use when app expects file sys structure and cannot directly store its data in memory
+			- very volatile means erase on stop or restart
+				- ephemeral
+			- may need larger machine type if RAM was sized for the app
+			- consider using persistent disk to back up RAM disk data
+
+			Recommendation
+				- use tmfs for fastest performance for small data structures
+				- use for high memory VM along with persistent disk to back up RAM disk data
+
+		Limitation
+			Shared core machine type
+				 - can only attach upto 16 disks
+			standard/high memory/high CPU/memory-optimized/Compute-optimized
+					- 128
+
+		Note
+			- Throughput is limited by number of compress
+				- shares same BW w/ Disk IOPS
+				- compete with any network egress/ingress throughput
+
+			- Compute Hardware Disk
+				- grow size
+					- repartition
+				- changes	
+					- reformat
+				- redundancy	
+					- create redundant disk array
+				- encryption
+					- encrypt fiels before writing them to the disk
+			
+			- Cloud Persistent disks
+				- simply grow disks and resize
+					- virtual networked devices
+				- redundancy
+					- Snapshot
+				- encryption
+					- auto encrypted
+				- Confidential
+					- we can use own keys so no one can get data except us
+				
+
+			
+
+
+
+	Common Compute Engine actions
+		metadata	
+			- useful for startup and shutdown scripts
+				- use metadata server w/o additional authorization to get unique infor
+
+		Moving instance within same region
+			- automate the move by using gcloud command
+				- gcloud comput instances move
+			- update references to VM cuz it's not automatic
+				- target VMs
+				- target pools
+			- process
+				- shutdown
+				- move to dest zone
+				- restart
+
+		Moving instance to diff region
+			- process	
+				- snapshot all persistent disk
+					- custom image
+				- create disk from that image in the new region
+				- create new VM from that region
+				- attach that snapshot
+				- assign static external IP
+				-  update references to new VM
+				- delete previous VM/disks/snapshot
+		
+		Snapshot
+			- stored in GCS
+				- not visible in your buckets cuz manage by the snapshot service
+			- spnapshots are incremental and automatically compress 
+				- means next snapshot will only copy the changes after the first snapshot
+			
+			Usage	
+				- backup critical data for availability and drive
+				- improve disk performance such us from HDD to SSD
+					- resizing disk to improve I/O performance 
+			
+			Note
+				- not applicable to local SSD
+				- can grow disks in size but can never shrink them
+				- snapshot doesn't backup VM metadata, tags and et.
+
+		Recommendation
+			- store startip/shutdown scripts in GCS
+		
 
 	Qwiklab - Working with Virtual Machines
 		https://googlecoursera.qwiklabs.com/focuses/34737878?parent=lti_session
@@ -647,33 +1023,13 @@ Module 3: Virtual Machines
 
 		//instructs cron to run backups every 4 hours.
 			0 */4 * * * /home/minecraft/backup.sh
-	Common Compute Engine applications
+	
+
 
 	Quiz
 	1. Which statement is true of Virtual Machine Instances in Compute Engine?
 		- In Compute Engine, a VM is a networked service that simulates the features of a computer.
 	2. What are sustained use discounts?
-		- 
-Automatic discounts that you get for running specific Compute Engine resources for a significant portion of the billing month
+		- Automatic discounts that you get for running specific Compute Engine resources for a significant portion of the billing month
 	3. Which statement is true of persistent disks?
 		- Persistent disks are encrypted by default.
-
-Essential Google Cloud Infrastructure: Core Services
-
-Module 1 - Identity and Access Management(IAM)
-
-Module 2 - Data Storage Services
-
-Module 3 - Resource Management
-
-Module 4 - Resource Monitoring
-
-Essential Google Cloud Infrastructure: Scaling and Automation
-
-Module 1 - Interconnecting Networks
-
-Module 2 - Load Balancing and Autoscaling
-
-Module 3 - Infrastructure Automation
-
-Module 4 - Managed Services

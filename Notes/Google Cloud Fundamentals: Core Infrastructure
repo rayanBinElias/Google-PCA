@@ -245,7 +245,7 @@ Four level hierarchy
 			services, 
 			api, 
 			billing, 
-			add/rmeove collaborator
+			add/remove collaborator
 		can have diff owners and users
 			billed and managed serpately
 
@@ -355,7 +355,7 @@ Four ways to access resources
 	2. Cloud SDK and CLoud Shell
 		Cloud SDK
 			cli in local machine
-			 like gcloud and bq/bigquery
+			like gcloud and bq/bigquery
 			- can manage google cloud resources
 		Cloud Shell
 			ClI in cloud console
