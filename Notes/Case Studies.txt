@@ -1,18 +1,247 @@
 Case Studies
 
 1. EHR Healthcare
-	- a leading provider of electronic health record software to the medical
-industry. EHR Healthcare provides their software as a service to multi-national medical
-offices, hospitals, and insurance providers. 
+	- a leading provider of electronic health record software to the medical industry. 
+	-EHR Healthcare provides their software as a service to multi-national medical offices, hospitals, and insurance providers. 
 
 Solution Concept
-	- growing exponentialy year over year.
-		- need scale, DR plan, CD to update service at a fast pace.
+	- growing exponentially year over year.
+		- need scale, DR plan, Continuous deployment to update service at a fast pace.
 	- GCP to replace colocation facilities
 
 Existing technical environment
-	- hosted multiple colocation facilities. One Data center is about to expire.
+	- Hosted multiple colocation facilities. One Data center is about to expire.
 	- Web app on a container run on kubernetes clusters
 	- DB are MySQl,MS SQL server, Redis and MongoDB
 	- On premise hosting several legacy file and APi based integration with insurance providers, no plan to move these sys at the current time, maybe in next several years
-	- 
+		- no plan to upgrade or move these systems at the current time.
+	- Microsoft Active Directory
+		- managed users
+	- Monitoring
+		- open source tools
+	- Alerts
+		- sent via email and often ignored
+Business Requirements
+	- on board new insurance providers as quickly as possible
+	- provide minimum 99.9% availability for all customer facing system
+	- increase ability to provide insights into healthcare trends
+	- reduce latency to all customers
+	- maintain regulatory compliance
+	- decrease infra admin costs
+	- make predictions and generate reports on industry trends based on provider data
+	
+Technical Requirements
+	- maintain legacy interfaces to insurance providers with connectivity to both on premises sys and cloud providers
+	- provide consistent way to manage customer facing app that are container based
+	- provide secure and high performance conn between on-premises sys and google cloud
+	- provide consistent logging, log retention, monitoring and alerting capabilities
+	- maintain and manage multiple container based environments
+	- dynamically scale and provision new env
+	- create interfaces toingest and process data from new providers
+
+CEO Statement
+	- We need to use Google cloud to leverage scalable/resilient platform that can span multiple environments seamlessly and provide consistent and stable user experience that positions us for future growth
+	- We experience outages
+		- misconfig systems
+		- inadequate capacity during spike traffic
+		- inconsistent monitoring practices
+	- we need to invest time and money for training team
+		- diff systems/environment
+			- manage it
+			- response to outages
+
+2. Helicopter Racing League
+
+Company Overview
+	- A pay per view stream with live telemetry and predictions throughout each race
+		- A global sports league for competitive helicopter racing
+	- each year
+		- world championship
+		- several regional league competitions
+Solutions Concept
+	- wants to migrate existing service to new platform 
+	  to expand use of AI and ML services to facilitate race predictions.
+	- Serve content both real time and recorded closer to emerging regions -> users
+
+Existing Tech Environment
+	- critical app runs on their current public cloud provider
+	- video recording and editing is performed at the race tracks
+	- content is encoded and transcoded in the cloud
+		- performed on VMs created for each job
+			- use spot VM
+	- enterprise grade connectivity and local compute
+		- provided by truck-mounted mobile data center
+	- race prediction
+		- hosted exclusively on their public cloud provider
+			-uses tensorflow running on VMs in the current public cloud provider
+	- existing content is stored in an object storage service on their existing public cloud provider
+	
+Business Requirements
+	- want to expand their predictive capabilities and reduce latency for their viewers in emerging markets
+		- support ability to expose predictive models to partners
+		- increase predictive capabilities during and before races
+			- race results
+			- mechanical failures
+			- crowd sentiment
+		- increase telemetry and create additional insights
+		- measure fan engagement with new predictions
+		- enhance global availability and quality of the broadcasts
+		- increase number of concurrent viewers
+		- minimize operational complexity
+		- ensure compliance with regulations
+		- create merchandising revenue stream
+
+Technical Requirements
+	- maintain or increase prediction throughput and accuracy
+	- reduce viewer latency to emerging regions
+	- increase transcoding performance
+	- create real-time analytics of viewer consumption patterns and engagement
+	- create data mart to enable processing of large volumes of race data
+
+CEO Statement
+CEO S. Hawke
+	- wants to bring high adrenaline racing to fans all around the world
+	- enhanced video streams that include predictions of events within the race(overtaking)
+	- current platforms allows us to predict outcomes but lacks facility
+	  to support real-time predictions during races and capacity to process
+	  season-long results.
+
+3. Mountkirk Games
+
+Company Overview
+	- Makes online, a session-based multiplayer games for mobile platforms
+		- migrated on premises env to google cloud, plan to expand to other platforms like AWS/AZURE
+		- Recent games 
+			- retro style first person shooter(FPS) game expected to be popular
+				- like pubg
+			- Real time digital banner will display global leaderboard 
+			  of all top players across every active arena.
+
+Solutions Concept 
+	- Deploy backend on Google Kubernetes Engine 
+		- scale rapidly
+		- use Global load balancer to route players to the closest region game arenas
+			- CDN
+	- Use Google Multi-region spanner cluster
+		- keep global leader board in sync
+		- Google Spanner
+			-  Relational DB 
+				- Platform as service
+				- unlimited scale,high performance, availability around the world
+			- fully manage by google
+			- scale out
+
+Existing Tech Environment
+	- lift and shift VM migrations with fewer minor exceptions
+		- five games
+			- each game exists in an isolated cloud project below a folder
+				- that maintains most of the permission and network policies
+			- legacy games with low traffic put all into a single project
+			- separate env for development and testing
+		- lift and shift
+			- replicate current state to new cloud env
+				- move entire house to a new neighborhood without changing anything
+					- pick it up and place in different directions
+
+Business Requirements
+	- support multiple gaming platforms
+	- support multiple regions
+	- support rapid iteration of game features
+	- minimize latency
+	- optimize for dynamic scaling
+	- use managed services and pooled resources
+	- minimize costs
+Technical Requirements
+	- dynamically scale based on game activity
+		- scale out when peak traffic
+	- publish scoring data on a near real-time global leaderboard
+		- AWS kinesis
+	- store game activity logs in a structured files for future analysis
+		- AWS Redshift
+	- uses GPU processing to render graphics server side for multi-platform support
+	- support eventual migration of legacy games to this new platform
+
+CEO Statement
+	- last game hosted in google cloud was a success
+	- we can now analyze player behavior and game telemetry in ways that we never could before
+	- That's why we're doing full migration on cloud
+	- all future games will use cloud native design principles
+	- Latency is our top priority
+	- Cost management is next
+	- We expect cloud to enable advanced analytics capabilities
+		- so we can rapidly iterate on our deployments of bug fixes and new functionality
+
+4. TerramEarth
+
+Company Overview
+	- Manufacturer company.
+	
+	Product
+		- Makes heavy equipment for mining and agri industries.
+		
+	Distribution
+		- 500 dealers and service centers in 100 countries.
+		
+	Mission
+		- make customers more productive through their product.
+Solutions Concept
+	Current situation
+		- 2 million vehicles in operation.
+		- 20% yearly growth
+
+	Relation to IT
+		- vehicles collect telemetry data through sensors during operation
+		- critical data transmitted in real time for fleet management
+		- other data is collected, compressed and uploaded daily when vehicles return to home base
+		- Each vehicle generates 200-500 MB per day
+		
+Existing Tech Environment
+	- Google Cloud Service
+		- data storage and analysis infra 
+			- serves clients from all around the world
+		- hosts web frontend
+			- for dealers and customers
+				- allows access to stock management and analytics
+	- Growing amt sensor data to manufacturer plants to Private Data Center
+		- legacy inventory and management system
+		- multiple network interconnects config to Google Cloud.
+	
+Business Requirements
+	- predict and detect vehicle malfunction and rapidly ship parts to dealerships for just in time repair where possible
+	- decrease cloud operational costs and adapt to seasonality
+	- increase speed and reliability of development workflow
+	- allow remote developers to be productive w/o compromising code or data security
+	- create a flexible and scalable platform for developers 
+	  to create custom APi services for dealers and partners
+
+Technical Requirements
+	- create abstraction layer for HTTP API access to their legacy systems 
+	  to enable a gradual move into the cloud without disrupting operations.
+		- Abstraction Layer
+			- translator/layman's term that simplify complex tech details
+			  that allows parts of sys to comm w/o needing to understanding all complex details
+	- modernize all CI/CD pipelines to allow developers to deploy container-based workloads
+	  in highly scalable environments.
+		- Cloud Build
+	- allow developers to run experiments without compromising security and governance requirements
+		- IAM access
+	- create self-service portal for internal and partner developers to create new projects,
+	  request resources for data analytics jobs and centrally manage access to the API endpoints
+	- use cloud-native solutions for keys and secrets management and optimize for identity-based access
+		- cloud identity
+		- Secret manager
+	- improve and standardize tools necessary for app and network monitoring and troubleshooting
+	
+	
+CEO Statement
+	- Maintain our competitive advantage
+		- provide excellent customer service
+		- minimize vehicle downtimes
+	- Migrate to Google Cloud 
+		- seek new ways to provide best in class online fleet management services
+		  to our customers and improve operations of our dealerships.
+	- 5 year strategy
+		- create partner ecosystem of new products by enabling access to our data
+		- increase autonomous operation capabilities of our vehicles
+		- create a path to move remaining legacy sys to the cloud.
+

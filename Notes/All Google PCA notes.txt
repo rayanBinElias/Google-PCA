@@ -1,0 +1,2458 @@
+Google Cloud Fundamentals: Core Infrastructure
+
+
+Learning objectives
+	1. Identify the purpose and value of Google Cloud products and services
+	2. Define how infrastructure is organized and controlled in Google Cloud
+	3. Explain how to create a basic infrastructure in google Cloud
+	4. Select and use Google Cloud storage options
+	5. Describe the purpose and value of Google Kubernetes Engine
+	6. Identify the use cases for serverless Google Cloud services
+	
+
+Week 1 Course Introduction
+
+Learning Objectives
+	1. Welcome learners to the course.
+
+Week 2 Introducing Google Cloud
+
+Learning objectives
+	1. Identify the benefits of Google Cloud.
+	2. Define the components of the Google network infrastructure, including points of presence, data centers, regions, and zones.
+	3. Identify the difference between infrastructure as a service (IaaS) and platform as a service (PaaS).
+
+Cloud Computing Overview
+	- way of using IT that has 5 equal important traits
+		1. On demand and self service
+		2. Access those resources from anywhere over the internet
+		3. Provider allocates resources to users out of the pool
+		4. Resources are elastic means flexible
+		5. Pay what you use/reserver as they go
+
+Why in demand nowadays?
+	History
+		First wave
+			colocation
+				- users rents physical space of the DC provider without investing own data center
+		
+		Second wave
+			virtualized data center
+				- uses virtual devices, match physical building blocks(CPUs, Disks, network) of hosted computing resources
+				- enterprieses still maintain infra and user controleed/user-config env
+				- not fast enough cuz not automated
+
+		Third wave
+			Container-based architecture
+				- fully automated elastic(auto scale) means automated service and scalable data
+				- auto provision and config infra used to run app
+
+		Future wave
+			Data Company
+				- great software based on high quality data
+
+
+IaaS and PaaS
+	IaaS
+	 	- cloud manage:
+	 		raw compute/server/virtualization
+	 		storage
+	 		newtork
+	 	- you:
+	 		app
+	 		data
+	 		runtime
+	 		middleware
+	 		OS
+
+	 	Sample
+	 		Compute Enigine
+
+	PaaS
+		- cloud manage:
+	 		everything
+	 	- you:
+	 		app
+	 		data
+	 	Sample
+	 		App engine
+
+	 Serverless/Function as a service
+	 	AWS/GCP run containers for you based on CPU/RAM you need
+	 	you don't manage/provision servers so you can concentrate on code
+	 	lambda/cloud function
+	 		even-drivent driven code
+	 			pay as you go
+	 	cloud run/ECS-Fargate
+
+	 SaaS
+	 	- cloud manage all
+	 	app run in the cloud as a service
+	 	Sample
+	 		gmail
+	 		docs
+	 		drive
+
+The Google Cloud network
+	Region(40)/AWS Region(33)
+		singapore
+
+	Zone(121)/Availability-zone(105)
+		asia-souteast1a-c
+
+	Network Edge locations(187)/Edge Locations(400)
+
+	Sample
+		Multi region archi sample
+		Cloud Spanbner/aurora
+
+Environment Impact
+	ISO 14001
+	carbon neutral/carbon free
+
+Security
+	Hardware infra layer
+		own design  chips/own network hardware design
+		Secure boot stack
+			ensures correct booting correct software stack
+				crypto sign over BIOS
+					bridge bet OS and hardware during startup process
+					startup guide
+				bootloader
+					manage flow bet software and  hardware during starup process
+					traffic cop
+				kernel
+					boss
+					core component of OSmake sures sys resources, comm bet  hardware and software, and process runs smoothly
+				OS of image
+
+		Premises security
+
+	Service deployment layer
+		Encryption of inter-service communication
+			provides crypto privacya nd remote procedure call(RPC) data on network
+
+			RPC
+				used when one comp talks to other comp over internet
+				protocol use to enable program to exec code of another computer
+				remote control
+
+	User Identity layer
+		User Identity
+			google central identity service utilizes U2F
+
+	Storage services layer
+		Encyption at rest
+			centrally managed keys
+			SSD/hard drives
+				support hardware encryption
+
+	Internet Communication layer
+		Google front end
+			support perfect forward secrecy
+				uses one time only session key
+			support TLS uses public private key pair
+			uses X.509 cert from CA
+
+		DoS protection with cloud armor in Global external LB
+
+	Operational security layer
+		Intrusion detection
+			ueses machine intel
+			test penetration with red team exercises
+		Reducing insider risk
+			continuous limit employee access and montiors them
+		Employee universal second factor(U2F) use
+			U2F
+				2 factor authentication like MFA
+				prevents phishing attacks
+		Software development practices
+			practices
+				central souce control
+				two party cid review
+				lib that prevent code class security bugs
+				runs vulnerability rewards programs
+					pay anyone who can discover nugs in the infra
+
+Open source ecosystems
+	can collaborate with many open sources like kb8, mongodb, tensorflow
+
+	TensorFow
+		open source library for ML
+
+	Operations suits
+		can monitor workloads across multiple cloud providers
+
+Pricing and billing
+	kb8s
+		per seconnd billing
+
+	Instance run more than 25% of a ,onth
+		discount for every incremental min use fot that inca
+
+		POnline pricing calculator
+
+	Cloud Billing is AWS budget
+		can create alert with budget limit met
+		can be set with 50,90,100
+
+	Cloud quotas
+		 manage qoutas fir each cloud services
+		 prevent sover consumption of resource
+
+		Rate quotas
+			project level
+
+		Allocation qoutas
+			project leve
+
+
+Quiz
+1. What is the primary benefit to a Google Cloud customer of using resources in several zones within a region?
+	- For improved fault tolerance/availability
+
+2.What type of cloud computing service lets you bind your application code to libraries that give access to the infrastructure your application needs?
+	- PaaS(cloud run/build/app engine)
+
+3.Why might a Google Cloud customer use resources in several regions around the world?
+	- To bring their applications closer to users around the world, and for improved fault tolerance
+
+
+Week 3 Resources and Access in the cloud
+
+Learning Objectives
+	1. Define the purpose of and use cases for IAM.
+	2. List the methods of interaction with Google Cloud.
+	3. Use Cloud Marketplace to interact with Google Cloud.
+	4. Identify the purpose of projects on Google Cloud.
+
+Google CLoud resource hierachy
+	- directly relates to how policies are managed and applioed when you google cloud
+	- policies are inherited downward
+	- policies defined in
+		org node
+		folder
+		project
+Four level hierarchy
+	1. resources
+		VM in GCE
+		buckets in GCS
+		tables in bigquery
+
+	2. Projects
+		org in folders or subfolders
+		policy here can enbale and use 
+			services, 
+			api, 
+			billing, 
+			add/remove collaborator
+		can have diff owners and users
+			billed and managed serpately
+
+		attributes
+			project id
+				globally unique and can't be changed
+				immutable
+					used by google of exact project to work with
+			proj name
+				user created
+				can be changed anythime
+			proj number
+				unique proj number 
+				used by google to keep track resources
+
+	3. Folders
+		- allows can be used to group different department
+		give team allow delgate admin rights for wokring independelty
+
+	4. Org node that encompasses all three above
+
+Cloud resource manager
+	manage projets
+	API that can gather list of all projects associateds with an an coount
+	create new proj
+	update exist project
+	delete projects
+	can recover deleted prokects
+	- can be access through RPC and REST API
+
+Project creator role
+	conrol who can create projects means who can spend money
+
+Workspace domain/org node
+	projects will belong to this domain
+
+Creating org node
+	workspace domain
+	cloud identity
+	google identity
+	acceess
+	application
+	endpoint mngmt platform
+
+Identity and Access Management(IAM)
+	power to restrict authorizations/access
+
+	IAM policy
+		set by admin
+		a set of rules who can access resources
+		
+		who
+			account
+			group
+			service account
+			cloud identity domain
+			- principal
+				email add
+		can do whaat
+			role
+				contains permissions
+				
+				Three kinds 
+					1. basic
+						affect all resources in the project
+
+						proj viewer
+							can accesss without edit
+						prok owner
+							can access and edit
+							can manage broles and permission and set up billing
+						proj editor
+							can access and edit
+						proj bill admin
+							contorl billing of project and change resource in project
+					2. predefined
+						like instanceAdmin in GCE
+					3. custom
+						assign role that has specific permission
+						can only be applied to project or org level
+			why
+				easier to mange
+
+		principle
+			zero trust security or least privilege permission
+
+
+Service accounts
+	-non human account withou human login that can access resources on behalf of syst/app
+
+	Use case
+		want only GCE VM to access cloud storage
+
+
+Cloud Identity
+	centrally managed users account like disabling them/removing from the group access to team's resources with google admin console
+
+	- already abailbe to google workspace customer
+
+	Active Director/LDAP(lightweight dir access protocol) sys
+		a phone book that track who's who and their access bet computers and apps over a network
+
+
+Interacting with Google Cloud
+Four ways to access resources
+	1. Google cloud console/web browser
+	2. Cloud SDK and CLoud Shell
+		Cloud SDK
+			cli in local machine
+			like gcloud and bq/bigquery
+			- can manage google cloud resources
+		Cloud Shell
+			ClI in cloud console
+			5 gb home dir
+			debian VM
+			cloud sdk gcloud pre installed
+	3. APis
+		allow code to be written to conrol services
+		GOogle APis explorer
+			shows what APis available in a resources
+	4. Google Cloud app
+		provides up to date bill info and alerts if budget is met
+		can setup costom graphs of cpu, network/request per sercond
+
+Coursera: Getting started with Google cloud platform and Qwiklabs
+Lab
+	Console and Cloud shell
+
+Getting Started with Cloud marketplace
+	sudo sh -c 'echo "<?php phpinfo(); ?>" > apache2/htdocs/phpinfo.php'
+
+Quiz
+1. Choose the correct completion: Services and APIs are enabled on a per-__________ basis.
+- projects
+
+2. Order these IAM role types from broadest to finest-grained.
+- Basic roles, predefined roles, custom roles
+
+3. Which of these values is globally unique, permanent, and unchangeable, but can be modified by the customer during creation?
+- The project ID
+
+
+Week 4 Virtual Machines and Networks in the Cloud
+
+Learning Objectives
+	1. Deploy a basic infrastructure to Google Cloud.
+	2. Explore how Cloud Load Balancing functions in Google Cloud.
+	3. Detail important VPC compatibilities including routing tables, firewalls and VPC peering.
+	4. Identify the purpose of and use cases for Google Compute Engine.
+	5. Explore the basics of networking in Google Cloud.
+	6. Outline how Google Compute Engine can scale.
+
+
+VPC Networking
+	- secure indiv private cloud compute model hosted within public cloud
+	- connect google cloud resources to internet
+	- segment networks
+
+	Main goal
+		DR
+
+Compute Engine
+	- config like physical server
+	- billed by second with one minute minimum
+	- discound by the longer they run minimum of 25% of a month, discount every add minute
+
+	Predetermine workloads/stable
+		upto 57% discount
+		min contract of 1 year or 3 years
+
+	premptible/spot VM
+		90% price
+		okay for VM to be terminated
+		use case
+			finish batch job analysizng large data set
+
+
+Scaling virtual Machines
+	scale out
+		horizontal scaling
+
+	sacle up
+		vertical scaling
+
+	machine type
+
+Important VPC compatibilities
+	Firewall defined through tag
+		is VM level
+		Security group(VM level) and NACL(subnet level) in AWS
+
+	VPC peering
+		comm two VPC
+
+	Shared VPC
+		where you can configure who and what in one project to interact with other VPC
+
+
+Cloud Load Balancing
+Types
+	1. Global HTTP(S)
+		- cross regional load balancing web app
+
+	2. Global SSL pRoxy
+		secure socket layer traffic
+
+	3. Global TCP proxy
+		TCP wiht no SSL
+
+	4. Regional External passthorugh netwokr load balancer	
+		UDP traffic or taffic on any  port number across region
+
+	5. Regional internal load balancer (proxy network LB/ Pasthrough network LB and Application load balancer)
+		Load balance inside  bet presentation and busines layer of app
+
+	6.Cross-region internal load balancer
+		- layer 7 load balancer  traffic to backend services
+
+
+Cloud DNS and CDN
+	Cloud DNS
+		- set url name like AWS route 53 
+
+	Edge caching(Cloud CDN)/Edge locations in AWS
+
+	- can be enable with External LB service
+
+Connecting networks to Google VPC
+Ways to  conenc on premise to Google cloud
+	1 . Cloud VPN/ AWS VPN
+		- a tunnel connection between on-premise or AWS/Azure network to GCP VPC securely over internet using 
+		 	- IPsec
+		 	- cloud router 
+				uses border gateway protocol to exchange route information over VPN
+
+		Limitation
+			- Security concerns
+			- BW reliability
+
+	2. Peering
+		- putting router in the same public data center/colocation Data center as a google PoP adn not on public internet
+			Point of Presence(PoP)
+				- loc where different networks can connect and share data on internet service provider infra
+					- reduces latency to google cloud services and resources
+		
+		2.1 Direct Peering
+			When to use
+				- connect on premise network to google cloud network
+
+		2.2 Carrier Peering
+			When to use
+				- customer not covers in google PoP connect through GCP with partner ISP
+
+		Limitation
+			- Not covered by Google Service Level Agreement
+		
+	3. Dedicated Interconnect
+		- allows for one or more direc, private connections to google
+		- if met with google specs, SLA upto 99.99%
+		- connection backed up by VPN
+		
+		When to use
+			- getting highest uptimes for interconnection
+		
+	4. Partner Interconnect
+		- provides connectivity between onprimes and VPC network through supported ISP
+		When to use
+			- on premise DC can't connect to colocation DC
+			- dat dont neet an entire 10 GB per second conenction
+			- support critical services or app that can tolerate downtime
+		
+	5. Cross Cloud Interconnect
+		- establish high BW dedicated connectivity bet google cloud and another cloud service provider
+		- available in 10GbpS or 100Gbps
+
+		- Cloud interconnect/AWS Direct connect
+			- a private hallway comm between onpremise or google cloud
+				- on premise  and google cloud connects through colocation facility using BGP bet Cloud router and onpremise router
+		 
+
+Getting started with VPC networking and GCE
+Objectives
+	- Explore the default VPC network
+	- Create an auto mode network with firewall rules
+	- Create VM instances using Compute Engine
+	- Explore the connectivity for VM instances
+
+Firewall Priority
+	- higher number indicates lower priorities
+
+Test network
+	ping -c 3 <Enter mynet-eu-vm's internal IP here>
+		allow-custom
+	ping -c 3 <Enter mynet-eu-vm's external IP here>
+		allow-icmp
+
+Which firewall rule allows the ping to mynet-eu-vm's external IP address?
+	allow-icmp
+
+Quiz
+1. In Google Cloud VPCs, what scope do subnets have?
+	- Regional
+
+2. What is the main reason customers choose Preemptible/Spot VMs?
+	- To reduce cost
+
+3. For which of these interconnect options is a Service Level Agreement available?
+	- Dedicated Interconnect
+
+4. How does Cloud Load Balancing allow you to balance HTTP-based traffic?
+	- Across multiple Compute Engine regions.
+
+
+Week 5 Storage in the Cloud
+
+Learning Objectives	
+	1. Deploy an application that uses Cloud SQL and Cloud Storage
+	2. Distinguish between Google Cloud's Database storage options
+	3. Distinguish between Cloud Storage Classes
+	4. Identify the purpose of and use cases for Cloud Storage
+
+Google Cloud storage options:
+
+1.Cloud Storage/S3 contains
+	 - Object Storage/Bucjets
+	 	- manage data as an objects/binary form and not file storage or block/disk storage
+
+	 - metadata
+	 	- global unique ID
+	 	- date created, author, resource type and permission
+	 	- all unique keys in the form of URLs
+
+	 Retrieval
+	 	- URL via direct download
+	 
+	 Note
+	 	- Storage objects are  immutable
+	 	- select end user nearest location for minimize latency 
+
+	 Feautures
+	 	- versioning
+
+	 Security best pracitices
+	 	- IAM roles
+	 	- Access Control lists(ACL)
+	 		- who can access and perform an action 
+	 			- can be specific to user or group of users
+	 		- permission
+	 			- what actions can be performed like read and write
+	 	- Lifecycle Management policies
+	 		- dekete objects older than 365 days
+
+	 Use cases
+	 	- Binary large-object(Blob) Storage
+	 		- website content
+	 		-backup and archiving
+	 	- static web hosting
+	 	- direct download
+
+
+
+Cloud Storage: Storage classes and data transfer
+Classes
+	1. Standard Storage
+		- hot data/frequently access data
+		When
+			- stored for only brief periods of time
+	2. Nearline Storage
+		- once a month/infrequetly access data
+		When
+			- reading/modifying data on onec a month
+			- data backups
+			- long term multimedia content
+			- data archiving
+		
+
+	3. Coldline Storage
+		- once every 90 days
+		- low cost for infrequent access data
+
+	4. Archive Storage
+		- once a year
+		- cheapest but has higher cost for data access
+		- min 465 min storage duration
+		Wgen
+			- online backup and DR
+
+	5. Auto class/Intelligient Tiering
+		- ideal for unknown/changin access patterns
+
+Ways to import
+	- cloud sdk
+		#list bucket lists
+			gcloud storage buckets list 
+
+		#upload file in a bucket
+		gsutil cp index.html gs://rayan_bucket-1
+
+		#list files in bucket
+		gsutil ls gs://rayan_bucket-1
+	- google cloud flatform
+		-
+Storage Transfer Serices
+	- import large amounts of online data into GCS quickly and cost effectively
+
+Transfer Appliance/Snowglobe
+	- data migration
+
+Import/export tables to and from 
+	- BigQuery
+	- Cloud SQL
+
+Others
+	- store app engine logs
+	- files for backups
+	- store VM startup scripts
+	- GCE images
+
+
+2. Cloud SQL
+	- Fully managed Relational DB
+		- MySQL
+		- PostgreSQL
+		- SQL Server
+
+	-supports
+		- scale up
+		- Master Slave auto replication
+		- backupos
+		- APP Engine
+			- Connector/J for Java
+			- MySQLdb for Python
+
+3. Cloud Spanner
+	- fullu managed Relational DB but better than cloud SQL
+		- tens of thjousands reads and writes per second
+	- supports
+		- scale out/horizontal
+
+4. Firestore
+	- noSQL key values
+	- supports
+		- mobile
+		- web
+		- server dev
+		- caches
+		- auto multi region data replication
+		- atomic batch operations
+		- real transaction support
+	- table is collection
+		- documents is key value pair
+	- charged at
+		- each doc read/write/delete
+		- doc read per query
+		- ingress is free
+		- 10GB free network egress per month between US region
+		- Per day quota
+			- 50,000 deoc reads
+			- 20,000 doc deletes
+			- 1 GB stored data
+
+5. Cloud Bigtable
+	- nosql big data DB
+
+	Who 
+		search
+		analtyics
+		maps
+		gmail
+
+	when
+		- operation and analytical app 
+			- IoT
+			- user anlaytics
+			- financial data analysis
+			- one TB of semi structured/sturctured data
+
+	Can collaborate with
+		Batch processes 
+			- Hadoop MapReduce
+			- Dataflow
+			- Spark
+
+Comparing storage options
+	Cloud Storage
+		Best for
+			- Storing immutable blobs larger than 10 MB
+
+		Capacity
+			PB
+			Max unit size: 5 TB per object
+
+	Cloud SQL
+		Best for
+			- full SQL support for an online transaction processing sys
+			- web frameworks and existing app
+
+		Capacity
+			Up to 64 TB
+
+	Spanner
+		Best for
+			- full SQL support for online transaction processing system
+			- hor scaling/scale out
+
+		Capacity
+			PB
+
+	Firestore
+		Best for
+			Massive scaling and predictability together w real time query results and offline query support
+		Capacity
+			TB
+			Max unit size: 1MB per entity
+
+	Cloud Big table
+		Best for
+			- storing large amt of structured objects
+			- not support SQL queries and multi-riow transactions
+			- analytical data with heavy read and write events
+		Capacity
+			Petabytes
+			Max unit size: 10MB p/cell, 100 MB p/row
+
+	Big Query
+		- On the edge between data storage and data processing
+
+Getting Started with Cloud Storage and Cloud SQL
+
+Objectives
+	- Create a Cloud Storage bucket and place an image into it.
+	- Create a Cloud SQL instance and configure it.
+	- Connect to the Cloud SQL instance from a web server.
+	- Use the image in the Cloud Storage bucket on a web page.
+
+GCE Auto start up Script
+	apt-get update
+	apt-get install apache2 php php-mysql -y
+	service apache2 restart
+
+GCS cloud shell
+	export LOCATION=ASIA
+
+	//Create bucket
+	gcloud storage buckets create -l $LOCATION gs://$DEVSHELL_PROJECT_ID
+	//Copt image to bucket
+	gcloud storage cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+	//Modify ACL to be readably by everyone
+	gcloud storage cp gs://cloud-training/gcpfci/my-excellent-blog.png my-excellent-blog.png
+
+
+qwiklabs-gcp-04-15d48010786c:us-central1:blog-db
+34.27.40.243
+
+
+Sample Web php MySQL connect code
+<html>
+<head><title>Welcome to my excellent blog</title></head>
+<body>
+<h1>Welcome to my excellent blog</h1>
+<?php
+ $dbserver = "CLOUDSQLIP";
+$dbuser = "blogdbuser";
+$dbpassword = "DBPASSWORD";
+// In a production blog, we would not store the MySQL
+// password in the document root. Instead, we would store it in a
+// configuration file elsewhere on the web server VM instance.
+
+$conn = new mysqli($dbserver, $dbuser, $dbpassword);
+
+if (mysqli_connect_error()) {
+        echo ("Database connection failed: " . mysqli_connect_error());
+} else {
+        echo ("Database connection succeeded.");
+}
+?>
+</body></html>
+
+Quiz
+1. What is the correct use case for Cloud Storage?
+	- Cloud Storage is well suited to providing durable and highly available object storage.
+
+2. Which database service can scale to higher database sizes?
+	- Cloud Spanner
+
+
+3. Why would a customer consider the Coldline storage class?
+	- To save money on storing infrequently accessed data.
+
+
+Week 6 Containers in the Cloud
+
+Learning Objectives	
+	1. Define the concept of a container and identify uses for containers.
+	2. Identify the purpose of and use cases for Kubernetes and Google Kubernetes Engine.
+
+Introduction to containers
+	- an isolated box around your code and its independencies
+	- limited access to its own partition of the fiel sys and hardware
+	- quick to start same as a process
+	- only need
+		- OS kernel 
+	- scale like PaaS but flexible as IaaS
+
+
+Kubernetes
+	- open source for managing and scaling containerized applications
+		- on many hosts
+		- scale them as microservices
+		- deployment
+		- rollouts
+		- roullbacks
+	- bootstrapped using google kubernetes engine
+
+	Cluster
+		- a set of nodes(compute instatnce) that run containers
+
+	Pod
+		- unit that contains containers
+
+Google Kubernetes Engine
+	- google hosted managed kubenetes service in the cloud
+
+	Advanced Cluster management feautures include:
+		- Google Cloud's load balancing for compute engine instances
+		- node pools to designate subsets of nodes within a cluster for additional flexibility
+		- automatic scaling of your cluster's node instance count
+		- automatic upgrades for your cluster's node software
+		- node auto-repair to maintain node health and availability
+		- logging and monitoring with Google Cloud's operation suite for visibility into your cluster.
+
+//Start up kubernete on a cluster in GKE
+	gcloud contsainer clusters create k1
+
+Quiz
+1. What is a Kubernetes pod?
+	- A group of containers
+		- containers in a pod are deployed/replicated as a group/together
+2. Where do the resources used to build Google Kubernetes Engine clusters come from?
+	- Compute Engine
+
+
+Week 7 Applications in the Cloud
+
+Learning Objectives	
+	1. Describe how Cloud Functions can support application development on Google Cloud.
+	2. Identify the purpose and use cases for Cloud Run.
+	3. Deploy a containerized application on Cloud Run.
+
+Cloud Run
+	- a serverless PaaS that runs stateless conatiners via web req or Hub sub events
+	- Built on Knative
+	- auto scale out and up
+
+	Ways/Deploy through
+		1. Source based workflows
+			- deploy through source code
+				- builpacks
+					- an open source that builds image from source code
+		2. Container-based workflow
+			- deploy through docker image
+
+	Pricing
+		1. handling req
+			- add fee per 1 million requests
+		2. startup
+		3. shutdown
+
+	Limitation
+		- only available for linux amd/64 and arm/64
+			- only in GKE can you deploy arm/64 
+
+Development in the Cloud
+
+Cloud Function
+	- a serverless/function as servuce that is event-driven.
+		- serverkless means no servers but you just don't worry to manage/provision them, GCP manage them.
+
+	Deploy through
+		1, Source code
+
+	Trigger
+		1. Cloud Storage
+			- async exec
+		2. PubSub
+			- async exec
+		3. HTTP invocation
+			- sync exec
+	
+	Usecases
+		1. Convert format
+		2. Convert thumbnail size
+		3. Store new files
+
+Hello Cloud Run
+Qwiklabs
+	https://googlecoursera.qwiklabs.com/focuses/34708884?parent=lti_session
+
+Objectives
+	1. Enable the Cloud Run API.
+	2. Create a simple Node.js application that can be deployed as a serverless, stateless container.
+	3. Containerize your application and upload to Container Registry (now called "Artifact Registry.")
+	4. Deploy a containerized application on Cloud Run.
+	5. Delete unneeded images to avoid incurring extra storage charges.
+
+SDK used command
+	//gcloud cheatsheet
+		https://cloud.google.com/sdk/docs/cheatsheet
+
+	//enable cloud run api
+		gcloud services enable run.googleapis.com
+
+	//set project
+		gcloud config set project
+
+	//set region
+		gcloud config set compute/region "REGION"
+
+	//list account name
+		gcloud auth list
+
+	//list project ID
+		gcloud config list project
+
+	//one liner with two command
+		mkdir helloworld && cd helloworld
+
+	//Build container image through gcloud command and store it ing Cloud Registry
+		gcloud builds submit --tag gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
+
+	//list container images
+		gcloud container images list
+
+	//register gcloud as credential helper for all google supported docjer registry
+		gcloud auth configure-docker
+
+	//run container from cloud shell
+		docker run -d -p 8080:8080 gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
+
+	//Verify
+		curl localhost:8080
+
+	//Deploy to cloud run
+		Location=asia-southeast1
+		gcloud run deploy --image gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld --allow-unauthenticated --region=$LOCATION
+
+	//Delete container image
+		gcloud container images delete gcr.io/$GOOGLE_CLOUD_PROJECT/helloworld
+
+	//Delete cloud run service
+		gcloud run services delete helloworld --region="REGION"
+
+
+Sample Dockerfile
+	# Use the official lightweight Node.js 12 image.
+	# https://hub.docker.com/_/node
+	FROM node:12-slim
+
+	# Create and change to the app directory.
+	WORKDIR /usr/src/app
+
+	# Copy application dependency manifests to the container image.
+	# A wildcard is used to ensure copying both package.json AND package-lock.json (when available).
+	# Copying this first prevents re-running npm install on every code change.
+	COPY package*.json ./
+
+	# Install production dependencies.
+	# If you add a package-lock.json, speed your build by switching to 'npm ci'.
+	# RUN npm ci --only=production
+	RUN npm install --only=production
+
+	# Copy local code to the container image.
+	COPY . ./
+
+	# Run the web service on container startup.
+	CMD [ "npm", "start" ]
+
+Quiz
+1. Select the managed compute platform that lets you run stateless containers through web requests or Pub/Sub events.
+	- Cloud run
+
+2. Cloud Run can only pull images from (Select 2): 
+	- Artifact Registry
+	- Docker Hub
+
+3. Why might a Google Cloud customer choose to use Cloud Functions?
+	- app contains event-driven code that they don't want to provision compute resourcees for.
+
+
+Week 8 Course Summary
+
+Learning Objectives	
+	1. Review learning concepts from throughout the course.
+
+Course Summary
+Module 1 - Introducing to Google Cloud
+	- Google Cloud and Cloud Computing
+	- Managed Infrastructure and services with IaaS and PaaS
+	- The Google Cloud network
+	- Security throughout the infrastructure
+	- Pricing structure and billings tools
+
+Module 2 - Resources and Access in the Cloud
+	- Google Cloud Resource Hierarchy
+		- Org node
+			- Folders
+				- Projects
+					- Resources
+	- Policies
+	- Identity and Access Management(IAM)
+	- Ways to access and interact with Google Cloud
+		- Google Cloud console
+		- Cloud SDK and Cloud Shell
+		- APIs
+		- Google Cloud App
+
+Module 3 - VMs and Networks in the Cloud
+	- Google Compute Engine(GCE)
+	- Virtual Private Cloud(VPC)
+	- Compute Engine's Autoscaling feature
+	- Google Virtual Private Cloud compatibility features
+		- Routing tables
+		- Firewalls
+		- VPC peering
+		- Shared VPC
+	- Cloud Load Balancing
+	- Google Cloud Interconnect
+
+Module 4 - Storage in the Cloud
+	- Google Cloud's core storage options
+		- Cloud Storage
+		- Cloud Bigtable
+		- Cloud SQL
+		- Cloud Spanner
+		- Firestore
+	- Four Cloud Storage classes
+		- Standard
+		- Nearline
+		- Coldline
+		- Archive
+
+Module 5 - Containers in the Cloud
+	- Containers
+	- Kubernetes
+	- Google Kubernetes Engine(GKE)
+
+Module 6 - Applications in the Cloud
+	- Cloud Run
+	- Cloud Functions
+
+Course Resources links
+	https://d3c33hcgiwev3.cloudfront.net/-YEvkqp0Tk-ob7J6Uzzj_w_23424d3021424220856ea3ae03e9f5a1_T-GCPFCI-B-_-Course-Resources-_-Google-Cloud-Fundamentals_-Core-Infrastructure.pdf?Expires=1710374400&Signature=MCrrmJq5Nx9aHIrDS7-3EzaSTyIdjKPBveL6-Gw0B-WB4T1qoPnamIp4a3HCc0cBGMGD2oQB9PhlxtL3l7g~on4ocQIVJdoqdikIJn6llf7Zmr-9I5-jbQORoXcQhvcRkjsiqgukNP1Rh0HXejVZL0upmPeHrMod61yURguZutM_&Key-Pair-Id=APKAJLTNE6QMUY6HBC5A
+
+Essential Google Cloud Infrastructure: Foundation
+
+Layman's Term of the following:
+	Cloud Infrastructure
+		Imagine you're in a City. 
+			- The infrastructure is the basic facilities and sys such as electricity, communications, water, fuel, sewerage systems. 
+			- The people are the end users 
+			- The cars, bikes, motorcycle and buildings like a mall/restaurant are the applications
+
+	Container 
+		- portable box which contains an app
+
+	Kubernetes 
+		- ochestrate code in containers
+
+Module 1: Interacting with Google Cloud
+
+	Learning Objectives 
+		1. List the different ways of interacting with Google Cloud 
+		2. Interact with the Google Cloud console and Cloud Shell 
+		3. Create Cloud Storage buckets 
+		4. Deploy solutions using Google Cloud Marketplace
+
+	Using Google Cloud
+		Ways to Interact with Google Cloud 
+			1. Google Cloud console - Web user interface
+
+			2. Cloud Shell and Google Cloud CLI/SDK/gcloud
+				- CLI
+
+				Cloud shell
+					- Temporary Compute Engine VM
+					- Command-line access to the instance via a browser
+					- 5 GB of persistent disk storage ($HOME dir)
+					- Pre-installed Cloud SDK and other tools
+					- gcloud: for working with Compute Engine and many Google Cloud services
+					- gcloud storage: for working with Cloud Storage
+					- kubectl: for working with Google Kubernetes Engine and Kubernetes
+					- bq: for working with BigQuery
+					- Language support for Java, Go, Python, Node.js, PHP, and Ruby
+					- Web preview functionality
+					- Built-in authorization for access to resources and instances
+
+			3. Rest-based API
+				- For custom applications
+
+				Restful API
+					- get/post/put/delete
+					- JSON
+
+				Two pupose why google cloud client Librariers exposes APIs
+					App APIs
+						- provide access to services
+
+					Admin APIs
+						- functionality for resource management
+						- build auttomated tools
+
+			4. Cloud Mobile App
+				- For iOS and Android
+
+				Features:
+					- manage VM and DB instances
+					- manage apps in app engine
+					- manage your billing
+					- Visualize projects w/ customizable dashboard
+
+			Qwiklabs - Working with Google Cloud Console and Cloud Shell
+
+				Objectives:
+					- Get access to Google Cloud
+					- Create a GCS using the google cloud console
+					- Create a GCS bucket using cloud shell
+					- Become familiar with Cloud shell features
+
+				Create a GCS bucket using cloud shell
+					//Create GCS bucket
+						gcloud storage buckets create gs://[BUCKET_NAME]
+
+					//upload my local file to GCS bucket
+						gcloud storage cp [MY_FILE] gs://[BUCKET_NAME]
+
+						//if file name has spaces
+							gcloud storage cp ‘my file.txt' gs://[BUCKET_NAME]
+
+				Create a persistent state in Cloud Shell
+					//list current config
+						gcloud config list
+
+					//config set project
+						gcloud config set project
+
+					//list all available regions
+						gcloud compute regions list
+
+					config file
+						REGION=asia-southeast1
+						PROJ_ID=realve-study
+
+					.profile
+						source config
+
+					To create a persistent state in Cloud Shell, which file would you configure?
+						-.profile
+
+			Qwiklabs - Infrastructure Preview
+
+				Objectives
+					- Use Marketplace to build a Jenkins Continuous Integration environment.
+					- Verify that you can manage the service from the Jenkins UI.
+					- Administer the service from the Virtual Machine host through SSH.
+
+				Google Cloud Marketplace lets you quickly deploy functional software packages by providing pre-defined templates with which Google Cloud service?
+					- Deployment Manager
+						- acquiring a virtual machine instance and installing and configuring software for you.
+						- Google Cloud service that uses templates written in a combination of YAML, python, and Jinja2 to automate the allocation of Google Cloud resources and perform setup tasks
+						Behind the scenes created
+							- VM
+								- startup script to install and config software
+								- network FW rules to allow traffic to the sercvice
+
+					Shut down and restart Jenkins service
+						sudo /opt/bitnami/ctlscript.sh stop
+						sudo /opt/bitnami/ctlscript.sh restart
+
+	Quiz
+
+	1. Which of the following does not allow you to interact with Google Cloud?
+		- Cloud Explorer
+
+	2. What is the difference between the Google Cloud Console and Cloud Shell?
+		- Cloud Shell is a command-line tool, while the Cloud Console is a graphical user interface
+
+Module 2: Virtual Networks
+
+	Learning Objectives
+		1. List the VPC objects in Google Cloud 
+		2. Explore VPC Networking. 
+		3. Implement Private Google Access and Cloud NAT
+
+	VPC 
+		- an isolated/private network where you can define IP address range to be used for your resources
+
+	Projects, Networks and Subnetworks
+
+		Projects
+			- associates objects and services with billing
+			- 15 networks
+
+		Networks
+			- can be shared with outher projects or be peered with VPC peering
+
+			CIDR(classless inter-domain routing)
+				- ways of splitting network to a smaller network called subnet
+				- method for allocating IP addr
+
+		Types
+			Default
+				- every project
+				- one subnet per region
+				- default firewall rules
+
+				Auto Mode
+					- Default network
+					- one subnet per region
+					- regional IP allocation
+					- fixed /20 subnet per region
+					- expandable upto /16
+
+			Custom Mode
+				- no default subnets created
+				- full control of IP ranges
+				- Regional IP allocation
+				- Expandable to IP ranges
+
+			Subnetworks
+				- smaller network from splitted network
+				- works on regional level
+				- cross zone is possible
+					- single FW rule can be applied to both VMs
+				- 4 reserves IP addrs compares to AW which has 5
+					- first
+						- network addr
+					- second
+						- subnet's gateway
+					- last
+						- broadcast addr
+					- ip before last
+						- - broadcast addr
+
+				-subnet mask
+					- allows part of undelying IP to get add next values from next base IP
+
+					Rules
+						- cannot overlap with other subnets
+						- ip range must be unique valid CIDR block
+						- new subnet IP ranges have to all within valid IP ranges
+						- can expand but not shrink
+						- auto mode can be expanded from /20 to /16
+
+			Notes
+				- Same VMs located in same network can communicate using private addr
+				- Two VMs in different network can comm with their private addr if using Google Edge routers/VPN
+					- diff bill and security risks
+
+			Expand Subnet
+				- change sider notation to lesser number
+
+				/29
+					4 instances
+
+				/24
+					256-4= 252 instances
+
+				/23
+					508 instances
+
+	IP Addresses
+		Internal IP 
+			- allocated from subnet range to VMs by DHCP
+		
+		DHCP(Dynamic Host Configuration Protocol) 
+			- allows hosts to automatically learn various netwokr w/o manual static config 
+			- automatically learn address of DNS server 
+			- DHCP lease is renewed every 24 hrs 
+			- VM name + IP is registered with network-scoped DNS 
+			
+		IPV4 ranges
+			10.0.0.0/8
+			10.0.0.0 to 10.255.255.255
+			172.16.0.0/12
+			172.16.0.0 to 172.31.255.255
+			192.168.0.0/16
+			192.168.0.0 to 192.168.255.255
+
+			External IP
+				- assigned from pool(ephemeral/temporary)
+				- reserved(static)
+				- bring your own IP address(BYOIP)
+				- VM doesn't know external IP
+					- It is mapped to the internal IP
+
+			Quotas/limits of instance per network
+				- 15,000 VM
+
+	Maopping IP addresses
+		External IPs are mapped to internal IP
+
+		Two types of internal DNS
+			- Zonal(preferred)
+			- Global
+
+		Note
+			- DNS name always poins to specific instance no matterr what internal IP addr is.
+
+		Cloud DNS
+			- google's DNS service
+			- 100& uptome SLA
+			- create and update millions of DNS records
+
+		Alias IP range
+			When to use
+				- multiple service running on a VM and want assigh diff IP addr to each service
+
+	Routes and Firewall Rules
+		Cloud Routes \
+		- defines the paths that network traffic takes from a virtual machine (VM) instance to other destination(same VPC network or outside).
+
+		GCP Firewall Rules/Security group
+			- stateful that allow/deny connections to or from your VM instances
+			- Ipmlied deny all ingress and allow all egress by default
+			- applited tot he network as a whole
+
+			Use case(Egress)
+				- Going out
+				- VM to internet
+				- VM to VM
+
+				Conditions
+					- Desination CIDR ranges
+					- Protocols
+					- Ports
+
+				Action:
+					Allow
+						- permit the matching egress connection
+
+					Deny
+						- block the matching egress connection
+
+			Use case(Egress)
+				- Going in
+				- internet to VM
+				- VM to VM
+
+				Conditions
+					- Source CIDR ranges
+					- Protocols
+					- Ports
+
+				Action:
+					Allow
+						- permit the matching egress connection
+
+					Deny
+						- block the matching egress connection
+
+	Pricing
+		Network Pricing
+			No charge 
+				- Ingress 
+				- egress to same zone(internal IP) 
+				- egress to google products like maps/drive/youtube 
+				- egress to dif cloud service within same region 
+				- Staic and ephemeral external IP addr atttached to forwarding rules used by Cloud NAT/VPN tunnel
+
+			Charge
+				- egress to same zome(External IP per GB)
+				- egress bet regions within US and CANADA(per GB)
+				- egress between zones in the same region(per GB)
+				- static external IP addr assigned but unused
+				- static and ephemeral external IP addr used on standard VM instances
+				- static and ephemeral IP add in use on preemptible VM instance
+
+			Note
+				Use Google CLoud Pricing Calculator
+
+	Qwiklabs - VPC Networking
+		Link
+			https://googlecoursera.qwiklabs.com/focuses/34733566?parent=lti_session
+		
+		Objectives
+			In this lab, you learn how to perform the following tasks:
+
+			1. Explore the default VPC network
+			2. Create an auto mode network with firewall rules
+			3. Convert an auto mode network to a custom mode network
+			4. Create custom mode VPC networks with firewall rules
+			5. Create VM instances using Compute Engine
+			6. Explore the connectivity for VM instances across VPC networks
+
+		Without a VPC network, you cannot create VM instances, containers, or App Engine applications.
+			- True
+
+		Which firewall rule allows the ping to mynet-eu-vm`s external IP address?
+			- allow-icmp
+
+		Create custom VPC network and subnet
+			//gcloud command
+				gcloud compute networks create managementnet --project=qwiklabs-gcp-01-b53880c2c02c --subnet-mode=custom --mtu=1460 --bgp-routing-mode=regional
+
+			//create subnet
+				gcloud compute networks subnets create managementsubnet-us --project=qwiklabs-gcp-01-b53880c2c02c --range=10.240.0.0/20 --stack-type=IPV4_ONLY --network=managementnet --region=us-east4
+
+		//Create custom network
+			gcloud compute networks create privatenet --subnet-mode=custom
+
+		//Create subnet-us
+			gcloud compute networks subnets create privatesubnet-us --network=privatenet --region=us-east4 --range=172.16.0.0/24
+
+		// create the privatesubnet-eu subnet
+			gcloud compute networks subnets create privatesubnet-eu --network=privatenet --region=europe-west4 --range=172.20.0.0/20
+
+		//list all available VPC networks
+			gcloud compute networks list
+
+		//list all available VPC subnet
+			gcloud compute networks subnets list --sort-by=NETWORK
+
+		//create FW rule for privatenet-allow-icmp-ssh-rdp
+			gcloud compute firewall-rules create privatenet-allow-icmp-ssh-rdp --direction=INGRESS --priority=1000 --network=privatenet --action=ALLOW --rules=icmp,tcp:22,tcp:3389 --source-ranges=0.0.0.0/0
+
+		// list all FW rules
+			gcloud compute firewall-rules list --sort-by=NETWORK
+
+		//gcloud create instance
+			gcloud compute instances create managementnet-us-vm \
+				--project=qwiklabs-gcp-01-b53880c2c02c \
+				--zone=us-east4-b \
+				--machine-type=e2-micro \
+				--network-interface=network-tier=PREMIUM,stack-type=IPV4_ONLY,subnet=managementsubnet-us \
+				--metadata=enable-oslogin=true \
+				--maintenance-policy=MIGRATE \
+				--provisioning-model=STANDARD \
+				--service-account=109867070428-compute@developer.gserviceaccount.com \
+				--scopes=https://www.googleapis.com/auth/devstorage.read_only,https://www.googleapis.com/auth/logging.write,https://www.googleapis.com/auth/monitoring.write,https://www.googleapis.com/auth/servicecontrol,https://www.googleapis.com/auth/service.management.readonly,https://www.googleapis.com/auth/trace.append \
+				--create-disk=auto-delete=yes,boot=yes,device-name=managementnet-us-vm,image=projects/debian-cloud/global/images/debian-11-bullseye-v20240213,mode=rw,size=10,type=projects/qwiklabs-gcp-01-b53880c2c02c/zones/us-east4-b/diskTypes/pd-balanced \
+				--no-shielded-secure-boot \
+				--shielded-vtpm \
+				--shielded-integrity-monitoring \
+				--labels=goog-ec-src=vm_add-gcloud \
+				--reservation-affinity=any
+				
+		//gcloud create instance tho privatenet-us-vm
+			gcloud compute instances create privatenet-us-vm --zone=us-east4-b --machine-type=e2-micro --subnet=privatesubnet-us --image-family=debian-11 --image-project=debian-cloud --boot-disk-size=10GB --boot-disk-type=pd-standard --boot-disk-device-name=privatenet-us-vm
+		
+		//list all VM instances
+			gcloud compute instances list --sort-by=ZONE
+
+		Which instances should you be able to ping from mynet-us-vm using internal IP addresses?
+			- mynet-eu-vm
+				- same VPC network called mynet eventhough seprate zones,regions and continents can communicate
+
+		Review
+			- VPC networks are by default isolated private networking domains. 
+			Therefore, no internal IP address communication is allowed between networks, 
+			unless you set up mechanisms such as VPC peering or VPN.
+
+Common Network Designs
+	1. Availability and Disaster Recovery
+		- Increased availibility with multiple zones
+			- Two Vm instances in one network, subnet and region but different zone
+		
+		- Globalization with multiple regions
+			- Two VM in same network, diff subnet, region and zone
+
+	2. Security
+		- Cloud NAT provides internet access to private instances
+			Scenario
+				One region
+					- 2 Instances in different subnet
+					- only use Internal IP and no Exteranl IP to make it private
+					- use cloud NAT for egress access internet such as update/patching/config management server
+						Cloud NAT	
+							- managed network address translation service
+							- does not allow ingress traffic
+							- Keep VPC isolated and secured
+		
+		- Private Google Access to Google APIs and services
+			- uses VPC Routing to allow communication between VM in different region in the same network
+			- enable private Google access to allow VM instance  to reach external IP addr of Google APIs and services
+				- Private VM instance need access to GCS bucket
+				- Private Google Access
+					- subnet level
+					- only internal IP and no effect on external IP
+
+	Qwiklabs - Implement Private Google Access and Cloud NAT
+	https://googlecoursera.qwiklabs.com/focuses/34735427?parent=lti_session
+	
+	Objectives
+		In this lab, you learn how to perform the following tasks:
+			1. Configure a VM instance that does not have an external IP address
+			2. Connect to a VM instance using an Identity-Aware Proxy (IAP) tunnel
+			3. Enable Private Google Access on a subnet
+			4. Configure a Cloud NAT gateway
+			5. Verify access to public IP addresses of Google APIs and services and other connections to the internet
+
+		VM Instance creation
+			- VM instance have ephemeral external IP bu default
+				- can be cahnge in policy constraint at org/project level
+
+		// SSH connectivity gcloud
+			gcloud compute ssh vm-internal --zone us-east1-d --tunnel-through-iap
+
+		Note:
+			No external IP addr	
+				- an only be reached by other instances on the network via a managed VPN gateway or via a Cloud IAP tunnel
+			Cloud IAP 
+				- enables context-aware access to VMs via SSH and RDP without bastion hosts
+
+			Currently, which of your VM instances can access the image from your bucket?
+				- Cloud Shell through SSH
+
+			If Private Google Access is ON on subnet level
+				- VM with only internal IP can only update for Google Ckloud packages or Google APIs and services
+
+			Cloud NAT gateway	
+				- implements outbound NAT, but not inbound NAT. 
+				- in other words, hosts outside of your VPC network can only respond to connections initiated by your instances; 
+				they cannot initiate their own, new connections to your instances via NAT.
+
+			Cloud NAT logging
+				- allows you to log NAT connections and errors. When Cloud NAT logging is enabled, one log entry can be generated for each of the following scenarios:
+					- When a network connection using NAT is created.
+					- When a packet is dropped because no port was available for NAT.
+				
+			For  Configure and view logs with Cloud NAT Logging pls refer to the qwiklab link above
+
+	Quiz
+	1. In Google Cloud, what is the minimum number of I addresses that a VM instance needs?
+		- One: Only an internal IP address
+	2. What are the three types of networks offered in Google Cloud?
+		- Default network, auto network, and custom network.
+	3. What is one benefit of applying firewall rules by tag rather than by address?
+		- When a VM is created with a matching tag, the firewall rules apply irrespective of the IP address it is assigned.
+			- ephemeral external IP addr is random that is why we use tag to make it simple and assigning match FW rules
+
+
+Module 3: Virtual Machines
+
+	Learning Objectives
+		1. Recall the CPU and memory options for virtual machines
+		2. Describe the disk options for virtual machines
+		3. Explain VM pricing and discounts
+		4. Create and customize VM instances using Compute Engine
+
+	Compute Engine
+		- are a collection of networked services which includes persistent disks that are network-attached. 
+		In some cases the Google Cloud VM behaves unlike hardware or other kinds of virtual machines, 
+		for example, when a multi-tenant virtual CPU "bursts", using excess capacity beyond the VM spec.
+	
+		Hardware Limitations
+			- CPU 
+			- GPU
+			Fixed
+				- TPU(Tensor Processing Unit)
+					- used in AI and training ML
+		
+		Machine type	
+			- Network throughput scales 2 Gbps per vCPU
+				- C3 series
+					- max of 200 Gbps with 176 vCPU
+
+		Storage Disks
+			- standard
+			- SSD
+				- higher IOPS than standard
+			- Local SSD
+				- create a ramdisk
+				- swap disk
+				- non persistent
+				- higher throughput and lower latency thatn SSD
+				
+		Networks
+			- one network and subnet for internal IP is required but external IP is optional
+	
+	VM access and lifecycle
+		Access
+			Linux
+				- SSH
+				- tcpL22
+
+			Windows
+				- windows
+				- tcp:3389
+
+		Lifecycle
+			provisioning	
+				Staging
+						running
+							instances.Suspend()
+								suspending
+									suspend
+										instaces.resume()
+											go back to provisioning
+							repairing
+								instances.stop()
+									stopping
+										terminated
+											instances.start()
+												go back to provisioning
+											instances.delete()
+												deleted
+			Shutdown script
+				~ 90s
+		
+		OS patch management	
+			- use to OS patches across a set GCE VM instances
+
+		Price
+			Charged
+				- Attached Disks
+				- Reserved IP addresses
+			Not Charged	
+				- Memory 
+				- CPU resources
+
+		Actions supported on a Terminal VM
+			allowed	
+				change machine type
+				migrate VM instance to another network
+				add/remove attached disks, change auto delete settings
+				modify instance tags
+				modify cusomt VM or project-wode metadata
+				remove or set a new static IP
+				modify VM availability policy
+			Not allowed
+				- cannot change the image of a stopped VM
+	
+		Actions allowed or running VM
+			allowed
+				add network tag
+				add disks
+				det if boot disk is deleted when instance is deleted
+					deleted by default
+				detached boot disk
+					create image
+			Not allowed	
+				change
+					machine type
+					CPU platform
+					zone
+					convert non-preemptibleto preemptible
+						preemptible can be interrupted
+		Note:
+			- VM policies can be change to allow thus actions above while VM is running.
+	
+		//Inside VM
+		//see info about unused, used memory and swap space
+			free
+		//see RAM details
+			sudo dmidecode -t 17
+		//see number of processors
+			nproc
+		//see details of CPU
+	
+	Qwiklab - Working with Virtual Machines
+		Objectives
+			In this lab, you learn how to perform the following tasks:
+
+			1. Create several standard VMs
+			2. Create advanced VMs
+
+	Compute options
+		https://cloud.google.com/compute/docs/machine-resource
+
+		Machine type structure	
+			Machine Family -> machine series -> machine type
+		Four Compute Engine Machine Families
+			1. General-purpose
+				- used for standard and cloud native workloads
+				E2 machine series
+					- 2 to 32 vCPUS with ratio of 0.5GB-8GB of memory per vCPU
+					- no app dependencies on specific cpu architecture
+						- web servers
+						- app server
+						- back office apps
+						- small to medium DB
+						- microservices
+						- virtual desktops
+						- development and test environments
+					- shared-core
+						- 0.25-1 vCPUs w/ 0.5-8GB of memory
+				N2,N2D, N1
+					- most flexible VM 
+					When to use
+						- web servers
+						- app server
+						- back office apps
+						- medium to large DB
+						- cache
+						- media/streaming
+					- uses Intel CPU	
+						- 128 vCPUs and 0.5 to 7HN RAM per vCPU
+							- Cascade Lake CPU
+								- default CPU upto 80 vCPUs
+							- Ice Lake
+								- default CPu for >80 vCPUs
+					- EPYC milan and EPYC Rome processors
+						- upto 224 vCPUs per node
+
+				Tau T2d and Tau T2a VMs
+					- uses 3rd gen AMD EPYCTM processors
+					- scale out optimized
+
+					When to use
+						- scale out workloads
+						- web server
+						- containerized microservices
+						- media transcoding
+						- large-scale java applications
+						
+					T2d
+						- upto 60 vCpUs per Vm with 4GB RAM per vCPU
+					
+					T2a
+						- run on ARM processors
+							x64 Ampere Altra Processor with ARM instruction with 3GHz
+
+						- use GKE fo cost optimized
+
+			2. Compute-optimized
+				C2
+					When to use
+						- compute-bound workloads
+						- high-performance web server
+						- gaming(AAA game servers)
+						- Ad server
+						- High performance computing (HPC)
+						- Media transcoding
+						- AI/ML
+
+				C2D
+					When to use
+						- memory-bound workloads
+						- gaming(AAA game servers)
+						- High performance computing (HPC)
+						- High performance DB
+						- Electronic Design Automation(ADA)
+						- Media transcoding
+
+				H3
+					- High performance computing (HPC)
+					- Electronic Design Automation(ADA)
+
+			3. Memory-optimized
+				M1
+					When to use
+						- medium in-memory DB such as SAP HANA
+						- tasks that req intensive use of memory w/ higher memory to vCPU ratios than
+						general purpose high memory machine types
+						- in memory DB and in-memory analytics, business warehousing(BW) workloads,
+						genomic analysis, SQL analysis services.
+						- Microsoft SQL server amd similar DB
+				
+				M2
+					When to use
+						- large inmemory DB such as SAP HANA
+						- in memory DB and in-memory analytics, business warehousing(BW) workloads,
+						genomic analysis, SQL analysis services, etc.
+
+				M3
+					- OLAP and OLTP SAP workloads
+					- memory intense electronic design Automation
+
+			4. Accelerator-optimized
+				- optimized for HPC workloads
+
+				A2
+					When to use
+						- CUDA-enabled ML training and inference
+						- HPC
+						- Massive parallelized computation
+
+				G2
+					When to use
+						- video transcoding
+						- remote visualtzaiont workstation
+
+		Creating custom machine types
+			When to use	
+				- requirements doesn't fit between predefine types
+				- need more RAM or CPU
+
+	Compute pricing
+		- Per-second billing, w/ minimum of 1 minute means you will billed 1 minute even if your VM run for 30 sec/less than a minute
+			- vCPUs
+			- GPUs
+			- GB of Memory
+		- Resource-based pricing
+			- each vCPU and GB of memory is billed separately
+		- Discounts:
+			- Sustained use
+				- activated when VM run 25% of a month
+				- automatic discounts you get for running speific resources for a significant portion of the billing month
+				- 30% discount so create first day of the month cuz it reset at the beginning of each month
+				- discount every incremental minute you use that instace		
+				- N1(upto 30% net discount)
+				- N2/N2D(upto 20% discount)	
+			- Committed use
+				- 1 or 3 years
+				- upto 57% discounts for most machine types including custom one
+				- 70% discount for memory optimized machine types
+				When to use
+					- workload is stable and predictable
+			- Preemptible/Spot VM instance
+				- might terminate/preempt these instance if google requires to access those resources
+					- cuz they are excess capacity so availability varies w/ usage
+				- preemptible can run max of 24 hrs at a time but Spot do not have max run time
+		- Recommendation Engine
+			- Notifies you of underutilized instances
+		- Free usage limits
+
+		Note: External IP incur a small cost
+
+	Special compute configurations
+		Preemptible	VM
+			- max 24 hrs continuous live
+			- 30 sec notif before machine slows down
+			- no auto restart
+				- fixs is load balancers to monitor and keep restarting preemptible VM
+			- no live migrations
+
+			Usage	
+				- running batch processing jobs
+
+			Updated version
+				Spot VMs
+					- finite CE resources so not always available
+				
+		Sole tenants node
+			- physically isolate workloads
+
+			Usage
+				- physical isolation from other workloads or VM in order to meet compliance requirements
+				- all VM in the same project
+
+		Shielded VM
+			- offer verifiable integrity to your VM instance
+				- boot/kernel level malware/rootkits protection
+			- secure boot
+			- virtual trusted platform module(vTPM) shield/sealing
+				- prevent data exfilitration
+			- Integrity monitoring
+
+			How to use
+				- select shielded image
+			
+		Confidential VMs
+			- encrypt data while it's being processed.
+			- easy to use w/ no changes to code or performance compromise.
+			- N2D Compute Engine VM running on second generation AMD Epyc(ROME) processors
+				- uses AMD Secure Encrypted Virtualization(SED)
+				- Confidential Computing support
+				Usage	
+					- compute heavy workloads
+					- high memory capacity
+					- high throughput
+					- support for parallel workloads
+			Note
+				- google doesn't have access to encryption keys
+
+			How to use
+				- select Confidential VM service
+					- console
+					- API
+					- gcloud CLi
+		
+	Images
+		Public base images
+			- Google
+			- third party vendors
+			- premium images(p)
+			- Linux
+			- windows
+
+		Custom images
+			- create new image from VM: pre-configured and installed SW
+			- import from:
+				- on-premium
+				- workstation
+				- another cloud
+			- features	
+				- image sharing/family/deprecation
+
+		Machine Images
+			- stores all:
+					- config
+					- metadata
+					- permission
+					- data from one or more disks
+			- uses mainly in maintenance scenario such as instance cloning/replication/disk backups/recovery 
+
+		Note:
+			- Premium images(p) are charges per second after a 1 minute mon except SQL server images(charged after 10 min)
+
+	Disk options
+		Boot disk
+			- VM comes w/ single root persistent disk from base image
+				- avoid delete
+					- disable delete boot disk when instance is deleted
+
+		Persistent disks
+			- network storage appearing as a block device
+			- attached to VM through the network interface and not physically attached to the machine
+			- can survice VM terminate
+			- bootable means attach to VM and boot from it
+			- spnapshots
+			- scales with size
+			- HDD or SSD options
+			- disk rezising even running and attached
+			- can be attached in read only mode
+			- Zonal
+				- reliable block storage
+			- regional
+				Usecase
+				High availability/perfomance DB
+					- active active across two zones
+						- sync replication across zones
+			- types
+				1. pd-standard Disks
+					- uses HDD
+					- large data processing workloads uses sequential I/Os
+					- large capacity only needed
+				2. pd-SSD
+					- perfomance SSD
+					- enterprise app and high performance DB that req latency and more IOPS than pd-standard
+				3. pd-balanced
+						- uses SSD
+						- max IOPS nad lower IOpS per GB
+						- genearal purpose app bet pd-standard and pd-SSD
+				4. pd-extreme
+						- uses SSD
+						- zonal only
+						- highend DB workloads
+						- high perforamnce for:
+							- random access workloads an
+							- bulk throughput
+			Encrption keys
+				- Google-managed
+				- Cusotmer-managed
+					- use CLoud key Management service
+				- Customer-supplied
+					- Customer-supplied encryption keys
+
+		Local SSD
+			- very high IOPS, lower latency, and higher througput than persistent disk
+				- but ephemeral
+			- physically attached to a VM
+			- 375 GBdisk upto 24, totla of 9TB per instance
+			- Data services reset but not VM stop or terminate	
+			- w/o data redundancy
+				
+		RAM disk
+			- tmfs
+				- store data in memory 
+			- faster than local disk but slower than memory	
+				- use when app expects file sys structure and cannot directly store its data in memory
+			- very volatile means erase on stop or restart
+				- ephemeral
+			- may need larger machine type if RAM was sized for the app
+			- consider using persistent disk to back up RAM disk data
+
+			Recommendation
+				- use tmfs for fastest performance for small data structures
+				- use for high memory VM along with persistent disk to back up RAM disk data
+
+		Limitation
+			Shared core machine type
+				 - can only attach upto 16 disks
+			standard/high memory/high CPU/memory-optimized/Compute-optimized
+					- 128
+
+		Note
+			- Throughput is limited by number of compress
+				- shares same BW w/ Disk IOPS
+				- compete with any network egress/ingress throughput
+
+			- Compute Hardware Disk
+				- grow size
+					- repartition
+				- changes	
+					- reformat
+				- redundancy	
+					- create redundant disk array
+				- encryption
+					- encrypt fiels before writing them to the disk
+			
+			- Cloud Persistent disks
+				- simply grow disks and resize
+					- virtual networked devices
+				- redundancy
+					- Snapshot
+				- encryption
+					- auto encrypted
+				- Confidential
+					- we can use own keys so no one can get data except us
+				
+
+			
+
+
+
+	Common Compute Engine actions
+		metadata	
+			- useful for startup and shutdown scripts
+				- use metadata server w/o additional authorization to get unique infor
+
+		Moving instance within same region
+			- automate the move by using gcloud command
+				- gcloud comput instances move
+			- update references to VM cuz it's not automatic
+				- target VMs
+				- target pools
+			- process
+				- shutdown
+				- move to dest zone
+				- restart
+
+		Moving instance to diff region
+			- process	
+				- snapshot all persistent disk
+					- custom image
+				- create disk from that image in the new region
+				- create new VM from that region
+				- attach that snapshot
+				- assign static external IP
+				-  update references to new VM
+				- delete previous VM/disks/snapshot
+		
+		Snapshot
+			- stored in GCS
+				- not visible in your buckets cuz manage by the snapshot service
+			- spnapshots are incremental and automatically compress 
+				- means next snapshot will only copy the changes after the first snapshot
+			
+			Usage	
+				- backup critical data for availability and drive
+				- improve disk performance such us from HDD to SSD
+					- resizing disk to improve I/O performance 
+			
+			Note
+				- not applicable to local SSD
+				- can grow disks in size but can never shrink them
+				- snapshot doesn't backup VM metadata, tags and et.
+
+		Recommendation
+			- store startip/shutdown scripts in GCS
+		
+
+	Qwiklab - Working with Virtual Machines
+		https://googlecoursera.qwiklabs.com/focuses/34737878?parent=lti_session
+
+		Objectives
+			In this lab, you learn how to perform the following tasks:
+
+			1. Customize an application server
+			2. Install and configure necessary software
+			3. Configure network access
+			4. Schedule regular backups
+
+		//make script file executable
+			sudo chmod 755 /home/minecraft/backup.sh
+
+		//Run backup script in the background
+			. /home/minecraft/backup.sh
+
+		//script sample to backup to GCS
+			#!/bin/bash
+			screen -r mcs -X stuff '/save-all\n/save-off\n'
+			/usr/bin/gcloud storage cp -R ${BASH_SOURCE%/*}/world gs://${YOUR_BUCKET_NAME}-minecraft-backup/$(date "+%Y%m%d-%H%M%S")-world
+			screen -r mcs -X stuff '/save-on\n'
+
+		//instructs cron to run backups every 4 hours.
+			0 */4 * * * /home/minecraft/backup.sh
+	
+
+
+	Quiz
+	1. Which statement is true of Virtual Machine Instances in Compute Engine?
+		- In Compute Engine, a VM is a networked service that simulates the features of a computer.
+	2. What are sustained use discounts?
+		- Automatic discounts that you get for running specific Compute Engine resources for a significant portion of the billing month
+	3. Which statement is true of persistent disks?
+		- Persistent disks are encrypted by default.
+
+Essential Google Cloud Infrastructure: Core Services
+
+Learning Objectives
+	1. Understand how to navigate the course
+	2. Understand how to download course resources
+
+Module 1 - Identity and Access Management(IAM)
+	- Administer Identity and Access Management for resources
+
+	Learning Objectives
+		1. Describe the IAM resource hierarchy
+		2. Explain the different types of IAM roles
+		3. Recall the different types of IAM members
+		4. Implement access control for resources using IAM
+
+	Identity and Access Management
+		- identiyfying who can do what on which resources
+		who
+			- IAM member
+		what
+			- roles
+				- permissions
+		resources
+			- Google cloud service
+
+	
+
+	Organization
+		- root node for google cloud hierarchy
+		- when workspace domain/identity accoun creates project, their domain name will be the name of their organization
+		Roles
+			Workspace/Cloud Identity super admin
+				- assign the organization admin role to some users
+				- be the point of contact in case of recovery issues
+				- control the lifecycle of the workspace or cloud identity accound and organization resource
+			- organization admin
+				- control over all cloud resources
+				- useful for auditing
+				- define IAM policies
+				- determine structure of the resource hierarchy
+				- delegate responsibility over critical components such as 
+					- networking
+					- billing
+					- resource hierarchy through IAM roles
+			- project creator
+				- controls project creation
+				- control over who can create projects
+	Folders
+		- where you can isolate department -> teams -> products  or shared Infrastructure
+		- allow delegation of adnmin rights
+
+	projects
+		- enabled: 
+			- services, 
+			- api, 
+			- billing, 
+			- add/remove collaborator
+	
+	Resource Manager Roles
+		Organization
+			- admin
+				- full control over all resources
+			- view access to all resources
+
+		Folders
+			- admin
+				- full control over folders
+			- creator
+				- browse hierarchy and create folders
+			- viewer
+				- view folders and projects below a resource
+		projects
+			creator
+				- create new projects(automatic owner) and migrate new projects into organization
+			deleter
+				- delete projects
+	roles
+		- offers fixed level access
+			- owner
+				- full admin access
+				- invite members
+				- remove members
+				- delete projects
+			- editor
+				- deploy app
+				- modify code
+				- config services 
+			- viewer
+				- read only acess
+			- billing admin
+				- manage billing
+				- add and remove admin
+				- no rights change resources in the project
+		Three types	
+			1. Basic
+				- owner
+				- editor
+				- viewer 
+			2. Predefined
+				- apply to aparticular google cloud service
+				why	
+					- grouping permissions into a role makes it easier to manage
+
+				Sample
+					Compute Engine
+						- Compute admin role	
+							- full control of all compute engine resources
+						- Network admin role	
+							- permission to create/modify/delete network resources
+							- only read access to FW ruless SSL cert
+							- read access to ephemeral IP addr too
+					Cloud storage	
+						- storage admin role
+							- create/modify/delete disks/images/snapshots
+							- given to manages project images without editing having edior role
+			3. Custom
+				When to use
+					- Implementing least privileged model
+
+	members
+	Service Accounts
+	Organization Restrictions
+		- prevent data exfiltration through phishing or insider attacks
+			- restricts access only to resources for authorized Google Cloud Organizations
+
+		How it works?
+			Managed Device(governed by company policies)
+				-> Customer managed Egress proxy(Egress proxy admin  config proxy to add org restricitions headers to any req originating from managed device)
+					-> Google Cloud Org/Vendor Google CLoud Org
+						-> Cloud Storage
+
+
+	IAM Best Practices
+		1. Leverage and understand the resource hierarchy
+			- use projects to group resources that share the same trust boundary
+			- check the policy granted on each resource and make sure you understand the inheritance
+			- use "principles of least privelege" when granting roles
+			- audit policies in Cloud Audit Logs: setiampolicy
+			- audit membership of groups used in policies
+		2. Grant roles to Google groups instead of individuals
+			- update group membership instead of changing IAM policy
+			- audit membership of groups used in policies
+			- control the ownership of the google group used in IAM policies
+		3. Service Accounts Best Practices
+			- Be very careful granting serviceAccountUser role
+			- When you create a service account, give it a display name that cleary identifies its purpos
+			- Establish a naming convention for service Accounts
+			- Establish key rotation policies and methods
+			- Audit w/ serviceAccount.keys.list() method
+		4. Cloud Identity-Aware Proxy(IAP)
+			- establish central authorization layer for app accessed by https
+				- app level access control model instead of network level firewalls
+					- means no VPN
+			- enforce access control policies for app and resources:
+				- identity-based access control
+				- central authorization layer for app accessed by https
+			- a security guard for your web app that controls access based on users identity/authenication and permission/authorization
+			Note
+				- IAM policy is applied after authentication.
+	
+
+
+	Qwiklabs - Exploring IAM
+		Objectives
+			In this lab, you learn how to perform the following tasks:
+
+				1. Use IAM to implement access control
+				2. Restrict access to specific features or resources
+				3 . Use the Service Account User role
+	
+	Quiz
+	1. What abstraction is primarily used to administer user access in IAM ?
+		-  Roles, an abstraction of job roles
+			- IAN uses predefined roles for giving user access
+			-	roles are define by more granukar permissios.
+			- permissions are not applied to users directly, only through the roles that are assigned to them
+	2. Which of the following is not a type of IAM role?
+		- Advanced
+		Type of IAM role:
+			1. Basic
+			2. Predefined
+			3. Custom
+
+	3. Which of the following is not a type of IAM member?
+		- Organization Account 	
+		Type of IAM member
+			1. GooCloud Identity domain
+			3. Service Account
+			4. Google Workspace domain
+			5. Google group
+			 
+	Review
+		- IAM builds on top of the Google Cloud services
+		- Wokspace Admin/Cloud Identity
+			- where creation of admin of corporate identities
+			- handled by a person seprate from Google CLoud Administrator
+		- Google Groups
+			- establish a roles to all members
+		- Wokspace admin
+			- administers membership in the group
+		- Service Accounts
+			- enable you to build IaaS through terraform
+
+Module 2 - Storage and Database Services
+	- Implement data storage services in Google Cloud
+
+	Learning Objectives
+		1. Differentiate between Cloud Storage, Cloud SQL, Cloud Spanner, Firestore and Cloud Bigtable
+		2. Choose a data storage service based on your requirements
+		3. Implement data storage services
+
+	Scope
+		Infrastructure Track
+			- Service differentiators
+			- When to consider using each service
+			- Set up and connect to a service
+		
+		Data Engineering Track
+			- How to use a database system
+			- Design, organization, structure, schema and use for an application
+			- Details about how a service stores and retrieves structured data
+
+	Cloud Storage
+
+	Cloud Storage features
+
+	Choosing a storage class
+
+	Filestore
+
+	Cloud SQL
+
+	Cloud Spanner
+
+	AlloyDB
+
+	Firestore
+
+	Cloud Bigtable
+
+	Memorystore
+
+	Quizes
+	1. What data storage service might you select if you just needed to migrate a standard relational database running on a single machine in a datacenter to the cloud?
+		- Cloud SQL
+	2. Which Google Cloud data storage service offers ACID transactions and can scale globally?
+		- Cloud Spanner
+	3. Which data storage service provides data warehouse services for storing data but also offers an interactive SQL interface for querying the data?
+		- BigQuery
+			- data warehousing service that allows storage of huge data sets while making them immediately processable w/o having to extract or run the processing in a separate service
+
+	Review
+		1. Cloud Storage
+			- fully managed object storage
+		2. Filestore
+			- fully managed file storage
+		3. Cloud SQL
+			- fully managed MySQL and PostgreSQL DB
+		4. Cloud Spanner
+			- relational DB service w/ transactional conistency, global cale and high availbility
+		6. AlloyDB
+			- fully managed postgreSQL compatible DB service
+		7. Firestore
+			- fully managed NoSQL document DB
+		8. Cloud Bigtable	
+			- fully managed noSQL wide column DB
+		9. Memorystore
+			- fully managed in-momemory data store servicefor Redis
+		
+
+Module 3 - Resource Management
+	- Manage and examine billing of Google Cloud resources
+
+Learning Objectives
+	1. Describe the cloud resource manager hierarchy
+	2. Recognize how quotas protect Google Cloud customers
+	3. Organize resources using labels
+	4. Explain the behavior of budget alerts in Google Cloud
+	5. Examine billing data with BigQuery
+
+Module 4 - Resource Monitoring
+	- Monitor resources using Google Cloud's operations suite
+
+Learning Objectives
+	1. Describe Google Cloud's operations suite for monitoring, logging, error reporting, tracing, and debugging
+	2. Create charts, alerts, and uptime checks for resources with Cloud Monitoring
+	3. Identify and fix errors using Cloud Debugger
+
+Essential Google Cloud Infrastructure: Scaling and Automation
+
+Module 1 - Interconnecting Networks
+
+Module 2 - Load Balancing and Autoscaling
+
+Module 3 - Infrastructure Automation
+
+Module 4 - Managed Services
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

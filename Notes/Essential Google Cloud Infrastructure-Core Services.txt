@@ -75,13 +75,207 @@ Module 1 - Identity and Access Management(IAM)
 			deleter
 				- delete projects
 	roles
+		- offers fixed level access
+			- owner
+				- full admin access
+				- invite members
+				- remove members
+				- delete projects
+			- editor
+				- deploy app
+				- modify code
+				- config services 
+			- viewer
+				- read only acess
+			- billing admin
+				- manage billing
+				- add and remove admin
+				- no rights change resources in the project
+		Three types	
+			1. Basic
+				- owner
+				- editor
+				- viewer 
+			2. Predefined
+				- apply to aparticular google cloud service
+				why	
+					- grouping permissions into a role makes it easier to manage
+
+				Sample
+					Compute Engine
+						- Compute admin role	
+							- full control of all compute engine resources
+						- Network admin role	
+							- permission to create/modify/delete network resources
+							- only read access to FW ruless SSL cert
+							- read access to ephemeral IP addr too
+					Cloud storage	
+						- storage admin role
+							- create/modify/delete disks/images/snapshots
+							- given to manages project images without editing having edior role
+			3. Custom
+				When to use
+					- Implementing least privileged model
+
 	members
-	Service Accounts
-	Organization Restrictions
+		- define who cand do what on wchich resources
+
+	Types
+		1. Google account
+			- developer/admin/person who interacts with google cloud
+
+		2. Service account	
+			- an account that belongs to your app instead of an indiv end user
+		3. Google group
+			- name collection of google accounts and servic accouns
+		4. Workspace domain
+			- rep org internet domain
+			- rep virtual group of all google accounts that have been created in an org workspace acct
+
+		5. Cloud IAP
+				- let users who don't have workspace domain manage users and groups using google admin console like wokspace domain
+
+	IAM policies
+		- policy consists of list of bindings
+		- bindin bind a list of members to a role
+			- role
+				- named list of permissions defined by IAM 
 	
+	IAM allow policies
+		- grant access to cloud resources
+		- control access to the resource itself, as well as any descendants of that resource
+		- associates, binds, one or more prinicpials(also known as a member or identity) w/ single IAM role
+
+	IAM deny policies
+		- deny rules prevent certain principals from using certain permissions, regardless of the roles they're granted
+		- deny policies are made up of deny rules. Each deny rule spcifies:
+			- a set of principals that are denied permissions
+			- permissions that the principals are denied/unable to use
+			- optional: condition that must be true for the permission to be denied
+		- when principal is denied a permission, they can't do anything that requires that permission
+	
+	IAM Conditions	
+		- enforce conditional, attribute-based access control for google resources
+			- grant resource access to identities(members) only if config conditions are met
+			- specified in the role bindings of a resource's IAM policy
+
+	Organizaiton policies
+		- config of Restrictions
+		- defined by configuring a constraint w/ desired Restrictions
+		- applied to the organization node, folders or projects
+		
+	Corporate directory migrations
+		Microsft AD or LDAP -> Google Cloud Directory Sync -> Users and groups in your Cloud Identity domain
+		
+	Single sign-on(SSO)
+		- use cloud identity to config SAML SSO
+		- if SAML2 isn't supported, use a third party solution(ADFS, Ping, or OKTA)
+
+	Note:
+		- cannot use IAM to create or manage your users/groups
+		- less restrictive parent policy will always ovverride more restrictive polociy
+		- chose smallest scope
+		- use role Recommendation to lessen excess permission
+		- deny policies first before allow policies
+
+	Service Accounts
+		- an account that belongs to your cloud resources instead of an indiv end user
+			- assistant robot that has secure access resources w/o using personal user credentials
+		- identity for carrying out service to service interactions
+
+		Types: 
+			1. user-created(custom)
+			2. built-in	
+				- compute engine default service accounts
+				- app engine default service accounts
+			3. Google APIs service account
+				- run internal google processes on your behalf
+
+		When to use
+			- convenient when you're not accessing user data
+			- provisioning resources with terraform
+			- App that interacrts with Google Cloud Storage 
+	
+		scopes
+			- used to determine whether an authenticated identity is authorized
+			- can be changed after an instance is created
+
+		How it works?
+			- programs running w/in compute engine instances can automatically acquire access tokens w/ credentials
+				- tokens are used to access any service API in your project and any other services that granted access to that service account
+		
+		Service account permissions
+			- default service accounts
+				- basic roles
+				- predefined roles
+			- user created service accounts
+				- predefined roles
+			- roles for service accounts can be assigned ot gorup or users
+
+		How service accounts authenticated?
+		Two types of service account keys	
+			1. Google-managed service accounts
+				- all service accounts have google-managed keys
+				- google stores both the public and private portion of the key
+				- each public key can be used for signing for a maximum of two weeks
+				- private keys are never directly accessible
+			2. User managed service accounts
+				- google only stores the public portion of a user managed key
+				- users are responsible for private key security
+				- can create upto 10 user-managed service account keys per service
+				- can be administered via the IAM API, gcloud, or the console
+
+		Note	
+			- Each service has scopes
+			- for user created service accounts, use IAM roles instead
+			- google doesn't save user-managed private keys so they can't recover them
+				- key rotation is managed by customer also
+
+	Organization Restrictions
+		- prevent data exfiltration through phishing or insider attacks
+			- restricts access only to resources for authorized Google Cloud Organizations
+
+		How it works?
+			Managed Device(governed by company policies)
+				-> Customer managed Egress proxy(Egress proxy admin  config proxy to add org restricitions headers to any req originating from managed device)
+					-> Google Cloud Org/Vendor Google CLoud Org
+						-> Cloud Storage
+
+
 	IAM Best Practices
+		1. Leverage and understand the resource hierarchy
+			- use projects to group resources that share the same trust boundary
+			- check the policy granted on each resource and make sure you understand the inheritance
+			- use "principles of least privelege" when granting roles
+			- audit policies in Cloud Audit Logs: setiampolicy
+			- audit membership of groups used in policies
+		2. Grant roles to Google groups instead of individuals
+			- update group membership instead of changing IAM policy
+			- audit membership of groups used in policies
+			- control the ownership of the google group used in IAM policies
+		3. Service Accounts Best Practices
+			- Be very careful granting serviceAccountUser role
+			- When you create a service account, give it a display name that cleary identifies its purpos
+			- Establish a naming convention for service Accounts
+			- Establish key rotation policies and methods
+			- Audit w/ serviceAccount.keys.list() method
+		4. Cloud Identity-Aware Proxy(IAP)
+			- establish central authorization layer for app accessed by https
+				- app level access control model instead of network level firewalls
+					- means no VPN
+			- enforce access control policies for app and resources:
+				- identity-based access control
+				- central authorization layer for app accessed by https
+			- a security guard for your web app that controls access based on users identity/authenication and permission/authorization
+			
+		Note
+				- IAM policy is applied after authentication.
+	
+
 
 	Qwiklabs - Exploring IAM
+		https://googlecoursera.qwiklabs.com/focuses/34777833?parent=lti_session
+
 		Objectives
 			In this lab, you learn how to perform the following tasks:
 
@@ -89,6 +283,12 @@ Module 1 - Identity and Access Management(IAM)
 				2. Restrict access to specific features or resources
 				3 . Use the Service Account User role
 	
+		//list GCS bucket
+			gcloud storage ls gs://[YOUR_BUCKET_NAME]
+
+		Note
+			- can grant group thus the members of the gfroup the role of Service Account User
+
 	Quiz
 	1. What abstraction is primarily used to administer user access in IAM ?
 		-  Roles, an abstraction of job roles
@@ -105,7 +305,8 @@ Module 1 - Identity and Access Management(IAM)
 	3. Which of the following is not a type of IAM member?
 		- Organization Account 	
 		Type of IAM member
-			1. GooCloud Identity domain
+			1. Google Account
+			2. Cloud Identity domain
 			3. Service Account
 			4. Google Workspace domain
 			5. Google group
