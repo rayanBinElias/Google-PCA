@@ -343,24 +343,644 @@ Module 2 - Storage and Database Services
 			- Details about how a service stores and retrieves structured data
 
 	Cloud Storage
+		- cloud's object storage.
+			- a collection ob buckets that you place objects into
+			- uses URL to access objects
+		
+		structure
+			buckets(globally unique name)
+				-> object
+		Use case	
+			- website content
+			- storing data for archiing and DR
+			- Distributing large data objects to users via direct download
+
+		Key features
+			- Scalable to exabytes
+
+			- Time to first byte in milliseconds
+			- Very high availbility across all storage classes
+			- Single API across storage classes
+
+		Classes
+			1. Standard
+				- frequently accessed data(hot)
+				- stored for only brief period of time
+				- no minimum storage duration and no retrieval constrain
+
+				When to use
+					- store data in same region as GKE clusters/GCE instance that uses it
+
+			2. Nearline
+				- infrequently accessed data like
+					- data backup
+					- long-tail multimedia content
+					- data archiving
+				- once a month
+
+				When to use
+					- lower availability than standard
+					- 30 day min storage duration
+					- costs for data access are acceptable trade-offs for lowered at-rest storage costs
+
+			3. Coldline
+				- cheaper infrequently accessed data than nearline
+				- once in a 90 days
+				When to use
+					- lower availability than those 2 above
+					- 90 day minimum storage duration
+					- higher cost for data access are acceptable trade-offs for lowered at-rest storage costs
+
+			4. Archive
+				- once a year archiving storage data
+				When to use
+					- lowest cost
+					- data archiving
+					- online backup
+					- DR
+					- coldest service but data can be retrieved w/in milliseconds at higher expense
+					- 365 day minimum storage duration
+		
+		Durability
+			11 nines percent
+
+		Location Types
+			1. Multi-region
+				- geo redundant
+				- use for data serving around the world
+					- website content
+					- streaming videos
+					- executing interactive workloads
+					- serving data supporting mobile and gaming applicaionts
+			2. Dual-Region
+				- geo redundant
+				- availability and DR
+
+			3. Region
+				- use w/ GKE/GCE instance that access it's data
+
+		Modify after creation
+			- can change storage data type
+			- can't change location type
+			- can change per object storage type/class
+			- default class of bucket is applied to a new objects
+			- objects can be moved from bucket to bucket
+			- Object lifecycle Management
+					- manage the classes of objects in your bucket
+						- like s3 Intel tiering but on object level
+					- with delete feature
+
+		Security
+			1. IAM
+			2. Access control lists/ACL
+				- for custom finer control
+					- define who has access level to buckets/object
+				- number entries is 100
+					- scope	
+						- define who(group/user) can perform specific action
+							- collaborator@gmail.com
+							- allUsers
+								- anyone who is on the internet
+							- allAuthenticatedUsers
+								- represents anyone who is authenticated w/ google account
+					- permission
+						- define what actions(Read/write) can be performed
+			3. Signed URLs
+				- for more detailed control for granting internet user who don't use google account
+					- means time-limited access to a bucket/object
+				- "Valet key" access to buckets and objects via ticket:
+					- Ticket is a cryptographically signed URL
+					- Time-limited
+					- Operations specified in ticket: HTTP/GET/PUT/DELETE and not POST
+					- Any user with URL can invoke permitted operations
+
+				Signed Policy documents
+					- for determining what kind of file can be uploaded by someone w/ signed URL
+				- URL is signed using private key associated w/ service account
+					- service account delegates its trust of the account to the holder of the URL
+				
+				Note
+					- signed URL expiration should be a reasonable time
 
 	Cloud Storage features
+		1. Customer-Supplied Encryption Key(CSEK)
+			- use your own key instead of Google managed keys
+		2. Object Lifeccyle management
+			- automatically delete/archive objects
+		3. Object versioning
+			- maintain multiple versions of objects
+				- charged each versions as if they were multiple files
+			- supports retrieval of objects that are deleted or overwritten
+			- maintain a history of modifications of objects
+				- older version is stored in archive with added generation number to its name
+				- turning it off will retain archive stored
+			- list archived versions of an object, restore an object to an older state/delete a version
+			
+			Support configuration
+				- object inspection occurs in asynchronous batches
+				- changes can take 24 hrs to apply
+				
+				When to use
+					- downgrade storage class on objects older than a year/archiving older versions of objects/downgrading
+						- downgrade to coldline for older than ayear
+					- delete objects created before a specific date
+					- keep only the 3 most recent versions of an object
+			
+		4. Directory synchronization
+			- synchronizes a VM directory w/ a bucket
+		5. Object change notifications using Pub/Sub
+		6. Autoclass
+			- manages all aspects of storage class for  a bucket
+
+		Notes
+			- objects are immutable means uploaded object cannot be modified
+		
+		database import services
+		  - use for transfering petabytes/terabytes
+			- Transfer Appliance/Snowcone-Snowmobile
+				- rack, capture and then ship your data to google cloud
+			- Storage transfer service
+				- import online data through online
+			- Offline Media Import
+				- Third party provider uploads the data from physical media
+
+		Global consistency
+			- read after write
+			- read after metadata-update
+			- read after delete
+			- bucket listing
+			- object listing
 
 	Choosing a storage class
+		Structured Data
+			- choose DB services
+		
+		Unstructured Data
+			- choose GCS
+				- Read < once a year
+					- archive
+				- Read once per 90 days
+					- coldline
+				- Read once per 30 days
+					- nearline
+				- Read less than 30 days
+					- standard
+				
+				Location type
+					- Region
+						- same as customer for:
+							- less latency and optimize network BW for data consumers
+								- analytics pipelines grouped in same region
+					- Dual region
+						- want same performance as region with higher availability(geo-redundant)
+					- Multi-region
+						- serve content to data consumers outside of google network and distributed across large geographic areas
+						- higher data availibility that comes with being geo-redundant
 
+				- Autoclass
+					- bucket level
+					- like Amazon s3 Intelligent- Tiering
+						- auto cost savings by moving objects between tiers based on access patterns.		
+					- variety of access frequencies/unknown/predictible
+					- No charged	
+						- storage class transitions
+						- no retrieval charges
+						- no early deleteion charges
+	
+	Qwiklabs: Cloud Storage
+		https://googlecoursera.qwiklabs.com/focuses/34814610?parent=lti_session
+	
+	Objectives
+		In this lab, you learn how to perform the following tasks:
+			- Create and use buckets
+			- Set access control lists to restrict access
+			- Use your own encryption keys
+			- Implement version controls
+			- Use directory synchronization
+			- Share a bucket across projects using IAM
+
+		Access control lists
+			// store bucket name into a variable
+				export BUCKET_NAME_1=bineliasray
+			
+			// verify
+				echo $BUCKET_NAME_1
+			
+			// copy first file to the bucket
+				gcloud storage cp setup.html gs://$BUCKET_NAME_1/
+			
+			// Get default access list
+				gsutil acl get gs://$BUCKET_NAME_1/setup.html  > acl.txt
+cat acl.txt
+	
+			// set access list to private
+				gsutil acl set private gs://$BUCKET_NAME_1/setup.html
+			
+			// verify results
+				gsutil acl get gs://$BUCKET_NAME_1/setup.html  > acl2.txt
+cat acl2.txt
+
+			// update ACL to make publicly readable
+				gsutil acl ch -u AllUsers:R gs://$BUCKET_NAME_1/setup.html
+
+			// verify
+				gsutil acl get gs://$BUCKET_NAME_1/setup.html  > acl3.txt
+cat acl3.txt
+
+		Customer-supplied encryption keys(CSEK)
+			// Create a CSEK: AES-256 base-64 key
+				python3 -c 'import base64; import os; 
+				print(base64.encodebytes(os.urandom(32)))'
+
+			//generate boto file
+				gsutil config -n
+
+			// check gsutil version
+				gsutil version -l 
+
+			// copy the key to boto fole encryption key variable
+			 encryption_key=2dAtVPvt9dCVKPkilGPcRGtlrXQ1C0gFgJrl8/XVWDY=
+
+		Rotate CSEK keys
+			// use above key for decryption_key1
+				decryption_key1=2dAtVPvt9dCVKPkilGPcRGtlrXQ1C0gFgJrl8/XVWDY=
+
+			// generate new key for encryption_key and update .boto file
+				encryption_key=ZougR707S+PRRMOjLGDOcNk2spvJ+H6mumVqom7yqnU=
+
+			// rewrite the key for file 1/setup2 and comment out the old decrypt key
+				gsutil rewrite -k gs://$BUCKET_NAME_1/setup2.html
+
+		Enable lifecycle management
+			// view current lifecycle policy 
+				gsutil lifecycle get gs://$BUCKET_NAME_1
+
+			// Create JSOn lifecycle policy file
+				vi life.json
+					{
+						"rule":
+						[
+							{
+								"action": {"type": "Delete"},
+								"condition": {"age": 31}
+							}
+						]
+					}
+			
+			// set policy
+				gsutil lifecycle set life.json gs://$BUCKET_NAME_1
+
+			// verify
+				gsutil lifecycle get gs://$BUCKET_NAME_1
+
+			// check of enable versioning is enabled
+				gsutil versioning get gs://$BUCKET_NAME_1
+
+			// enable versioning
+				gsutil versioning set on gs://$BUCKET_NAME_1
+
+		Create serveral versions of sample file in bucket
+			//delete five lines
+			from 59 kb to 57.1kb
+			
+			//upload to GCS bucket
+				gcloud storage cp -v setup.html gs://$BUCKET_NAME_1
+			
+			//list all versions of the file
+				gcloud storage ls -a gs://$BUCKET_NAME_1/setup.html
+
+			//oldest
+			gs://bineliasray1/setup.html#1710722349381314
+			
+			//newest
+			gs://bineliasray1/setup.html#1710723107639739
+
+		Synchronize a directory and sync w/ a bucket
+			//Make a nested directory structure so that you can examine what happens when it is recursively copied to a bucket.
+				mkdir firstlevel
+				mkdir ./firstlevel/secondlevel
+				cp setup.html firstlevel
+				cp setup.html firstlevel/secondlevel
+
+			//To sync the firstlevel directory on the VM with your bucket, run the following command:
+				gsutil rsync -r ./firstlevel gs://$BUCKET_NAME_1/firstlevel
+
+			//Verify
+				gcloud storage ls -r gs://$BUCKET_NAME_1/firstlevel
+
+		Cross-project sharing
+			//Create service account in project 2
+				cross-project-storage
+				//permission
+					cloud storage>Storage object viewer
+			
+			//Verify by connecting to it from a VM in project 1
+				//upload key creadential.json
+				//authorize VM
+					gcloud auth activate-service-account --key-file credentials.json
+
+				//verify access
+					//list object in buckets
+					gcloud storage ls gs://$BUCKET_NAME_2/
+
+					//upload file to bucket 2
+					gcloud storage cp credentials.json gs://$BUCKET_NAME_2/
+	
 	Filestore
+		- managed file storage service that requires file sys interface and shared file syst
+		- fuly managed network attached storage(NAS) for Compute Engine and GKE instances
+		- predictable performance
+		- full NFSv3 support
+		- scale to 100s of TBs for high performance workloads
 
+		Usecase
+			- application migrations
+			- media rendering
+				- enabling visual effects artists to collaborate on same fileshare as rendering workflows typically run across fleets of compute machines/shared file sys
+			- electronic design automation(EDA)
+				- data management
+				- unirversally accessiblw
+			- data analytics
+				- compute complex financial models or analysis of environmental database
+			- Genome sequencing
+			- Research institutions performing scientific research
+			
 	Cloud SQL
+		- managed structured/relational DB services.
+		- MySQL/PostgreSQL/Microsoft SQL Server DB
+		- auto patches and updates
+			- but you still have to administer MySQL users w/ native authentication tools
+		- supports
+			- cloud shell
+			- app engine
+			- google workspace scripts
+			- SQL workbench
+			- toad
+			- standard MySQL drivers
+		- performance
+			- upto 64TB storage capacity
+			- 60,000 IOPS
+			- 624 GB of RAM per instance
+			- scale up to 96 vCPU
+			- scale out w/ read replicas
+
+		Cloud SQL services
+			- High availability setup
+				- one primary instance
+					- write only
+					- persistent disk 1
+						- sync replication  from regional persistent disk
+				- one standby instance
+					- only read only
+					- persistend disk 2
+						- sync replication  from regional persistent disk
+				- one regional persistent disks
+					- attach to both primary instance and standby instance
+			- Backup service
+			- Import/Export
+			- Scaling
+				- up: Machine capacity
+					- require machine restart
+				- out: Read replicas
+					- horizontal scalibility
+						- consider cloud spanner
+
+			Auto failover
+				- primary instance is down, standby instance will be the new primary and users rerouted to that instance
+		
+		Recommended
+			- Security 
+				- app in the same region sa cloud SQL
+					- cloud SQL can use private IP connection
+				- if app is in different region/project
+					1. Cloud SQL Auth Proxy
+						- automated SSL cert that handles:
+							- authentication
+							- encryption
+							- key rotation
+					2. Manual SSL connection 
+						- need manual control over SSL cert
+							- you rotate cert yourself
+					3. Authorized networks
+						- cannot use SSL
+						- authorizes specific IP addr to connect http external IP addr
+
+		Qwiklabs - Implementing Cloud SQL
+			https://googlecoursera.qwiklabs.com/focuses/34832957?parent=lti_session
+
+			Objectives
+			In this lab, you learn how to perform the following tasks:
+
+				1. Create a Cloud SQL database
+				2. Configure a virtual machine to run a proxy
+				3. Create a connection between an application and Cloud SQL
+				4. Connect an application to Cloud SQL using Private IP address
+
+				username
+					student-04-b93d4607a686@qwiklabs.net
+				password
+					CqNhmzDiQLg5
+
+				//A few points to consider for machine type config:
+					1. Shared-core machines are good for prototyping, and are not covered by Cloud SLA.
+					2. Each vCPU is subject to a 250 MB/s network throughput cap for peak performance. Each additional core increases the network cap, up to a theoretical maximum of 2000 MB/s.
+					3. For performance-sensitive workloads such as online transaction processing (OLTP), a general guideline is to ensure that your instance has enough memory to contain the entire working set and accommodate the number of active connections.
+
+				//A few points to consider for storage config:
+					1. SSD (solid-state drive) is the best choice for most use cases. HDD (hard-disk drive) offers lower performance, but storage costs are significantly reduced, so HDD may be preferable for storing data that is infrequently accessed and does not require very low latency.
+					2. There is a direct relationship between the storage capacity and its throughput.
+
+			Configure a proxy on a virtual machine
+				Two VM
+					one Wordpress VM private IP
+					one worpress proxy VM
+						//Download the Cloud SQL Proxy and make it executable
+							wget https://dl.google.com/cloudsql/cloud_sql_proxy.linux.amd64 -O cloud_sql_proxy && chmod +x cloud_sql_proxy
+
+				Cloud SQL instance
+					//Instance connection name
+						qwiklabs-gcp-00-8103347d7842:us-east1:wordpress-db
+
+					//To activate the proxy connection to your Cloud SQL database and send the process to the background, run the following command:
+					./cloud_sql_proxy -instances=$SQL_CONNECTION=tcp:3306 &
+
+				Connect an application to the Cloud SQL instance
+					//Configure the Wordpress application. To find the external IP address of your virtual machine, query its metadata:
+						curl -H "Metadata-Flavor: Google" http://169.254.169.254/computeMetadata/v1/instance/network-interfaces/0/access-configs/0/external-ip && echo
+
+				Connect to Cloud SQL via internal IP
+					Note
+						- host your application in the same region and VPC connected network as your Cloud SQL, you can leverage a more secure and performant configuration using Private IP.
+						- Notice that this time you are creating a direct connection to a Private IP, instead of configuring a proxy. That connection is private, which means that it doesn't egress to the internet and therefore benefits from better performance and security.
+
+					//private IP
+						10.58.0.2
+
+				Overview
+					you created a Cloud SQL database and configured it to use both an external connection over a secure proxy and a Private IP address, which is more secure and performant. Remember that you can only connect via Private IP if the application and the Cloud SQL server are collocated in the same region and are part of the same VPC network. If your application is hosted in another region, VPC, or even project, use a proxy to secure its connection over the external connection.
+
 
 	Cloud Spanner
+		- managed relational data workload not analytics but having 99.999% availability
+		- scale to petabytes
+			- auto failover
+			- horizontal Scaling
+			- auto replication/synchrnous replication
+		- high availability
+			- multi-regional: five 9's
+			- regional: four 9's
+		
+		Usecase
+			- used for financial and inventory applications 
+					- transactions and inventory management
 
+	Cloud Spanner Architecture
+		- replicates data in end cloud zones within one region/across several regions
+			- high availability and global placement
+			- uses global fiber network for synch across region
+		- uses atomic clocks ensures atomiscity when updating data
+
+	When to use
+		- Outgrown single instance RDBMS
+		- sharding for DB throughput
+		- need transactional consistency
+		- global data + strong consistency
+		- DB consolidation
+
+	Note:
+		- need full relational capability
+			- use Cloud SQL
+			
 	AlloyDB
+		- fully postgreSQL DB service
+			- auto:
+				- backups
+				- replication 
+				- patching
+				- capacity management
 
-	Firestore
+		When to use
+			 - hybrid transactional and analytical processing
+			 - high/fast transactional processing 
+			 	- more than four times faster than standard PostgreSQL
+			 - high availability
+			 		- 99.99% uptime SLA
+			- multiple read replicas
+			- inclusive maintenance
+			- real-time business insights for analytical queries
+				- built in vertex AI
+	
+	Cloud Firestore
+		- fully managed serverless nosql document DB 
+			- simplifies storing, syncing and querying data
+			- mobile, web and IOT apps at global scale
+			- live synchronization and offline support
+			- security features
+			- supports ACID transactions
+				- if any of the operations fail and cannot retried, the whole transaction will fail
+			- multi-region replication
+			- powerful query engine
+
+		- next generation of Cloud Datastore
+
+		Datastore mode
+			- compatible w/ datastore applications
+			- strong consistency
+			- no entity group limits
+			
+			When to use
+				 - new server projects
+
+		Native mode
+			- strongly consistent storage layer
+			- collection and document data model
+			- real-time updates
+			- mobile and web client libraries
+		
+		When two use
+				- new:
+					- mobile apps
+					- web apps
+
+		Decision tree
+			Consider Cloud Firestore	
+				- schema might change
+				- need adaptable DB
+				- scale down to zero
+				- low maintenance overhead
+				- scale up to TB 
+			
+			Consider Cloud Bigtable
+				- don't require transactional consistency
 
 	Cloud Bigtable
+		- fully managed noSQL DB w/ PB scale and very low latency
+		- seamless scaling for throughput
+		- learn to adjust to specific access patterns
+			- throughput scales linearly
+		- supports high read/write throughput at low latency
+			- great storage engine for machine learning app
+			- easy integration w/ open source big data tools
+				- Hadoop
+				- cloud dataflow
+				- cloud dataproc
+				- HBase API
+		
+		Usecases
+			- operation and analytical applications
+			- IoT
+			- user analytics
+			- financial data analysis
+
+		Cloud Bigtable storage model
+			column family
+				column qualifier
+					- used as data
+			row key
+
+		Processing is separated from storage
+			- clients
+			- processing
+				- bigtable nodes
+				- tablets
+					- sharded into blocks of contiguous rows
+			- storage
+				- colossus file system
+					- google file sys
+					- SSTable format
+						- persistent, ordered immutable map from keys to values
+							- arbitrary byte strings
+		
+		Decision tree
+			Consider Cloud Bigtable
+				- bigtable scales up well
+				- storing > 1TB of unstrucutred data
+				- very volumes of high volume of writes
+				- need read/write latency of less than 10ms and strong consistency
+				- HBase API compatibility
+
+			Consider Cloud Firestore
+				- firestore scales down well
+
+			Note:
+				- Smallest cloud bigtable cluster creation
+					- three nodes that can handle 30,000 operations per second
+						- pay per operational node
+							- means you pay whether you're using them or not
 
 	Memorystore
+		- fully managed in-memory data store service for:
+			- workloads requiring:
+				- microsecond response times
+				- large spikes in traffics
+					- gaming environments
+					- real-time analytics
+
+	BigQuery
+		- relational data workload used primary for analytics
+
+	Cloud SQL
+		- relational data workload not analytics and not 99.999% availability
 
 	Quizes
 	1. What data storage service might you select if you just needed to migrate a standard relational database running on a single machine in a datacenter to the cloud?
@@ -393,21 +1013,403 @@ Module 2 - Storage and Database Services
 Module 3 - Resource Management
 	- Manage and examine billing of Google Cloud resources
 
-Learning Objectives
-	1. Describe the cloud resource manager hierarchy
-	2. Recognize how quotas protect Google Cloud customers
-	3. Organize resources using labels
-	4. Explain the behavior of budget alerts in Google Cloud
-	5. Examine billing data with BigQuery
+	Learning Objectives
+		1. Describe the cloud resource manager hierarchy
+		2. Recognize how quotas protect Google Cloud customers
+		3. Organize resources using labels
+		4. Explain the behavior of budget alerts in Google Cloud
+		5. Examine billing data with BigQuery
+
+	Resource Manager
+		- hierarchically manage resources by project, folder, and organization
+
+		Note
+			- IAM policies are inherited top-to-bottom
+				- IAM allow and deny policies
+			- Billing and Resource Monitoring are accomulated from the bottom up
+				- Org contains all billing accounts
+				- project is associated w/ one billing account
+				- a resource belongs to one and only one project
+
+		Project creator
+			why
+				project accumulates consumption of all its resources
+					- can be used to track resources and quota usage
+
+			track resource and quota usage
+				- enable billing
+				- manage permission and credentials
+				- enable service and APIs
+				- billing and reporting is per project
+
+			Project use 3 identifying attributes
+				- proj name
+				- proj number
+				- project ID/app ID
+
+			Resource hierarchy
+				- Global/project
+					- images
+					- snapshots
+					- networks
+				- regional/project
+					- external IP addresses
+				- zonal/project
+					- instances 
+					- disks
+
+	Quotas
+		All respirces are subject to project quotas or limits/3 categories
+			1. How many resource you can create per project?
+				- 15 VPC networks/project
+			2. How quickly you can make API requests in a project: rate limits?
+				- 5 admin actions/sec(Cloud Spanner rate limits)
+			3. How many resources you can create per region?
+				- 24 CPus region/prokect
+			
+		How to increase?
+			1. As you use google cloud expands over time, your quotas may increase accordingly
+			2. Request quota adjustments
+				- quotas page in the google cloud console or a support ticket
+
+		Why use project quotas?
+			- project quotas prevent runaway consumption in case of error or malicious attacks
+			- prevent billing spikes/suprises
+			- forces sizing consideration and periodic review 
+	
+	Labels
+		- utility for organizing google cloud resources by label filtering
+		- key value pairs that can be attach to resources:
+			- VMs
+			- disks
+			- snapshots
+
+		How?
+			- google cloud console
+			- gcloud
+			- Resource Manager API
+
+		limits
+			- 64 labels/resources
+
+		Example
+			- inventory
+			- file resources
+			- scripts
+				- help analyze costs
+				- run bulk operators
+			- department/team/Cost center
+				- dept:marketing
+				- dept:engineering
+			- components
+				- component:Redis
+				- componet:fe
+			- owner/contact
+				- owner:gaurav
+				- contact:opm
+			- environment/storage
+				- environment:prod
+				- environment:test
+			- state
+				-state:active
+				-state:readyfordeletion
+
+		Comparing labels and transfering
+			Labels
+				- are a way to organize resources across Google Cloud
+					- disks/image/snapshots...
+					- user-defined strings in key-value format
+					- propagated through billing
+			Tags
+				- applied to instances only
+					- user-defined strings
+					- primarily used for networking(Firewall rules)
+	
+	Billing
+		- one billing account per projects
+
+		Controlling costs features	
+			Setting budget
+				- Scope
+					- name
+					- projects
+				- amount
+					- budget type
+					- target amt
+				- Actions
+					- percent of budget
+					- amt
+					- trigger on
+				- alerts
+					- email
+					-  Pub/Sub -> Cloud functions
+			
+			Looker Studo/Data studio
+				- visualing google cloud spend in billing dashboard
+				 - easy to read/share
+				 - fully customizable
+
+			BigQuery	
+				- analyze your spend
+				- fully managed enterprise data warehouse w/ SWL and fast response times
+			
+		Note
+			- labels can help you optimize google cloud spend
+
+	Qwiklabs: Examining Billing data with BigQuery
+		- In this lab, you learn how to use BigQuery to analyze billing data.
+		- https://googlecoursera.qwiklabs.com/focuses/34833617?parent=lti_session
+
+		Objectives
+			In this lab, you learn how to perform the following tasks:
+				1. Sign in to BigQuery from the Cloud Console
+				2. Create a dataset
+				3. Create a table
+				4. Import data from a billing CSV file stored in a bucket
+				5. Run complex queries on a larger dataset
+
+		Locate the row that has the Description: Network Internet Ingress from EMEA to Americas.
+		What was the total consumption and units consumed?
+			- 9,738,199 bytes
+			
+		Locate the row that has the Description: Network Internet Egress from Americas to China.
+		Can you interpret the information?
+			- 5,542 bytes exited the Americas and was transferred to China at a charge of 1e-06.
+
+		Compose a simple query
+			SELECT * FROM `imported_billing_data.sampleinfotable`
+			WHERE Cost > 0
+
+			How many rows had cost greater than 0?
+			 - 20 rows
+
+		Analyze a large billing dataset with SQL
+			SELECT
+  			product,
+				resource_type,
+				start_time,
+				end_time,
+				cost,
+				project_id,
+				project_name,
+				project_labels_key,
+				currency,
+				currency_conversion_rate,
+				usage_amount,
+				usage_unit
+			FROM
+				`cloud-training-prod-bucket.arch_infra.billing_data`
+		
+		find the latest 100 records where there were charges (cost > 0), for New Query,
+			SELECT
+				product,
+				resource_type,
+				start_time,
+				end_time,
+				cost,
+				project_id,
+				project_name,
+				project_labels_key,
+				currency,
+				currency_conversion_rate,
+				usage_amount,
+				usage_unit
+			FROM
+				`cloud-training-prod-bucket.arch_infra.billing_data`
+			WHERE
+				Cost > 0
+			ORDER BY end_time DESC
+			LIMIT
+				100
+
+		find all charges that were more than 3 dollars, for Compose New Query, paste the following in Query Editor:
+			SELECT
+				product,
+				resource_type,
+				start_time,
+				end_time,
+				cost,
+				project_id,
+				project_name,
+				project_labels_key,
+				currency,
+				currency_conversion_rate,
+				usage_amount,
+				usage_unit
+			FROM
+				`cloud-training-prod-bucket.arch_infra.billing_data`
+			WHERE
+				cost > 3
+
+		To find the product with the most records in the billing data, for New Query, paste the following in Query Editor:
+			SELECT
+				product,
+				COUNT(*) AS billing_records
+			FROM
+				`cloud-training-prod-bucket.arch_infra.billing_data`
+			GROUP BY
+				product
+			ORDER BY billing_records DESC
+
+		Which product had the most billing records?
+			- Cloud Pub/Sub has 10,271 records
+
+		To find the most frequently used product costing more than 1 dollar, for New Query, paste the following in Query Editor:
+			SELECT
+				product,
+				COUNT(*) AS billing_records
+			FROM
+				`cloud-training-prod-bucket.arch_infra.billing_data`
+			WHERE
+				cost > 1
+			GROUP BY
+				product
+			ORDER BY
+				billing_records DESC
+
+		Which product had the most billing records of over $1
+			- Compute Engine has 17 charges costing more than 1 dollar.
+
+		To find the most commonly charged unit of measure, for Compose New Query, paste the following in Query Editor:
+Compute Engine has 17 charges costing more than 1 dollar.
+			
+		What was the most commonly charged unit of measure?
+		- Byte-seconds were the most commonly charged unit of measure with 2,937 requests.
+		
+		To find the product with the highest aggregate cost, for New Query, paste the following in Query Editor:
+			SELECT
+				product,
+				ROUND(SUM(cost),2) AS total_cost
+			FROM
+				`cloud-training-prod-bucket.arch_infra.billing_data`
+			GROUP BY
+				product
+			ORDER BY
+				total_cost DESC
+
+			Which product has the highest total cost?
+			- Compute Engine has an aggregate cost of $112.02.
+
+		Note
+			- If the project ID is not specified, BigQuery will default to the current project.
+
+	Quiz
+	1. No resources in Google Cloud can be used without being associated with...
+		- A project
+	2. A budget is set at $500 and an alert is set at 100%. What happens when the full amount is used?
+		- A notification email is sent to the Billing Administrator.
+	3. How do quotas protect Google Cloud customers?
+		- By preventing uncontrolled consumption of resources.
+
+	Review
+		- analyze spending data with BigQuery
+		- reporting
+			- establish accountability
+		- Transparency
+			- principle og google cloud
 
 Module 4 - Resource Monitoring
 	- Monitor resources using Google Cloud's operations suite
 
-Learning Objectives
-	1. Describe Google Cloud's operations suite for monitoring, logging, error reporting, tracing, and debugging
-	2. Create charts, alerts, and uptime checks for resources with Cloud Monitoring
-	3. Identify and fix errors using Cloud Debugger
+	Learning Objectives
+		1. Describe Google Cloud's operations suite for monitoring, logging, error reporting, tracing, and debugging
+		2. Create charts, alerts, and uptime checks for resources with Cloud Monitoring
+		3. Identify and fix errors using Cloud Debugger
 
+	Google Cloud's Operations suite/Stackdriver
+		- a service that provides monitoring, logging, error reporting, trace, profiler and diagnostics for your applications
+		- manages across platforms
+			- Google cloud and AWS
+			- dynamic discovery of google cloud with smart defaults
+			- open source agents and integrations
+		- access to powerful data and analytics tools
+		- collaboration w/ third-party software
+
+	Monitoring
+
+	Qwiklabs: Resource monitoring
+		https://googlecoursera.qwiklabs.com/focuses/34836054?parent=lti_session
+		- you learn how to use Cloud Monitoring to gain insight into applications that run on Google Cloud.
+
+		Objectives
+		In this lab, you learn how to perform the following tasks:
+
+			1. Explore Cloud Monitoring
+			2. Add charts to dashboards
+			3. Create alerts with multiple conditions
+			4. Create resource groups
+			5. Create uptime checks
+
+		Why is monitoring important to Google?
+		 - It is at the base of site reliability which incorporates aspects of software engineering and applies that to operations whose goals are to create ultra-scalable and highly reliable software systems.
+	Logging
+
+		What is not a recommended best practice for alerts?
+			- Report all noise to ensure all data points are presented.
+
+			Recommendation
+				- Use multiple notification channels so you avoid a single point of failure.
+				- Configure alerting on symptoms and not necessarily causes.
+				- Customize your alerts to the audience need
+		
+		Select all valid targets for Cloud Monitoring uptime alert notifications.
+			- pub/sub
+			- email
+			- webhook
+			- sms
+			- 3rd party service
+
+	Error Reporting
+	
+	
+	Tracing
+		- provides latency sampling and reporting for Google App Engine, Google HTTP(S) load balancers, and applications instrumented with the Cloud Trace SDKs. 
+		Reporting includes per-URL statistics and latency distributions
+
+	
+	Profiling
+
+	Qwiklabs:Error Reporting and Debugging
+		https://googlecoursera.qwiklabs.com/focuses/34836054?parent=lti_session
+		- In this lab, you learn how to use Cloud Error Reporting and integrate Cloud Debugger.
+
+		Objectives
+		In this lab, you learn how to perform the following tasks:
+
+			1. Launch a simple Google App Engine application
+			2. Introduce an error into the application
+			3. Explore Cloud Error Reporting
+			4. Use Cloud Debugger to identify the error in the code
+			5. Fix the bug and monitor in Cloud Operations
+		
+		To create a local folder and get the App Engine Hello world application, run the following commands:
+			mkdir appengine-hello
+			cd appengine-hello
+			gsutil cp gs://cloud-training/archinfra/gae-hello/* .
+
+		To run the application using the local development server in Cloud Shell, run the following command:
+			dev_appserver.py $(pwd)
+
+		Deploy the application to App Engine
+			//To deploy the application to App Engine, run the following command:
+				gcloud app deploy app.yaml
+
+			//verify that the application is working by running the following command:
+				gcloud app browse
+	
+	Quiz
+	1. What is the foundational process at the base of Google's Site Reliability Engineering (SRE) ?
+		- Monitoring.
+			- Before you can take any of the other actions, you must first be monitoring the system.
+	2. What is the purpose of the Cloud Trace service?
+		- Reporting on latency as part of managing performance.
+	3. Google Cloud’s operations suite integrates several technologies, including monitoring, logging, error reporting, and debugging that are commonly implemented in other environments as separate solutions using separate products. What are key benefits of integration of these services?
+		- Reduces overhead, reduces noise, streamlines use, and fixes problems faster
+			- Integration with Google Cloud’s operations suite streamlines and unifies these traditionally independent services, making it much easier to establish procedures around them and to use them in continuous ways.
+	
+	Review
+		Site Reliability Engineering
+			- operate and maintain you app through monitoring, loggin, error reporting, fault tracing and profiling features
 Essential Google Cloud Infrastructure: Scaling and Automation
 
 Module 1 - Interconnecting Networks
