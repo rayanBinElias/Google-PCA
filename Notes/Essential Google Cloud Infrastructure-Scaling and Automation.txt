@@ -15,18 +15,396 @@ Module 1 - Interconnecting Networks
     HA VPN
 
     Qwiklab: Configuring Google Cloud HA VPN
+      https://googlecoursera.qwiklabs.com/focuses/34859444?parent=lti_session
+      - HA VPN is a high-availability (HA) Cloud VPN solution that lets you securely connect your on-premises network to your VPC network through an IPsec VPN connection in a single region. HA VPN provides an SLA of 99.99% service availability.
+      - HA VPN is a regional per VPC, VPN solution. HA VPN gateways have two interfaces, each with its own public IP address. When you create an HA VPN gateway, two public IP addresses are automatically chosen from different address pools. When HA VPN is configured with two tunnels, Cloud VPN offers a 99.99% service availability uptime.
+      - In this lab you create a global VPC called vpc-demo, with two custom subnets in us-east4 and us-central1. 
+        In this VPC, you add a Compute Engine instance in each region. 
+        You then create a second VPC called on-prem to simulate a customer's on-premises data center. 
+        In this second VPC, you add a subnet in region us-central1 and a Compute Engine instance running in this region. 
+        Finally, you add an HA VPN and a cloud router in each VPC and run two tunnels from each HA VPN gateway before testing the configuration to verify the 99.99% SLA.
 
+      Objectives
+      In this lab, you learn how to perform the following tasks:
+
+        1. Create two VPC networks and instances.
+        2. Configure HA VPN gateways.
+        3. Configure dynamic routing with VPN tunnels.
+        4. Configure global dynamic routing mode.
+        5. Verify and test HA VPN gateway configuration.
+
+      //list active acct
+        gcloud auth list
+
+      //list active proj
+        gcloud config list project
+
+      Task 1. Set up a Global VPC environment
+        //create a VPC network called vpc-demo
+          gcloud compute networks create vpc-demo --subnet-mode custom
+
+          //create subnet vpc-demo-subnet1 in the region us-central1
+            gcloud compute networks subnets create vpc-demo-subnet1 \
+--network vpc-demo --range 10.1.1.0/24 --region "us-central1"
   Cloud Interconnect and Peering
-    Cloud Interconnect and Peering
-    
-    Cloud Interconnect
 
+          //Create subnet vpc-demo-subnet2 in the region us-east4
+            gcloud compute networks subnets create vpc-demo-subnet2 \
+--network vpc-demo --range 10.2.1.0/24 --region us-east4
+
+          //Create a firewall rule to allow all custom traffic within the network:
+            gcloud compute firewall-rules create vpc-demo-allow-custom \
+  --network vpc-demo \
+  --allow tcp:0-65535,udp:0-65535,icmp \
+  --source-ranges 10.0.0.0/8
+
+          //Create a firewall rule to allow SSH, ICMP traffic from anywhere:
+            gcloud compute firewall-rules create vpc-demo-allow-ssh-icmp \
+    --network vpc-demo \
+    --allow tcp:22,icmp
+
+          //Create a VM instance vpc-demo-instance1 in zone us-central1-b:
+            gcloud compute instances create vpc-demo-instance1 --machine-type=e2-medium --zone us-central1-b --subnet vpc-demo-subnet1
+
+          //Create a VM instance vpc-demo-instance2 in zone us-east4-b:
+            gcloud compute instances create vpc-demo-instance2 --machine-type=e2-medium --zone us-east4-b --subnet vpc-demo-subnet2
+
+      Task 2. Set up a simulated on-premises environment
+        //create a VPC network called on-prem:
+          gcloud compute networks create on-prem --subnet-mode custom
+
+        //Create a subnet called on-prem-subnet1:
+          gcloud compute networks subnets create on-prem-subnet1 \
+--network on-prem --range 192.168.1.0/24 --region us-central1
+    
+        //Create a firewall rule to allow all custom traffic within the network:
+          gcloud compute firewall-rules create on-prem-allow-custom \
+  --network on-prem \
+  --allow tcp:0-65535,udp:0-65535,icmp \
+  --source-ranges 192.168.0.0/16
+
+        //Create a firewall rule to allow SSH, RDP, HTTP, and ICMP traffic to the instances:
+          gcloud compute firewall-rules create on-prem-allow-ssh-icmp \
+    --network on-prem \
+    --allow tcp:22,icmp
+
+        //Create an instance called on-prem-instance1 in the region us-central1.
+          Note: 
+            - In the below command replace with a zone in us-central1 but different from the one used to create the vpc-demo-instance1 in the vpc-demo-subnet1 .
+          gcloud compute instances create on-prem-instance1 --machine-type=e2-medium --zone us-central1-b --subnet on-prem-subnet1
+
+      Task 3. Set up an HA VPN gateway
+        //create an HA VPN in the vpc-demo network:
+          gcloud compute vpn-gateways create vpc-demo-vpn-gw1 --network vpc-demo --region us-central1
+
+        //Create an HA VPN in the on-prem network:
+          gcloud compute vpn-gateways create on-prem-vpn-gw1 --network on-prem --region us-central1
+
+        //View details of the vpc-demo-vpn-gw1 gateway to verify its settings:
+          gcloud compute vpn-gateways describe vpc-demo-vpn-gw1 --region us-central1
+
+        //View details of the on-prem-vpn-gw1 vpn-gateway to verify its settings:
+          gcloud compute vpn-gateways describe on-prem-vpn-gw1 --region us-central1
+
+      Create cloud routers
+        //Create a cloud router in the vpc-demo network:
+          gcloud compute routers create vpc-demo-router1 \
+    --region us-central1 \
+    --network vpc-demo \
+    --asn 65001
+
+        //Create a cloud router in the on-prem network:
+          gcloud compute routers create on-prem-router1 \
+    --region us-central1 \
+    --network on-prem \
+    --asn 65002
+
+    Task 4. Create two VPN tunnels
+      Two on-premises VPN gateway devices
+        - Each of the tunnels from each interface on the Cloud VPN gateway must be connected to its own peer gateway.
+      A single on-premises VPN gateway device with two interfaces
+        - Each of the tunnels from each interface on the Cloud VPN gateway must be connected to its own interface on the peer gateway.
+      A single on-premises VPN gateway device with a single interface
+        - Both of the tunnels from each interface on the Cloud VPN gateway must be connected to the same interface on the peer gateway.
+
+      //Create the first VPN tunnel in the vpc-demo network:
+        gcloud compute vpn-tunnels create vpc-demo-tunnel0 \
+    --peer-gcp-gateway on-prem-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router vpc-demo-router1 \
+    --vpn-gateway vpc-demo-vpn-gw1 \
+    --interface 0
+
+      //Create the second VPN tunnel in the vpc-demo network:
+        gcloud compute vpn-tunnels create vpc-demo-tunnel1 \
+    --peer-gcp-gateway on-prem-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router vpc-demo-router1 \
+    --vpn-gateway vpc-demo-vpn-gw1 \
+    --interface 1
+
+      //Create the first VPN tunnel in the on-prem network:
+        gcloud compute vpn-tunnels create on-prem-tunnel0 \
+    --peer-gcp-gateway vpc-demo-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router on-prem-router1 \
+    --vpn-gateway on-prem-vpn-gw1 \
+    --interface 0
+
+      //Create the second VPN tunnel in the on-prem network:
+        gcloud compute vpn-tunnels create on-prem-tunnel1 \
+    --peer-gcp-gateway vpc-demo-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router on-prem-router1 \
+    --vpn-gateway on-prem-vpn-gw1 \
+    --interface 1
+
+    Task 5. Create Border Gateway Protocol (BGP) peering for each tunnel
+      - In this task you configure BGP peering for each VPN tunnel between vpc-demo and VPC on-prem. HA VPN requires dynamic routing to enable 99.99% availability.
+      //Create the router interface for tunnel0 in network vpc-demo:
+        gcloud compute routers add-interface vpc-demo-router1 \
+    --interface-name if-tunnel0-to-on-prem \
+    --ip-address 169.254.0.1 \
+    --mask-length 30 \
+    --vpn-tunnel vpc-demo-tunnel0 \
+    --region us-central1
+      
+      //Create the BGP peer for tunnel0 in network vpc-demo:
+        gcloud compute routers add-bgp-peer vpc-demo-router1 \
+    --peer-name bgp-on-prem-tunnel0 \
+    --interface if-tunnel0-to-on-prem \
+    --peer-ip-address 169.254.0.2 \
+    --peer-asn 65002 \
+    --region us-central1
+
+      //Create a router interface for tunnel1 in network vpc-demo:
+        gcloud compute routers add-interface vpc-demo-router1 \
+    --interface-name if-tunnel1-to-on-prem \
+    --ip-address 169.254.1.1 \
+    --mask-length 30 \
+    --vpn-tunnel vpc-demo-tunnel1 \
+    --region us-central1
+
+      //Create the BGP peer for tunnel1 in network vpc-demo:
+        gcloud compute routers add-bgp-peer vpc-demo-router1 \
+    --peer-name bgp-on-prem-tunnel1 \
+    --interface if-tunnel1-to-on-prem \
+    --peer-ip-address 169.254.1.2 \
+    --peer-asn 65002 \
+    --region us-central1
+
+      //Create a router interface for tunnel0 in network on-prem:
+        gcloud compute routers add-interface on-prem-router1 \
+    --interface-name if-tunnel0-to-vpc-demo \
+    --ip-address 169.254.0.2 \
+    --mask-length 30 \
+    --vpn-tunnel on-prem-tunnel0 \
+    --region us-central1
+
+      //Create the BGP peer for tunnel0 in network on-prem:
+        gcloud compute routers add-bgp-peer on-prem-router1 \
+    --peer-name bgp-vpc-demo-tunnel0 \
+    --interface if-tunnel0-to-vpc-demo \
+    --peer-ip-address 169.254.0.1 \
+    --peer-asn 65001 \
+    --region us-central1
+
+      //Create a router interface for tunnel1 in network on-prem:
+        gcloud compute routers add-interface  on-prem-router1 \
+    --interface-name if-tunnel1-to-vpc-demo \
+    --ip-address 169.254.1.2 \
+    --mask-length 30 \
+    --vpn-tunnel on-prem-tunnel1 \
+    --region us-central1
+
+      //Create the BGP peer for tunnel1 in network on-prem:
+        gcloud compute routers add-bgp-peer  on-prem-router1 \
+    --peer-name bgp-vpc-demo-tunnel1 \
+    --interface if-tunnel1-to-vpc-demo \
+    --peer-ip-address 169.254.1.1 \
+    --peer-asn 65001 \
+    --region us-central1
+
+    Task 6. Verify router configurations
+      - In this task you verify the router configurations in both VPCs. You configure firewall rules to allow traffic between each VPC and verify the status of the tunnels. You also verify private connectivity over VPN between each VPC and enable global routing mode for the VPC.
+
+      //View details of Cloud Router vpc-demo-router1 to verify its settings:
+        gcloud compute routers describe vpc-demo-router1 \
+    --region us-central1
+
+      //View details of Cloud Router on-prem-router1 to verify its settings:
+        gcloud compute routers describe on-prem-router1 \
+    --region us-central1
+
+    Configure firewall rules to allow traffic from the remote VPC
+      - Configure firewall rules to allow traffic from the private IP ranges of peer VPN.
+    
+      //Allow traffic from network VPC on-prem to vpc-demo:
+        gcloud compute firewall-rules create vpc-demo-allow-subnets-from-on-prem \
+    --network vpc-demo \
+    --allow tcp,udp,icmp \
+    --source-ranges 192.168.1.0/24
+
+      //Allow traffic from vpc-demo to network VPC on-prem:
+        gcloud compute firewall-rules create on-prem-allow-subnets-from-vpc-demo \
+    --network on-prem \
+    --allow tcp,udp,icmp \
+    --source-ranges 10.1.1.0/24,10.2.1.0/24
+
+    Verify the status of the tunnels
+      //List the VPN tunnels you just created:
+        gcloud compute vpn-tunnels list
+
+      //Verify that vpc-demo-tunnel0 tunnel is up:
+        gcloud compute vpn-tunnels describe vpc-demo-tunnel0 \
+      --region us-central1
+
+      //Verify that vpc-demo-tunnel1 tunnel is up:
+        gcloud compute vpn-tunnels describe vpc-demo-tunnel1 \
+      --region us-central1
+
+      //Verify that on-prem-tunnel0 tunnel is up:
+        gcloud compute vpn-tunnels describe on-prem-tunnel0 \
+      --region us-central1
+
+      //Verify that on-prem-tunnel1 tunnel is up:
+        gcloud compute vpn-tunnels describe on-prem-tunnel1 \
+      --region us-central1
+
+    Verify private connectivity over VPN
+      //Open a new Cloud Shell tab and type the following to connect via SSH to the instance on-prem-instance1: Replace <zone_name> with the zone in which the on-prem-instance1 was created.
+        gcloud compute ssh on-prem-instance1 --zone zone_name
+
+      //From the instance on-prem-instance1 in network on-prem, to reach instances in network vpc-demo, ping 10.1.1.2:
+        ping -c 4 10.1.1.2
+
+    Global routing with VPN
+      //Open a new Cloud Shell tab and update the bgp-routing mode from vpc-demo to GLOBAL:
+        gcloud compute networks update vpc-demo --bgp-routing-mode GLOBAL
+
+      //Verify the change:
+        gcloud compute networks describe vpc-demo
+
+      //From the Cloud Shell tab that is currently connected to the instance in network on-prem via ssh, ping the instance vpc-demo-instance2 in region us-east4:
+        ping -c 2 10.2.1.2
+
+    Task 7. Verify and test the configuration of HA VPN tunnels
+      //Bring tunnel0 in network vpc-demo down:
+        gcloud compute vpn-tunnels delete vpc-demo-tunnel0  --region us-central1
+
+      //Verify that the tunnel is down:
+        gcloud compute vpn-tunnels describe on-prem-tunnel0  --region us-central1
+
+      //Switch to the previous Cloud Shell tab that has the open ssh session running, and verify the pings between the instances in network vpc-demo and network on-prem:
+        ping -c 3 10.1.1.2
+
+    Task 8. (Optional) Clean up lab environment
+      //Delete VPN tunnels
+        gcloud compute vpn-tunnels delete on-prem-tunnel0  --region us-central1
+
+        gcloud compute vpn-tunnels delete vpc-demo-tunnel1  --region us-central1
+
+        gcloud compute vpn-tunnels delete on-prem-tunnel1  --region us-central1
+
+      //Remove BGP peering
+        gcloud compute routers remove-bgp-peer vpc-demo-router1 --peer-name bgp-on-prem-tunnel0 --region us-central1
+
+        gcloud compute routers remove-bgp-peer vpc-demo-router1 --peer-name bgp-on-prem-tunnel1 --region us-central1
+
+        gcloud compute routers remove-bgp-peer on-prem-router1 --peer-name bgp-vpc-demo-tunnel0 --region us-central1
+
+        gcloud compute routers remove-bgp-peer on-prem-router1 --peer-name bgp-vpc-demo-tunnel1 --region us-central1
+
+      //Delete cloud routers
+        gcloud compute  routers delete on-prem-router1 --region us-central1
+
+        gcloud compute  routers delete vpc-demo-router1 --region us-central1
+
+      //Delete VPN gateways
+        gcloud compute vpn-gateways delete vpc-demo-vpn-gw1 --region "REGION"
+
+        gcloud compute vpn-gateways delete on-prem-vpn-gw1 --region "REGION"
+
+      //Delete instances
+        gcloud compute instances delete vpc-demo-instance1 --zone "ZONE"
+
+        gcloud compute instances delete vpc-demo-instance2 --zone "ZONE"
+
+        gcloud compute instances delete on-prem-instance1 --zone zone_name
+
+      //Delete firewall rules
+        gcloud compute firewall-rules delete vpc-demo-allow-custom
+
+        gcloud compute firewall-rules delete on-prem-allow-subnets-from-vpc-demo
+
+        gcloud compute firewall-rules delete on-prem-allow-ssh-icmp
+
+        gcloud compute firewall-rules delete on-prem-allow-custom
+
+        gcloud compute firewall-rules delete vpc-demo-allow-subnets-from-on-prem
+
+        gcloud compute firewall-rules delete vpc-demo-allow-ssh-icmp
+
+      //Delete subnets
+        gcloud compute networks subnets delete vpc-demo-subnet1 --region "REGION"
+        gcloud compute networks subnets delete vpc-demo-subnet2 --region REGION 2
+        gcloud compute networks subnets delete on-prem-subnet1 --region "REGION"
+
+      //Delete VPC
+        gcloud compute networks delete vpc-demo
+        gcloud compute networks delete on-prem
+  
+  Cloud Interconnect and Peering
+    Dedicated 
+      - direct connection to google's netwprl
+    Shared
+      - connection to google's network through a Partner
+
+    Layer 3
+      Network layer(Packets)
+        - provides access to google to google workspace services/youtube/google api 
+          - using public ip addresses
+          - using CLoud VPN(Virutal Private Network) service 
+            - uses public ip add but traffic is encrypted that provide access to internal IP addr
+        - IP
+        - router
+        - control routing
+    Layer 2
+      Data link layer(Frames)
+        - uses VLAN that pipes directly into your GCP environment 
+          - provides connectivity to internal IP add
+        - ethernet/mac/llc
+        - NIC/Switches
+        - error free data transfer
+    Types
+      Dedicated layer 3
+        Direct Peering
+
+      Dedicated layer 2
+        Dedicated Interconnect
+
+      Shared layer 3
+        Carrier Peering
+
+      Shared layer 3 and 2
+        Partner Interconnect
+
+    Cloud Interconnect
+      
     Peering
     
     Choosing a connection
 
   Sharing VPC Networks
-    Shhared VPC and VPC Peering
+    Shared VPC and VPC Peering
 
 Module 2 - Load Balancing and Autoscaling
   - Configure load balancers and autoscaling for VM instances
