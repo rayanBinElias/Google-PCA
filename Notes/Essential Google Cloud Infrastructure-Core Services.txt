@@ -1317,7 +1317,7 @@ Module 4 - Resource Monitoring
 		3. Identify and fix errors using Cloud Debugger
 
 	Google Cloud's Operations suite/Stackdriver
-		- a service that provides monitoring, logging, error reporting, trace, profiler and diagnostics for your applications
+		- a service agent that provides monitoring, logging, error reporting, trace, profiler and diagnostics for your applications
 		- manages across platforms
 			- Google cloud and AWS
 			- dynamic discovery of google cloud with smart defaults
@@ -1326,6 +1326,77 @@ Module 4 - Resource Monitoring
 		- collaboration w/ third-party software
 
 	Monitoring
+		- base of SRE.
+		- dynamically  configures monitoring after resources are deployed
+		- has intelligent defaults that allow you to easily create charts for basic monitoring activities
+		- monitors platform, system and application metrics
+			- ingesting data
+				- metrics, events, metadata
+			- generates insights through dashboards, charts, alerts
+		
+		Integrated services	
+			- app engine
+			- compute engine instance
+			- url of host
+			- AWS instance/load balancer
+
+		Example
+			-  Uptime/health checks
+				- have Dashboard
+				- sends alerts via email
+		
+		site reliability engineering(SRE)
+			- applies aspect of software engineering to operations whos goals are
+				- create ultra-scalble and reliable software systems
+			- enable google to build, deploy, monitor and maintain some e of the largest software sys in the world
+
+			hierarchy
+				1. product
+				2. development
+				3. capacity planning
+				4. testing+releasse procedures
+				5. postmortem/RCA
+				6/. Incident response
+				7. Monitoring
+	
+		Note:
+			- metric scope 
+				- is the root entity that holds monitoring and configuration information
+					- scoping project
+						- monitoring
+						- dashboards
+						- uptime checks
+							- configured to test availability of your public services from locations around the world
+							- create alerting policy and view the latency of each global location
+							Sample
+								- HTTP uptime check
+									- checked every minute w/ 10-s timeout
+						- configurations
+				- is a "single pane of glass"
+			-  metrics data and log entries remain in the individual project
+			- charts of CPu utilization/oacjkets ents and received and packets dropped by firewall
+				- provides visibility into the utilization and network traffic of your VM instaces
+
+		Best Practices when creating alerts
+			1. Alerting on symptoms and not necessarly the causes
+				- monitor failing queries of DB and then identify whether the DB is down
+			2. Use multiple notif channel like email and SMS to avoid single point of failure
+			3. Customize alerts to audience's needs 
+				- describe what actions need to be taken
+				- what resources need to be examined
+			4. Avoid noise 
+			5. Adjust monitor alerts so that they are actionalble
+
+		Monitoring VM 
+			Ops agent
+				- gathers sys and app metrics from VM instances and sends them to Monitoring
+				- can monitor 3rd party app
+					- apache
+					- mysSQL
+					- oracle DB
+					- SAP HANA
+					- nginx
+
 
 	Qwiklabs: Resource monitoring
 		https://googlecoursera.qwiklabs.com/focuses/34836054?parent=lti_session
@@ -1342,7 +1413,7 @@ Module 4 - Resource Monitoring
 
 		Why is monitoring important to Google?
 		 - It is at the base of site reliability which incorporates aspects of software engineering and applies that to operations whose goals are to create ultra-scalable and highly reliable software systems.
-	Logging
+
 
 		What is not a recommended best practice for alerts?
 			- Report all noise to ensure all data points are presented.
@@ -1359,15 +1430,84 @@ Module 4 - Resource Monitoring
 			- sms
 			- 3rd party service
 
+	Logging
+		- allows you to store, search, analyze, monitor and alert on log data and events from google cloud and AWS
+		- a fully managed service that performs at scale and can ingest platform/systems/app log data from thousands of services
+			- API to write to Logs
+			- 30 day retention
+		- can do log search/view/filtering
+		- can create log-based metrics
+		- can export to:
+			- GCS
+			- BigQuery
+				- create easy-ti-understand reports and dashboards
+			- Pub/Sub
+				- enables you to stream logs to apps or endpoints
+
+			Why?
+				-analyze logs and visualize in Looker studio	
+					- network traffics
+						- forecast capacity growth
+					- network usage
+						- optimize network expensis
+					- network forensics
+						- analyze incidents
+
+
+
 	Error Reporting
-	
-	
+		- counts, analyzes and aggregates and display errors in your running cloud services
+			- Error notification
+			- Error Dashboard 
+				- sorting
+				- fitering
+
+		Integrated Services
+			- app engine
+			- app scripts
+			- compute engine
+			- cloud functions
+			- cloud run
+			- GKE
+			- Amazon EC2
+
+		Supports
+			- Go
+			- java
+			- .Net
+			- Node.js
+			- PHP
+			- python
+			- ruby
+
 	Tracing
 		- provides latency sampling and reporting for Google App Engine, Google HTTP(S) load balancers, and applications instrumented with the Cloud Trace SDKs. 
 		Reporting includes per-URL statistics and latency distributions
+		- collects per URL latency data and displays it in near real-time.
+		- automaticall analyzes all data and generate in depth latency reports for suface performance
+		- used to keep services running at extreme scale
 
+		Why?
+			Managing the amt of time of latency is important for application performance.
+
+		Integrated Service
+			- App Engine
+			- Google HTTP(S) load balancers
+			- Applications instrumented w/ the Cloud Trace SDKs
 	
 	Profiling
+		- continuously analyze the performancd of CPU/RAM intensive functions exec across app
+		- uses statistical techniques and extremely low-impact instances
+		- runs across all production instance to provide complete picture of app performance w/o slowing instances
+		
+		Supports:
+			- java
+			- goals
+			- node.js
+			- python
+
+		Why?
+			- need to fix poorly performing code that increases latency and cost of app of web services everyday
 
 	Qwiklabs:Error Reporting and Debugging
 		https://googlecoursera.qwiklabs.com/focuses/34836054?parent=lti_session
@@ -1390,13 +1530,46 @@ Module 4 - Resource Monitoring
 		To run the application using the local development server in Cloud Shell, run the following command:
 			dev_appserver.py $(pwd)
 
+		// Create an app in app engine
+			https://cloud.google.com/appengine/docs/flexible/python/create-app
+
 		Deploy the application to App Engine
 			//To deploy the application to App Engine, run the following command:
 				gcloud app deploy app.yaml
 
 			//verify that the application is working by running the following command:
 				gcloud app browse
-	
+
+			
+
+		Introduce an error to break the application
+			//To re-deploy the application to App Engine, run the following command:
+				gcloud app deploy app.yaml --quiet
+
+					The --quiet flag disables all interactive prompts when running gcloud commands. 
+					If input is required, defaults will be used. In this case, it avoids the need for you to type Y when prompted to continue the deployment.
+
+			//verify
+				gcloud app browse
+
+			Which service requires a logging agent installed to collect and send logs to Cloud Operations?
+				- Compute Engine
+
+		Explore Cloud Error Reporting
+			Which service(s) are currently supported by Cloud Error Reporting?
+				- App Engine Standard
+				- Kubernetes
+				- App Engine Flexible
+				- Compute Engine
+
+			What would not be considered a benefit of Cloud Operations?
+				- Boosts all network performance
+
+			Benefit of error reporting
+				- Faster problem resolution
+				- Multi-cloud monitoring
+				- Reduces monitoring overhead
+
 	Quiz
 	1. What is the foundational process at the base of Google's Site Reliability Engineering (SRE) ?
 		- Monitoring.
@@ -1410,12 +1583,4 @@ Module 4 - Resource Monitoring
 	Review
 		Site Reliability Engineering
 			- operate and maintain you app through monitoring, loggin, error reporting, fault tracing and profiling features
-Essential Google Cloud Infrastructure: Scaling and Automation
-
-Module 1 - Interconnecting Networks
-
-Module 2 - Load Balancing and Autoscaling
-
-Module 3 - Infrastructure Automation
-
-Module 4 - Managed Services
+			

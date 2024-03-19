@@ -1,9 +1,42 @@
 Essential Google Cloud Infrastructure: Scaling and Automation
 
 Module 1 - Interconnecting Networks
+  - connect your Infrastructure to  Google Cloud
+
+  Learning Objectives
+    1. Recall the Google Cloud interconnect and peering services available to connect your infrastructure to Google Cloud
+    2. Determine which Cloud Interconnect or peering service to use in specific circumstances
+    3. Create and configure Google Cloud HA VPN
+    4. Recall when to use Shared VPC and when to use VPC Network Peering
+
+  Cloud VPN
+    Cloud VPN
+
+    HA VPN
+
+    Qwiklab: Configuring Google Cloud HA VPN
+
+  Cloud Interconnect and Peering
+    Cloud Interconnect and Peering
+    
+    Cloud Interconnect
+
+    Peering
+    
+    Choosing a connection
+
+  Sharing VPC Networks
+    Shhared VPC and VPC Peering
 
 Module 2 - Load Balancing and Autoscaling
+  - Configure load balancers and autoscaling for VM instances
 
+  Learning Objectives
+    1. Recall the various load balancing services
+    2. Determine which Google Cloud load balancer to use in specific circumstances
+    3. Describe autoscaling behavior, policies, configuration, and metrics
+    4. Configure load balancers and autoscaling
+    
 Module 3 - Infrastructure Automation
 
 Module 4 - Managed Services
