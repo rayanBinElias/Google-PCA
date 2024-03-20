@@ -398,13 +398,164 @@ Module 1 - Interconnecting Networks
         Partner Interconnect
 
     Cloud Interconnect
-      
+      - direct access to RFC1918/ private IP addr/internal IP addr in your VPC with SLA
+      VPN tunnel
+        - provides encrypted tunnel to VPC networks through the public interconnect
+          - IPsecVPN tunnel
+          - remote VPN gateway
+          - cloud routers
+          - BGP peering
+
+        - capacity
+          - 1.5 Gbps(public internet) to 3 Gbps(direct peering link) per tunnel
+
+      Dedicated Interconnect
+        - provides dedicated, direct connection to VPC networks through google supported olocation facility
+        - provides direct physical connections between on-premises and google's network
+          - allowing transfer of large amts of data compared for additional BW over public interconnect
+        - 99.9% or 99.99% uptime SLA
+        - capacity
+          - upto 8 links of 10 Gbps
+            - min of 10 Gbps
+          - upto 10 links 100 Gbps
+
+        how?
+          google cloud  share colocation facility with on premise network through BGP
+            cloud router to google peering edge between on premise router
+
+        
+      Partner Interconnect
+        - provides dedicated BW, connection to VPC network through a ISP
+        - used when no supported colocation facility near you
+        - 99.9% or 99.99% uptime SLA
+        - capacity
+          - 50 Mbps-50 Gbps per connection
+
+        how?
+          google cloud  share colocation facility with supported service provider
+            cloud router to google peering edge between on service provider peering edge to on pre,ise router
+
+        Process
+          - Identify supported locations
+          - choose either primary/redundant cross-cloud interconnect ports from google and service provider
+       
+      Cross-cloud interconnect
+        - provides dedicated physical connection between VPC network and network hosted by cloud service provider
+        - estabilish high-BW dedicated connectivity bet googl cloud and another cloud service provider
+        - supports the adoption of an integrated multi cloud strategy
+        - 2 connection sizes:
+          - 10 Gbps
+          - 100 Gbps
+        - google provision a dedicated physical connection 
+
+      Note:
+        - Choose Cloud VPN
+          - lower cost solution
+          - lower BW needs
+          - experimenting w/ migrating workloads to Google CLoud
+        - Choose Dedicated or Parner Interconnect
+          - enterprise grade connection that has higher throughput
+        - Choose Cross-Cloud Interconnect
+          - connect to another cloud service provider
+    
     Peering
+      - useful when access to google cloud propertions
+      - access  to google public IPs only w/o SLA
+      Types
+        1. Direct peering
+          - allows connection between your business network and google's using broad-reaching edge network locations
+            - exchange BGP routes bet google and peering entity   
+          - No SLA
+          - Peering requirements
+            - https://peering.google.com/#/options/peering
+            - GCP edge Points of Presence( PoPs )
+              - where google's network connects to the rest of the internet via peering
+              - https://www.peeringdb.com/asn/15169
+        
+        2. Carrier peering
+          - used when require access to google poublic infra and cannot satisfy google's peering requirements
+          - works/ direction with carrier peering Partner
+          - no SLA
+          - support Internet service provider and requirments
+            - https://cloud.google.com/network-connectivity/docs/carrier-peering#service_providers
     
     Choosing a connection
+      If connect on-premises to Google Workspace/Google APIs
+        - choose Direct peering'
+          - meet google peering requirments
+        - chose carrier peering
+          - didn't meet peering requirments
 
+      If connect google cloud wuth another cloud service
+        - Choose Cloud VPN
+          - connect google cloud VPC networks w/ other cloud
+          - don't need dedicated high BW
+          - encryption managed by google
+        - Choose Self-managed encryption tunnels
+          - connect google cloud VPC networks w/ other cloud
+          - don't need dedicated high BW
+          - not encryption managed by google
+        - Choose Cross-Cloud Interconnect
+          - connect google cloud VPC networks w/ other cloud
+          - need dedicated high BW
+          - Google managed routing solution
+        - Choose Self-managed connectivity
+          - connect google cloud VPC networks w/ other cloud
+          - need dedicated high BW
+          - not google managed routing solution
+
+      If connect on-premises w/ google cloud
+        Choose Dedicated Interconnect
+          - need dedicated and high BW
+          - min dedicated BW of 10 Gbps
+        Choose Parner Interconnect
+          - need dedicated and high BW
+          - not minimum dedicated BW of 10 Gbp
+            Choose L2 Partner Interconnect
+              - need BGP peering
+            Choose L3 Partner Interconnect
+              - no BGP peering
+        Choose Cloud VPN
+          - does not need dedicated and high BW
+          - encryption managed by google
+          - choose Cloud VPN over Cloud Interconnect with Baw of more 10 Gbps
+        - Choose Self-managed encryption tunnels
+          - don't need dedicated high BW
+          - not encryption managed by google
+  
   Sharing VPC Networks
     Shared VPC and VPC Peering
+      Shared VPC 
+        - allows share a network across several projects in same GCP org using Internal IP
+      
+      Shared VPC Peering/VPC network peering
+        - allow to private IP/internal IP connectivity across two VPC networks across diff projects/org
+        - a decentralized/distributed approach to multi-project networking
+        - doesn' incur:
+          - network latency
+          - security
+          - cost drawbacks
+    
+    Note:
+      Host/service project  
+        - project that participates in shared VPC
+
+      Standalone project
+        - project does not participate in shared VPC
+
+      Standalone VPC network
+        - unshared VPC network that exists in eitheri standalone project or a servic prokect
+  Quiz
+    1. What is the purpose of Virtual Private Networking (VPN)?
+      - To enable a secure communication method (a tunnel) to connect two trusted environments through an untrusted environment, such as the Internet.
+        - VPN use IPsec tunnels to provide encapsulated and encrypted path through a hostile or untrusted environment
+    2. Which Google Cloud Interconnect service requires a connection in a Google Cloud colocation facility and provides 10 Gbps per link?
+      - Dedicated Interconnect
+    3. If you cannot meet Google’s peering requirements, which network connection service should you choose to connect to Google Workspace and YouTube?
+      - Carrier Peering
+    4. Which of the following approaches to multi-project networking, uses a centralized network administration model?
+      - Shared VPC
+        - centralized approach to multi-project networking because securiy and networking policy occurs in single designated VPC networkx
 
 Module 2 - Load Balancing and Autoscaling
   - Configure load balancers and autoscaling for VM instances
@@ -415,6 +566,47 @@ Module 2 - Load Balancing and Autoscaling
     3. Describe autoscaling behavior, policies, configuration, and metrics
     4. Configure load balancers and autoscaling
     
+  Managed Instance Groups
+
+  HTTP(S) Load Balancing
+
+  Qwiklab: Configuring an HTTP load balancer w/ autoscaling
+    https://googlecoursera.qwiklabs.com/focuses/34883910?parent=lti_session
+    - Google Cloud HTTP(S) load balancing is implemented at the edge of Google's network in Google's points of presence (POP) around the world. 
+      User traffic directed to an HTTP(S) load balancer enters the POP closest to the user and is then load-balanced over Google's global network to the closest backend that has sufficient available capacity.
+
+    - In this lab, you configure an HTTP load balancer as shown in the diagram below. 
+      Then, you stress test the load balancer to demonstrate global load balancing and autoscaling.
+
+    Objectives
+    In this lab, you learn how to perform the following tasks:
+
+      1. Create a health check firewall rule
+      2. Create a NAT configuration using Cloud Router
+      3. Create a custom image for a web server
+      4. Create an instance template based on the custom image
+      5. Create two managed instance groups
+      6. Configure an HTTP load balancer with IPv4 and IPv6
+      7. Stress test an HTTP load balancer
+
+    The HTTP load balancer should forward traffic to the region that is closest to you.
+      - yes
+
+    //To place a load on the load balancer, run the following command:
+    ab -n 500000 -c 1000 http://$LB_IP/
+    
+  Cloud CDN
+
+  SSL Proxy/TCP Proxy Load Balancing
+
+  Network Load Balancing
+
+  Internal Load Balancing
+
+  Qwilkab: Configuring and Internal Load balancer
+
+  Choosing a Load Balancer
+
 Module 3 - Infrastructure Automation
 
 Module 4 - Managed Services
