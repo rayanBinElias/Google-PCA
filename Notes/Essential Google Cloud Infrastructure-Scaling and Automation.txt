@@ -11,6 +11,73 @@ Module 1 - Interconnecting Networks
 
   Cloud VPN
     Cloud VPN
+      - securely connects your on-premises network to yhour google cloud VPC network
+
+    Two Cloud VPN gateways  
+      1. HA VPN
+        - high availability cloud VPN sol'n that lets you securely connect on-premise network 
+          to your VPC network through an IPsec VPN connection in a single region.
+        - SLA if 99.99% service availability
+
+        Supports site-to-site VPN for different topologies/configuration scenarios:
+          - An HA VPN gateway to peer VPN devices
+          - An HA VPN gateway to an AWS virtual private gateway
+          - Two HA VPN gateways connected to each other
+
+        How for Google Cloud to On-premise?
+          - Cloud HA VPN Gateway
+            - google cloud auto chooses two external IP
+               - supports multiple tunnels
+          - Cloud Router
+          - Two on premise VPN gateway
+          - Two or four VPN tunnels
+            - serves as the virtual medium through IPsec encrypted data
+            - must be paired
+            - VPN tunnels connected to HA VPN gateways must use dynamic(BGP) routing
+              - active/active routing configurations
+              - active/passive routing configurations
+
+        How for Google Cloud to AWS Cloud?
+          - two tunnels from AWS TGW/VPG to one interface of HA cloud VPN gateway
+          - other two tunnels from AWS TGW/VPG to second interface of same HA cloud VPN gateway
+
+        HA VPN between Google Cloud networks topology
+          - each
+
+        Dynamic routing with Cloud router
+          - auto/managed routes w/o chaning tunnel config usign BGP
+
+          How?
+            - BGP link local IP addr bet cloud router and peer gaweway
+            - two VPN tunnel
+            - one Google VPN gateway
+
+      2. Classic VPN
+        - securely connects your onpremises network to your google cloud vpc network through IPsec VPN tunnel
+        - data at transit is encrypted by one VPN gateway and decrypted by other gateway
+        - SLA of 99.9% sevice availability
+        
+        Supports:
+          - site-to-site VPN
+          - static routes
+          - dynamic routes(cloud Router)
+          - IKEv1 and IKEv2 ciphers
+        
+        Doesn't support
+          - dial in to a VPN using client VPN software
+
+        When to use?
+          - low volume data connection
+
+        How?
+          - Cloud VPN Gateway
+            - google cloud regional external IP
+          - On-premises VPN Gateway
+            - has an external IP
+            - Maximum Transimission Unit cannot be greater than 1460 bytes
+          - Two VPN tunnels
+            - serves as the virtual medium through IPsec encrypted data
+            - must be paired
 
     HA VPN
 
@@ -518,10 +585,13 @@ Module 1 - Interconnecting Networks
         Choose Cloud VPN
           - does not need dedicated and high BW
           - encryption managed by google
-          - choose Cloud VPN over Cloud Interconnect with Baw of more 10 Gbps
-        - Choose Self-managed encryption tunnels
+        Choose Self-managed encryption tunnels
           - don't need dedicated high BW
           - not encryption managed by google
+        Choose Cloud VPN over Cloud Interconnect 
+          - with BW of more 10 Gbps
+          - need dedicated and high network BW
+          - encryption managed by google
   
   Sharing VPC Networks
     Shared VPC and VPC Peering
@@ -567,45 +637,256 @@ Module 2 - Load Balancing and Autoscaling
     4. Configure load balancers and autoscaling
     
   Managed Instance Groups
+    - a collection of identical VM instances that you control as a single entity using an instance template
+    - deploy identical instances based on instance template
+    - instance group can be resized
+    - manager ensures all instances are running
+    - typically used w/ autoscaler
+    - can be single zone or regional
+
+    Autoscaling and health checks
+      - allows you to auto add/remove instances from a MIG based on load
+
+      Autoscaling policies supports
+        - CPU utilization
+        - load balancing capacity
+        - monitoring metrics
+        - queue-based workload like Pub/Sub 
+        - schedule such as start-time, duration and recurrence
+
+      Health checks
+        - similar to uptime check in stackdriver
+
+        Setup?
+          - Protocol
+          - ports
+          - health criteria:
+              1. timeout_sec
+                - How long to wait (in seconds) before a request is considered a failure
+              2. check_interval_sec
+                - how often in seconds to check whether an instance is healthy
+              3. healthy_threshold
+                - How many consecutive successes must occur to mark a VM instance healthy.
+              4 .unhealthy_threshold
+                - How many consecutive failures must occur to mark a VM instance unhealthy
 
   HTTP(S) Load Balancing
-
-  Qwiklab: Configuring an HTTP load balancer w/ autoscaling
-    https://googlecoursera.qwiklabs.com/focuses/34883910?parent=lti_session
-    - Google Cloud HTTP(S) load balancing is implemented at the edge of Google's network in Google's points of presence (POP) around the world. 
-      User traffic directed to an HTTP(S) load balancer enters the POP closest to the user and is then load-balanced over Google's global network to the closest backend that has sufficient available capacity.
-
-    - In this lab, you configure an HTTP load balancer as shown in the diagram below. 
-      Then, you stress test the load balancer to demonstrate global load balancing and autoscaling.
-
-    Objectives
-    In this lab, you learn how to perform the following tasks:
-
-      1. Create a health check firewall rule
-      2. Create a NAT configuration using Cloud Router
-      3. Create a custom image for a web server
-      4. Create an instance template based on the custom image
-      5. Create two managed instance groups
-      6. Configure an HTTP load balancer with IPv4 and IPv6
-      7. Stress test an HTTP load balancer
-
-    The HTTP load balancer should forward traffic to the region that is closest to you.
-      - yes
-
-    //To place a load on the load balancer, run the following command:
-    ab -n 500000 -c 1000 http://$LB_IP/
+    - acts at layer7/application layer of OSI model
+      - deals w/ actual content of each message and allows routing decision based on unhealthy_threshold
+    - provides global load balancing
+    - anyacast IP addr
+    - HTTP on port 80/8080
+    - HTTPs on port 443
+    - supports ipv4 and ipv6 clients
+    - autoscaling
+      - no pre-warming and enables content-based and cross regiona load balamncing
+    - url maps
+      - route some URLs to one set of instance like distributing them
+      - req are generally routed to instance group near to the user 
     
-  Cloud CDN
+    Architecture of an HTTP load balancer
+      Internet -> Global Forwarding rule -> Target Proxy -> URL map
+      -> Backend Service(Constantly checked by Health Check) -> Instance Group -> 
+    
+      Global Forwarding rule
+        - directs incoming requests from the internet to a target HTTP Proxy.
+      
+      Target HTTP Proxy
+        - checks each request against a URL map to determine appropriate backend service
+
+      Backend Service
+        - directs each request to an appropriate instance  based on serving capacity, zone/location and instance health
+        - contains:
+          - health check
+            - only instances that pass health check are allowed to receive new requests
+          - sesson affinity
+            - attempts to send all req from the same client to same virtual machine instance
+          - timeout settings(30 sec by default)
+            - amt of time backend service will wait on backend before considering req is a failure
+          - one or more backends
+            - an instance group(managed or unmanaged)
+            - a balancing mode(CPU utilization or RPS)
+              - tells load balancing sys how to det when backend is at full usage
+            - A capacity scaler(ceiling percentage of CPU/Rate targets)
+              - additional control w/ balancing mode settings
+                - 80% CPU utilization and 100% capacity
+                - 80% CPU utilization and 50% capacity
+
+    Distributing Algorithm used are
+      1. Round robin
+        - use by default to distribute requests among available instances.
+
+    Cross-Region  LB
+      - backend service in 2 or more region
+
+    Content-Based LB
+      - url map split traffic based on content(video/web traffic)
+
+    HTTPS LB
+      - same structure of HTTP LB but uses target HTTPS proxy instead of HTTP proxy.
+      - reuires at least one signed SSL cert installed
+        - upto 15 SSL cert per target proxy
+      - client SSL session terminates at the LB
+      - support the QUIC transport layer Protocol
+        QUIC transport layer Protocol
+          - quick UPD internet connections allows faster client connections
+          - lower latncy because eliminates head of line blocking multiplexed stream
+          - supports connection migration when client's IP addr changes
+
+      Network endpoint groups(NEG)
+        - a config object that specifies a group of backend endpoints/services
+          - cloud run/app engine/function
+            - serverless neg means dno endpoints
+          Internet NEG
+            - contains single endpoint  specified by IP addr hosted outside google cloud
+
+    Qwiklab: Configuring an HTTP load balancer w/ autoscaling
+      https://googlecoursera.qwiklabs.com/focuses/34883910?parent=lti_session
+      - Google Cloud HTTP(S) load balancing is implemented at the edge of Google's network in Google's points of presence (POP) around the world. 
+        User traffic directed to an HTTP(S) load balancer enters the POP closest to the user and is then load-balanced over Google's global network to the closest backend that has sufficient available capacity.
+
+      - In this lab, you configure an HTTP load balancer as shown in the diagram below. 
+        Then, you stress test the load balancer to demonstrate global load balancing and autoscaling.
+
+      Objectives
+      In this lab, you learn how to perform the following tasks:
+
+        1. Create a health check firewall rule
+        2. Create a NAT configuration using Cloud Router
+        3. Create a custom image for a web server
+        4. Create an instance template based on the custom image
+        5. Create two managed instance groups
+        6. Configure an HTTP load balancer with IPv4 and IPv6
+        7. Stress test an HTTP load balancer
+
+      The HTTP load balancer should forward traffic to the region that is closest to you.
+        - yes
+
+      //To place a load on the load balancer, run the following command:
+      ab -n 500000 -c 1000 http://$LB_IP/
+    
+  Cloud CDN(Content Delivery Network)
+    - cached content at CDN nodes/Edge PoPs near to your users for faster response
+
+    Cloud CDN cache modes
+      - control the factors that determine whether or not Cloud CDN caches your content
+
+      Three chache modes:
+        1. USE_ORIGIN_HEADERS
+          - requires origin responses to set valid cache directives and valid caching headers
+        
+        2. CACHE_ALL_STATIC
+          - auto caches static content that doesn't have no-store,private or no cache directive
+        
+        3. FORCE_CACHE_ALL
+          - unconditionally caches responses, overriding any cache directives set by the origin
+
+      Note:
+        - not to cache:
+          - private data
+          - per user content such as dynamic HTML or API responses
 
   SSL Proxy/TCP Proxy Load Balancing
+    SSL Proxy Load Balancing
+      - global load balancing for encrypted non HTTP traffic
+      - terminates ssl session at load balancing layer
+      - multi region and auto directs traffic to closest region that has capacity
+      - supports ipv4 and ipv6 addr for client traffic
+      
+      Benefits:
+        - Intelligent routing
+          - route req to backend loc where there is capacity
+        - Certificate mngmt
+          - you only need to update customer facing cert in one place when you need to switch those certificates
+          - can reduce mngmt overhead by using self-signed cert on your instances
+        - security patching
+          - auto apply patches with SSL/TCP stack is vulnerable
+        - SSL policies
+          - https://cloud.google.com/load-balancing/docs/tcp#overview
+
+    TCP Proxy Load Balancing
+      - global load balancing for encrypted non HTTP traffic
+      - terminates ssl session at load balancing layer
+      - supports ipv4/ipv6 clients
+
+      Benefits:
+        - Intelligent routing
+          - route req to backend loc where there is capacity
+        - security patching
+          - auto apply patches with SSL/TCP stack is vulnerable
 
   Network Load Balancing
+    - a regional non-proxied LB.
+      - traffic can only be balanced bet VM instances in same region
+    - only supports ipv4 clients
+    - Forwarding rules(IP protocol data)
+      - balance load of your sys based on the incoming IP protocol data
+        - addr
+        - port
+        - protocol type
+    - Traffic:
+      - UDP
+      - TCP/SSL ports
+    - Architecture:
+      - Backend service-based
+        - regional backend service
+        - defines the behavior of the load balancer and how it distributes traffic to its backend instance groups
+        - enables new features not supported w/ legacy target pools
+          - non-legacy health checks
+            - TCP
+            - SSL
+            - HTTP
+            - HTTPS
+            - HTTP/2
+          - auto-scaling w/ managed instance groups
+          - connection draining
+          - configurable failover policy
+      - Target pool-based
+        - defines a group of instances that receive incoming traffic from forwarding rules
+          - TCP and UDP traffic only
+        - balance traffic based on a hash of the source IP and port and the dest IP and port
+        - up to 50 target pools per project in the same region
+        - one health check
 
   Internal Load Balancing
 
-  Qwilkab: Configuring and Internal Load balancer
+    Qwilkab: Configuring and Internal Load balancer
+      - https://googlecoursera.qwiklabs.com/focuses/34907383?parent=lti_session
+      - Google Cloud offers Internal Load Balancing for your TCP/UDP-based traffic. 
+        Internal Load Balancing enables you to run and scale your services behind a private load balancing IP address that is accessible only to your internal virtual machine instances.
+      
+      Objectives
+      In this lab, you will learn how to perform the following tasks:
 
-  Choosing a Load Balancer
+        1. Create internal traffic and health check firewall rules.
+        2. Create a NAT configuration using Cloud Router.
+        3. Configure two instance templates.
+        4. Create two managed instance groups.
+        5. Configure and test an internal load balancer
+
+      Which of these fields identify the location of the backend?
+        -Server Hostname
+        -Server Location
+
+
+  Choosing a load balancer
+
+  Quiz
+  1. Which of the following is not a Google Cloud load balancing service?
+    - hardware-defined LB
+      - cloud LB is managed service for all traffic and not device based sol'm
+  2. Which three Google Cloud load balancing services support IPv6 clients?
+    - HTTP(S) LB
+    - SSL/TCP proxy LB
+    - 
+  3. Which of the following are applicable autoscaling policies for managed instance groups?
+    - Load balancing capacity
+    - Queue-based workload
+    - Monitoring metrics
+    - CPU utilization
+
+  Review
+    - combine external and internal LV to support 3 tier web services
 
 Module 3 - Infrastructure Automation
 
