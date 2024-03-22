@@ -1151,7 +1151,7 @@ Module 3 - Resource Management
 
 			BigQuery	
 				- analyze your spend
-				- fully managed enterprise data warehouse w/ SWL and fast response times
+				- fully managed enterprise data warehouse w/ SQL and fast response times
 			
 		Note
 			- labels can help you optimize google cloud spend
@@ -1440,7 +1440,7 @@ Module 4 - Resource Monitoring
 		- can export to:
 			- GCS
 			- BigQuery
-				- create easy-ti-understand reports and dashboards
+				- create easy-to-understand reports and dashboards
 			- Pub/Sub
 				- enables you to stream logs to apps or endpoints
 

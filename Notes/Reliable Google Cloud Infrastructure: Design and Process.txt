@@ -1,0 +1,92 @@
+Reliable Google Cloud Infrastructure: Design and Process
+  - architecting and designing sys
+    - architect your app using microservices
+
+  Steps
+    - Requirements
+      - security
+      - availability
+      - durability
+      - Cost
+      - Disaster Recovery
+    - Verify by maintenance
+      - monitoring
+      - logging
+  
+  Activity 1: Defining your Case Study
+    - Come up w/ an interestinc case Study
+      - Trello clone app
+    - Write a short description
+    - list some main features
+    - list user roles/Typical users
+
+  Agenda
+    - Defining services
+    - Microservice Design and Architecture
+    - DevOps Automation
+    - Choosing Storage Solutions
+    - Google cloud and Hybrid Network Architecture
+    - Deploying Applications to Google Cloud
+    - Designing reliable systems
+    - Reliability and security
+    - Maintenance and monitoring
+
+  Defining services
+    Learning Objectives
+      1. Describe users in terms of roles and personas.
+      2. Evaluate KPIs using SLOs and SLIs.
+      3. Determine the quality of application requirements using SMART crite
+        
+  Requirements, Analysis and Design
+
+  SLOs, SLIs and SLAs
+
+  Review
+
+  Microservices
+
+  REST and APIs
+
+  DevOps Automation
+    Cotinuous Integration Pipelines
+
+    Infrastructure as Code
+
+    Qwiklabs: Building a DevOps Pipelines
+      https://googlecoursera.qwiklabs.com/focuses/34929270?parent=lti_session
+      
+      Overview
+      In this lab, you will build a continuous integration pipeline using Cloud Source Repositories, Cloud Build, build triggers, and Artifact Registry.
+
+      Objectives
+      In this lab, you will learn how to perform the following tasks:
+
+        1. Create a Git repository
+        2. Create a simple Python application
+        3. Test Your web application in Cloud Shell
+        4. Define a Docker build
+        5. Manage Docker images with Cloud Build and Artifact Registry
+        6. Automate builds with triggers
+        7. Test your build changes
+
+      //clone the gcloud source repos clone devops-repoe empty repository from cloud source repository
+        gcloud source repos clone devops-repo
+      
+      //create an Artifact Registry repository named devops-repo:
+        gcloud artifacts repositories create devops-repo \
+    --repository-format=docker \
+    --location=us-west1
+
+      //To configure Docker to authenticate to the Artifact Registry Docker repository, enter the following command:
+        gcloud auth configure-docker us-west1-docker.pkg.dev
+
+      //To use Cloud Build to create the image and store it in Artifact Registry, type the following command:
+        gcloud builds submit --tag us-west1-docker.pkg.dev/$DEVSHELL_PROJECT_ID/devops-repo/devops-image:v0.1 .
+
+  Key Storage Characteristics
+
+  Choosing Google Cloud Storage and Data Solution
+
+  Designing Google Cloud Networks
+
+  Connecting Networks

@@ -3719,3 +3719,1118 @@ Module 4 - Resource Monitoring
 		Site Reliability Engineering
 			- operate and maintain you app through monitoring, loggin, error reporting, fault tracing and profiling features
 			
+Essential Google Cloud Infrastructure: Scaling and Automation
+
+Module 1 - Interconnecting Networks
+  - connect your Infrastructure to  Google Cloud
+
+  Learning Objectives
+    1. Recall the Google Cloud interconnect and peering services available to connect your infrastructure to Google Cloud
+    2. Determine which Cloud Interconnect or peering service to use in specific circumstances
+    3. Create and configure Google Cloud HA VPN
+    4. Recall when to use Shared VPC and when to use VPC Network Peering
+
+  Cloud VPN
+    Cloud VPN
+      - securely connects your on-premises network to yhour google cloud VPC network
+
+    Two Cloud VPN gateways  
+      1. HA VPN
+        - high availability cloud VPN sol'n that lets you securely connect on-premise network 
+          to your VPC network through an IPsec VPN connection in a single region.
+        - SLA if 99.99% service availability
+
+        Supports site-to-site VPN for different topologies/configuration scenarios:
+          - An HA VPN gateway to peer VPN devices
+          - An HA VPN gateway to an AWS virtual private gateway
+          - Two HA VPN gateways connected to each other
+
+        How for Google Cloud to On-premise?
+          - Cloud HA VPN Gateway
+            - google cloud auto chooses two external IP
+               - supports multiple tunnels
+          - Cloud Router
+          - Two on premise VPN gateway
+          - Two or four VPN tunnels
+            - serves as the virtual medium through IPsec encrypted data
+            - must be paired
+            - VPN tunnels connected to HA VPN gateways must use dynamic(BGP) routing
+              - active/active routing configurations
+              - active/passive routing configurations
+
+        How for Google Cloud to AWS Cloud?
+          - two tunnels from AWS TGW/VPG to one interface of HA cloud VPN gateway
+          - other two tunnels from AWS TGW/VPG to second interface of same HA cloud VPN gateway
+
+        HA VPN between Google Cloud networks topology
+          - each
+
+        Dynamic routing with Cloud router
+          - auto/managed routes w/o chaning tunnel config usign BGP
+
+          How?
+            - BGP link local IP addr bet cloud router and peer gaweway
+            - two VPN tunnel
+            - one Google VPN gateway
+
+      2. Classic VPN
+        - securely connects your onpremises network to your google cloud vpc network through IPsec VPN tunnel
+        - data at transit is encrypted by one VPN gateway and decrypted by other gateway
+        - SLA of 99.9% sevice availability
+        
+        Supports:
+          - site-to-site VPN
+          - static routes
+          - dynamic routes(cloud Router)
+          - IKEv1 and IKEv2 ciphers
+        
+        Doesn't support
+          - dial in to a VPN using client VPN software
+
+        When to use?
+          - low volume data connection
+
+        How?
+          - Cloud VPN Gateway
+            - google cloud regional external IP
+          - On-premises VPN Gateway
+            - has an external IP
+            - Maximum Transimission Unit cannot be greater than 1460 bytes
+          - Two VPN tunnels
+            - serves as the virtual medium through IPsec encrypted data
+            - must be paired
+
+    HA VPN
+
+    Qwiklab: Configuring Google Cloud HA VPN
+      https://googlecoursera.qwiklabs.com/focuses/34859444?parent=lti_session
+      - HA VPN is a high-availability (HA) Cloud VPN solution that lets you securely connect your on-premises network to your VPC network through an IPsec VPN connection in a single region. HA VPN provides an SLA of 99.99% service availability.
+      - HA VPN is a regional per VPC, VPN solution. HA VPN gateways have two interfaces, each with its own public IP address. When you create an HA VPN gateway, two public IP addresses are automatically chosen from different address pools. When HA VPN is configured with two tunnels, Cloud VPN offers a 99.99% service availability uptime.
+      - In this lab you create a global VPC called vpc-demo, with two custom subnets in us-east4 and us-central1. 
+        In this VPC, you add a Compute Engine instance in each region. 
+        You then create a second VPC called on-prem to simulate a customer's on-premises data center. 
+        In this second VPC, you add a subnet in region us-central1 and a Compute Engine instance running in this region. 
+        Finally, you add an HA VPN and a cloud router in each VPC and run two tunnels from each HA VPN gateway before testing the configuration to verify the 99.99% SLA.
+
+      Objectives
+      In this lab, you learn how to perform the following tasks:
+
+        1. Create two VPC networks and instances.
+        2. Configure HA VPN gateways.
+        3. Configure dynamic routing with VPN tunnels.
+        4. Configure global dynamic routing mode.
+        5. Verify and test HA VPN gateway configuration.
+
+      //list active acct
+        gcloud auth list
+
+      //list active proj
+        gcloud config list project
+
+      Task 1. Set up a Global VPC environment
+        //create a VPC network called vpc-demo
+          gcloud compute networks create vpc-demo --subnet-mode custom
+
+          //create subnet vpc-demo-subnet1 in the region us-central1
+            gcloud compute networks subnets create vpc-demo-subnet1 \
+--network vpc-demo --range 10.1.1.0/24 --region "us-central1"
+  Cloud Interconnect and Peering
+
+          //Create subnet vpc-demo-subnet2 in the region us-east4
+            gcloud compute networks subnets create vpc-demo-subnet2 \
+--network vpc-demo --range 10.2.1.0/24 --region us-east4
+
+          //Create a firewall rule to allow all custom traffic within the network:
+            gcloud compute firewall-rules create vpc-demo-allow-custom \
+  --network vpc-demo \
+  --allow tcp:0-65535,udp:0-65535,icmp \
+  --source-ranges 10.0.0.0/8
+
+          //Create a firewall rule to allow SSH, ICMP traffic from anywhere:
+            gcloud compute firewall-rules create vpc-demo-allow-ssh-icmp \
+    --network vpc-demo \
+    --allow tcp:22,icmp
+
+          //Create a VM instance vpc-demo-instance1 in zone us-central1-b:
+            gcloud compute instances create vpc-demo-instance1 --machine-type=e2-medium --zone us-central1-b --subnet vpc-demo-subnet1
+
+          //Create a VM instance vpc-demo-instance2 in zone us-east4-b:
+            gcloud compute instances create vpc-demo-instance2 --machine-type=e2-medium --zone us-east4-b --subnet vpc-demo-subnet2
+
+      Task 2. Set up a simulated on-premises environment
+        //create a VPC network called on-prem:
+          gcloud compute networks create on-prem --subnet-mode custom
+
+        //Create a subnet called on-prem-subnet1:
+          gcloud compute networks subnets create on-prem-subnet1 \
+--network on-prem --range 192.168.1.0/24 --region us-central1
+    
+        //Create a firewall rule to allow all custom traffic within the network:
+          gcloud compute firewall-rules create on-prem-allow-custom \
+  --network on-prem \
+  --allow tcp:0-65535,udp:0-65535,icmp \
+  --source-ranges 192.168.0.0/16
+
+        //Create a firewall rule to allow SSH, RDP, HTTP, and ICMP traffic to the instances:
+          gcloud compute firewall-rules create on-prem-allow-ssh-icmp \
+    --network on-prem \
+    --allow tcp:22,icmp
+
+        //Create an instance called on-prem-instance1 in the region us-central1.
+          Note: 
+            - In the below command replace with a zone in us-central1 but different from the one used to create the vpc-demo-instance1 in the vpc-demo-subnet1 .
+          gcloud compute instances create on-prem-instance1 --machine-type=e2-medium --zone us-central1-b --subnet on-prem-subnet1
+
+      Task 3. Set up an HA VPN gateway
+        //create an HA VPN in the vpc-demo network:
+          gcloud compute vpn-gateways create vpc-demo-vpn-gw1 --network vpc-demo --region us-central1
+
+        //Create an HA VPN in the on-prem network:
+          gcloud compute vpn-gateways create on-prem-vpn-gw1 --network on-prem --region us-central1
+
+        //View details of the vpc-demo-vpn-gw1 gateway to verify its settings:
+          gcloud compute vpn-gateways describe vpc-demo-vpn-gw1 --region us-central1
+
+        //View details of the on-prem-vpn-gw1 vpn-gateway to verify its settings:
+          gcloud compute vpn-gateways describe on-prem-vpn-gw1 --region us-central1
+
+      Create cloud routers
+        //Create a cloud router in the vpc-demo network:
+          gcloud compute routers create vpc-demo-router1 \
+    --region us-central1 \
+    --network vpc-demo \
+    --asn 65001
+
+        //Create a cloud router in the on-prem network:
+          gcloud compute routers create on-prem-router1 \
+    --region us-central1 \
+    --network on-prem \
+    --asn 65002
+
+    Task 4. Create two VPN tunnels
+      Two on-premises VPN gateway devices
+        - Each of the tunnels from each interface on the Cloud VPN gateway must be connected to its own peer gateway.
+      A single on-premises VPN gateway device with two interfaces
+        - Each of the tunnels from each interface on the Cloud VPN gateway must be connected to its own interface on the peer gateway.
+      A single on-premises VPN gateway device with a single interface
+        - Both of the tunnels from each interface on the Cloud VPN gateway must be connected to the same interface on the peer gateway.
+
+      //Create the first VPN tunnel in the vpc-demo network:
+        gcloud compute vpn-tunnels create vpc-demo-tunnel0 \
+    --peer-gcp-gateway on-prem-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router vpc-demo-router1 \
+    --vpn-gateway vpc-demo-vpn-gw1 \
+    --interface 0
+
+      //Create the second VPN tunnel in the vpc-demo network:
+        gcloud compute vpn-tunnels create vpc-demo-tunnel1 \
+    --peer-gcp-gateway on-prem-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router vpc-demo-router1 \
+    --vpn-gateway vpc-demo-vpn-gw1 \
+    --interface 1
+
+      //Create the first VPN tunnel in the on-prem network:
+        gcloud compute vpn-tunnels create on-prem-tunnel0 \
+    --peer-gcp-gateway vpc-demo-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router on-prem-router1 \
+    --vpn-gateway on-prem-vpn-gw1 \
+    --interface 0
+
+      //Create the second VPN tunnel in the on-prem network:
+        gcloud compute vpn-tunnels create on-prem-tunnel1 \
+    --peer-gcp-gateway vpc-demo-vpn-gw1 \
+    --region us-central1 \
+    --ike-version 2 \
+    --shared-secret [SHARED_SECRET] \
+    --router on-prem-router1 \
+    --vpn-gateway on-prem-vpn-gw1 \
+    --interface 1
+
+    Task 5. Create Border Gateway Protocol (BGP) peering for each tunnel
+      - In this task you configure BGP peering for each VPN tunnel between vpc-demo and VPC on-prem. HA VPN requires dynamic routing to enable 99.99% availability.
+      //Create the router interface for tunnel0 in network vpc-demo:
+        gcloud compute routers add-interface vpc-demo-router1 \
+    --interface-name if-tunnel0-to-on-prem \
+    --ip-address 169.254.0.1 \
+    --mask-length 30 \
+    --vpn-tunnel vpc-demo-tunnel0 \
+    --region us-central1
+      
+      //Create the BGP peer for tunnel0 in network vpc-demo:
+        gcloud compute routers add-bgp-peer vpc-demo-router1 \
+    --peer-name bgp-on-prem-tunnel0 \
+    --interface if-tunnel0-to-on-prem \
+    --peer-ip-address 169.254.0.2 \
+    --peer-asn 65002 \
+    --region us-central1
+
+      //Create a router interface for tunnel1 in network vpc-demo:
+        gcloud compute routers add-interface vpc-demo-router1 \
+    --interface-name if-tunnel1-to-on-prem \
+    --ip-address 169.254.1.1 \
+    --mask-length 30 \
+    --vpn-tunnel vpc-demo-tunnel1 \
+    --region us-central1
+
+      //Create the BGP peer for tunnel1 in network vpc-demo:
+        gcloud compute routers add-bgp-peer vpc-demo-router1 \
+    --peer-name bgp-on-prem-tunnel1 \
+    --interface if-tunnel1-to-on-prem \
+    --peer-ip-address 169.254.1.2 \
+    --peer-asn 65002 \
+    --region us-central1
+
+      //Create a router interface for tunnel0 in network on-prem:
+        gcloud compute routers add-interface on-prem-router1 \
+    --interface-name if-tunnel0-to-vpc-demo \
+    --ip-address 169.254.0.2 \
+    --mask-length 30 \
+    --vpn-tunnel on-prem-tunnel0 \
+    --region us-central1
+
+      //Create the BGP peer for tunnel0 in network on-prem:
+        gcloud compute routers add-bgp-peer on-prem-router1 \
+    --peer-name bgp-vpc-demo-tunnel0 \
+    --interface if-tunnel0-to-vpc-demo \
+    --peer-ip-address 169.254.0.1 \
+    --peer-asn 65001 \
+    --region us-central1
+
+      //Create a router interface for tunnel1 in network on-prem:
+        gcloud compute routers add-interface  on-prem-router1 \
+    --interface-name if-tunnel1-to-vpc-demo \
+    --ip-address 169.254.1.2 \
+    --mask-length 30 \
+    --vpn-tunnel on-prem-tunnel1 \
+    --region us-central1
+
+      //Create the BGP peer for tunnel1 in network on-prem:
+        gcloud compute routers add-bgp-peer  on-prem-router1 \
+    --peer-name bgp-vpc-demo-tunnel1 \
+    --interface if-tunnel1-to-vpc-demo \
+    --peer-ip-address 169.254.1.1 \
+    --peer-asn 65001 \
+    --region us-central1
+
+    Task 6. Verify router configurations
+      - In this task you verify the router configurations in both VPCs. You configure firewall rules to allow traffic between each VPC and verify the status of the tunnels. You also verify private connectivity over VPN between each VPC and enable global routing mode for the VPC.
+
+      //View details of Cloud Router vpc-demo-router1 to verify its settings:
+        gcloud compute routers describe vpc-demo-router1 \
+    --region us-central1
+
+      //View details of Cloud Router on-prem-router1 to verify its settings:
+        gcloud compute routers describe on-prem-router1 \
+    --region us-central1
+
+    Configure firewall rules to allow traffic from the remote VPC
+      - Configure firewall rules to allow traffic from the private IP ranges of peer VPN.
+    
+      //Allow traffic from network VPC on-prem to vpc-demo:
+        gcloud compute firewall-rules create vpc-demo-allow-subnets-from-on-prem \
+    --network vpc-demo \
+    --allow tcp,udp,icmp \
+    --source-ranges 192.168.1.0/24
+
+      //Allow traffic from vpc-demo to network VPC on-prem:
+        gcloud compute firewall-rules create on-prem-allow-subnets-from-vpc-demo \
+    --network on-prem \
+    --allow tcp,udp,icmp \
+    --source-ranges 10.1.1.0/24,10.2.1.0/24
+
+    Verify the status of the tunnels
+      //List the VPN tunnels you just created:
+        gcloud compute vpn-tunnels list
+
+      //Verify that vpc-demo-tunnel0 tunnel is up:
+        gcloud compute vpn-tunnels describe vpc-demo-tunnel0 \
+      --region us-central1
+
+      //Verify that vpc-demo-tunnel1 tunnel is up:
+        gcloud compute vpn-tunnels describe vpc-demo-tunnel1 \
+      --region us-central1
+
+      //Verify that on-prem-tunnel0 tunnel is up:
+        gcloud compute vpn-tunnels describe on-prem-tunnel0 \
+      --region us-central1
+
+      //Verify that on-prem-tunnel1 tunnel is up:
+        gcloud compute vpn-tunnels describe on-prem-tunnel1 \
+      --region us-central1
+
+    Verify private connectivity over VPN
+      //Open a new Cloud Shell tab and type the following to connect via SSH to the instance on-prem-instance1: Replace <zone_name> with the zone in which the on-prem-instance1 was created.
+        gcloud compute ssh on-prem-instance1 --zone zone_name
+
+      //From the instance on-prem-instance1 in network on-prem, to reach instances in network vpc-demo, ping 10.1.1.2:
+        ping -c 4 10.1.1.2
+
+    Global routing with VPN
+      //Open a new Cloud Shell tab and update the bgp-routing mode from vpc-demo to GLOBAL:
+        gcloud compute networks update vpc-demo --bgp-routing-mode GLOBAL
+
+      //Verify the change:
+        gcloud compute networks describe vpc-demo
+
+      //From the Cloud Shell tab that is currently connected to the instance in network on-prem via ssh, ping the instance vpc-demo-instance2 in region us-east4:
+        ping -c 2 10.2.1.2
+
+    Task 7. Verify and test the configuration of HA VPN tunnels
+      //Bring tunnel0 in network vpc-demo down:
+        gcloud compute vpn-tunnels delete vpc-demo-tunnel0  --region us-central1
+
+      //Verify that the tunnel is down:
+        gcloud compute vpn-tunnels describe on-prem-tunnel0  --region us-central1
+
+      //Switch to the previous Cloud Shell tab that has the open ssh session running, and verify the pings between the instances in network vpc-demo and network on-prem:
+        ping -c 3 10.1.1.2
+
+    Task 8. (Optional) Clean up lab environment
+      //Delete VPN tunnels
+        gcloud compute vpn-tunnels delete on-prem-tunnel0  --region us-central1
+
+        gcloud compute vpn-tunnels delete vpc-demo-tunnel1  --region us-central1
+
+        gcloud compute vpn-tunnels delete on-prem-tunnel1  --region us-central1
+
+      //Remove BGP peering
+        gcloud compute routers remove-bgp-peer vpc-demo-router1 --peer-name bgp-on-prem-tunnel0 --region us-central1
+
+        gcloud compute routers remove-bgp-peer vpc-demo-router1 --peer-name bgp-on-prem-tunnel1 --region us-central1
+
+        gcloud compute routers remove-bgp-peer on-prem-router1 --peer-name bgp-vpc-demo-tunnel0 --region us-central1
+
+        gcloud compute routers remove-bgp-peer on-prem-router1 --peer-name bgp-vpc-demo-tunnel1 --region us-central1
+
+      //Delete cloud routers
+        gcloud compute  routers delete on-prem-router1 --region us-central1
+
+        gcloud compute  routers delete vpc-demo-router1 --region us-central1
+
+      //Delete VPN gateways
+        gcloud compute vpn-gateways delete vpc-demo-vpn-gw1 --region "REGION"
+
+        gcloud compute vpn-gateways delete on-prem-vpn-gw1 --region "REGION"
+
+      //Delete instances
+        gcloud compute instances delete vpc-demo-instance1 --zone "ZONE"
+
+        gcloud compute instances delete vpc-demo-instance2 --zone "ZONE"
+
+        gcloud compute instances delete on-prem-instance1 --zone zone_name
+
+      //Delete firewall rules
+        gcloud compute firewall-rules delete vpc-demo-allow-custom
+
+        gcloud compute firewall-rules delete on-prem-allow-subnets-from-vpc-demo
+
+        gcloud compute firewall-rules delete on-prem-allow-ssh-icmp
+
+        gcloud compute firewall-rules delete on-prem-allow-custom
+
+        gcloud compute firewall-rules delete vpc-demo-allow-subnets-from-on-prem
+
+        gcloud compute firewall-rules delete vpc-demo-allow-ssh-icmp
+
+      //Delete subnets
+        gcloud compute networks subnets delete vpc-demo-subnet1 --region "REGION"
+        gcloud compute networks subnets delete vpc-demo-subnet2 --region REGION 2
+        gcloud compute networks subnets delete on-prem-subnet1 --region "REGION"
+
+      //Delete VPC
+        gcloud compute networks delete vpc-demo
+        gcloud compute networks delete on-prem
+  
+  Cloud Interconnect and Peering
+    Dedicated 
+      - direct connection to google's netwprl
+    Shared
+      - connection to google's network through a Partner
+
+    Layer 3
+      Network layer(Packets)
+        - provides access to google to google workspace services/youtube/google api 
+          - using public ip addresses
+          - using CLoud VPN(Virutal Private Network) service 
+            - uses public ip add but traffic is encrypted that provide access to internal IP addr
+        - IP
+        - router
+        - control routing
+    Layer 2
+      Data link layer(Frames)
+        - uses VLAN that pipes directly into your GCP environment 
+          - provides connectivity to internal IP add
+        - ethernet/mac/llc
+        - NIC/Switches
+        - error free data transfer
+    Types
+      Dedicated layer 3
+        Direct Peering
+
+      Dedicated layer 2
+        Dedicated Interconnect
+
+      Shared layer 3
+        Carrier Peering
+
+      Shared layer 3 and 2
+        Partner Interconnect
+
+    Cloud Interconnect
+      - direct access to RFC1918/ private IP addr/internal IP addr in your VPC with SLA
+      VPN tunnel
+        - provides encrypted tunnel to VPC networks through the public interconnect
+          - IPsecVPN tunnel
+          - remote VPN gateway
+          - cloud routers
+          - BGP peering
+
+        - capacity
+          - 1.5 Gbps(public internet) to 3 Gbps(direct peering link) per tunnel
+
+      Dedicated Interconnect
+        - provides dedicated, direct connection to VPC networks through google supported olocation facility
+        - provides direct physical connections between on-premises and google's network
+          - allowing transfer of large amts of data compared for additional BW over public interconnect
+        - 99.9% or 99.99% uptime SLA
+        - capacity
+          - upto 8 links of 10 Gbps
+            - min of 10 Gbps
+          - upto 10 links 100 Gbps
+
+        how?
+          google cloud  share colocation facility with on premise network through BGP
+            cloud router to google peering edge between on premise router
+
+        
+      Partner Interconnect
+        - provides dedicated BW, connection to VPC network through a ISP
+        - used when no supported colocation facility near you
+        - 99.9% or 99.99% uptime SLA
+        - capacity
+          - 50 Mbps-50 Gbps per connection
+
+        how?
+          google cloud  share colocation facility with supported service provider
+            cloud router to google peering edge between on service provider peering edge to on pre,ise router
+
+        Process
+          - Identify supported locations
+          - choose either primary/redundant cross-cloud interconnect ports from google and service provider
+       
+      Cross-cloud interconnect
+        - provides dedicated physical connection between VPC network and network hosted by cloud service provider
+        - estabilish high-BW dedicated connectivity bet googl cloud and another cloud service provider
+        - supports the adoption of an integrated multi cloud strategy
+        - 2 connection sizes:
+          - 10 Gbps
+          - 100 Gbps
+        - google provision a dedicated physical connection 
+
+      Note:
+        - Choose Cloud VPN
+          - lower cost solution
+          - lower BW needs
+          - experimenting w/ migrating workloads to Google CLoud
+        - Choose Dedicated or Parner Interconnect
+          - enterprise grade connection that has higher throughput
+        - Choose Cross-Cloud Interconnect
+          - connect to another cloud service provider
+    
+    Peering
+      - useful when access to google cloud propertions
+      - access  to google public IPs only w/o SLA
+      Types
+        1. Direct peering
+          - allows connection between your business network and google's using broad-reaching edge network locations
+            - exchange BGP routes bet google and peering entity   
+          - No SLA
+          - Peering requirements
+            - https://peering.google.com/#/options/peering
+            - GCP edge Points of Presence( PoPs )
+              - where google's network connects to the rest of the internet via peering
+              - https://www.peeringdb.com/asn/15169
+        
+        2. Carrier peering
+          - used when require access to google poublic infra and cannot satisfy google's peering requirements
+          - works/ direction with carrier peering Partner
+          - no SLA
+          - support Internet service provider and requirments
+            - https://cloud.google.com/network-connectivity/docs/carrier-peering#service_providers
+    
+    Choosing a connection
+      If connect on-premises to Google Workspace/Google APIs
+        - choose Direct peering'
+          - meet google peering requirments
+        - chose carrier peering
+          - didn't meet peering requirments
+
+      If connect google cloud wuth another cloud service
+        - Choose Cloud VPN
+          - connect google cloud VPC networks w/ other cloud
+          - don't need dedicated high BW
+          - encryption managed by google
+        - Choose Self-managed encryption tunnels
+          - connect google cloud VPC networks w/ other cloud
+          - don't need dedicated high BW
+          - not encryption managed by google
+        - Choose Cross-Cloud Interconnect
+          - connect google cloud VPC networks w/ other cloud
+          - need dedicated high BW
+          - Google managed routing solution
+        - Choose Self-managed connectivity
+          - connect google cloud VPC networks w/ other cloud
+          - need dedicated high BW
+          - not google managed routing solution
+
+      If connect on-premises w/ google cloud
+        Choose Dedicated Interconnect
+          - need dedicated and high BW
+          - min dedicated BW of 10 Gbps
+        Choose Parner Interconnect
+          - need dedicated and high BW
+          - not minimum dedicated BW of 10 Gbp
+            Choose L2 Partner Interconnect
+              - need BGP peering
+            Choose L3 Partner Interconnect
+              - no BGP peering
+        Choose Cloud VPN
+          - does not need dedicated and high BW
+          - encryption managed by google
+        Choose Self-managed encryption tunnels
+          - don't need dedicated high BW
+          - not encryption managed by google
+        Choose Cloud VPN over Cloud Interconnect 
+          - with BW of more 10 Gbps
+          - need dedicated and high network BW
+          - encryption managed by google
+  
+  Sharing VPC Networks
+    Shared VPC and VPC Peering
+      Shared VPC 
+        - allows share a network across several projects in same GCP org using Internal IP
+      
+      Shared VPC Peering/VPC network peering
+        - allow to private IP/internal IP connectivity across two VPC networks across diff projects/org
+        - a decentralized/distributed approach to multi-project networking
+        - doesn' incur:
+          - network latency
+          - security
+          - cost drawbacks
+    
+    Note:
+      Host/service project  
+        - project that participates in shared VPC
+
+      Standalone project
+        - project does not participate in shared VPC
+
+      Standalone VPC network
+        - unshared VPC network that exists in eitheri standalone project or a servic prokect
+  Quiz
+    1. What is the purpose of Virtual Private Networking (VPN)?
+      - To enable a secure communication method (a tunnel) to connect two trusted environments through an untrusted environment, such as the Internet.
+        - VPN use IPsec tunnels to provide encapsulated and encrypted path through a hostile or untrusted environment
+    2. Which Google Cloud Interconnect service requires a connection in a Google Cloud colocation facility and provides 10 Gbps per link?
+      - Dedicated Interconnect
+    3. If you cannot meet Google’s peering requirements, which network connection service should you choose to connect to Google Workspace and YouTube?
+      - Carrier Peering
+    4. Which of the following approaches to multi-project networking, uses a centralized network administration model?
+      - Shared VPC
+        - centralized approach to multi-project networking because securiy and networking policy occurs in single designated VPC networkx
+
+Module 2 - Load Balancing and Autoscaling
+  - Configure load balancers and autoscaling for VM instances
+
+  Learning Objectives
+    1. Recall the various load balancing services
+    2. Determine which Google Cloud load balancer to use in specific circumstances
+    3. Describe autoscaling behavior, policies, configuration, and metrics
+    4. Configure load balancers and autoscaling
+    
+  Managed Instance Groups
+    - a collection of identical VM instances that you control as a single entity using an instance template
+    - deploy identical instances based on instance template
+    - instance group can be resized
+    - manager ensures all instances are running
+    - typically used w/ autoscaler
+    - can be single zone or regional
+
+    Autoscaling and health checks
+      - allows you to auto add/remove instances from a MIG based on load
+
+      Autoscaling policies supports
+        - CPU utilization
+        - load balancing capacity
+        - monitoring metrics
+        - queue-based workload like Pub/Sub 
+        - schedule such as start-time, duration and recurrence
+
+      Health checks
+        - similar to uptime check in stackdriver
+
+        Setup?
+          - Protocol
+          - ports
+          - health criteria:
+              1. timeout_sec
+                - How long to wait (in seconds) before a request is considered a failure
+              2. check_interval_sec
+                - how often in seconds to check whether an instance is healthy
+              3. healthy_threshold
+                - How many consecutive successes must occur to mark a VM instance healthy.
+              4 .unhealthy_threshold
+                - How many consecutive failures must occur to mark a VM instance unhealthy
+
+  HTTP(S) Load Balancing
+    - acts at layer7/application layer of OSI model
+      - deals w/ actual content of each message and allows routing decision based on unhealthy_threshold
+    - provides global load balancing
+    - anyacast IP addr
+    - HTTP on port 80/8080
+    - HTTPs on port 443
+    - supports ipv4 and ipv6 clients
+    - autoscaling
+      - no pre-warming and enables content-based and cross regiona load balamncing
+    - url maps
+      - route some URLs to one set of instance like distributing them
+      - req are generally routed to instance group near to the user 
+    
+    Architecture of an HTTP load balancer
+      Internet -> Global Forwarding rule -> Target Proxy -> URL map
+      -> Backend Service(Constantly checked by Health Check) -> Instance Group -> 
+    
+      Global Forwarding rule
+        - directs incoming requests from the internet to a target HTTP Proxy.
+      
+      Target HTTP Proxy
+        - checks each request against a URL map to determine appropriate backend service
+
+      Backend Service
+        - directs each request to an appropriate instance  based on serving capacity, zone/location and instance health
+        - contains:
+          - health check
+            - only instances that pass health check are allowed to receive new requests
+          - sesson affinity
+            - attempts to send all req from the same client to same virtual machine instance
+          - timeout settings(30 sec by default)
+            - amt of time backend service will wait on backend before considering req is a failure
+          - one or more backends
+            - an instance group(managed or unmanaged)
+            - a balancing mode(CPU utilization or RPS)
+              - tells load balancing sys how to det when backend is at full usage
+            - A capacity scaler(ceiling percentage of CPU/Rate targets)
+              - additional control w/ balancing mode settings
+                - 80% CPU utilization and 100% capacity
+                - 80% CPU utilization and 50% capacity
+
+    Distributing Algorithm used are
+      1. Round robin
+        - use by default to distribute requests among available instances.
+
+    Cross-Region  LB
+      - backend service in 2 or more region
+
+    Content-Based LB
+      - url map split traffic based on content(video/web traffic)
+
+    HTTPS LB
+      - same structure of HTTP LB but uses target HTTPS proxy instead of HTTP proxy.
+      - reuires at least one signed SSL cert installed
+        - upto 15 SSL cert per target proxy
+      - client SSL session terminates at the LB
+      - support the QUIC transport layer Protocol
+        QUIC transport layer Protocol
+          - quick UPD internet connections allows faster client connections
+          - lower latncy because eliminates head of line blocking multiplexed stream
+          - supports connection migration when client's IP addr changes
+
+      Network endpoint groups(NEG)
+        - a config object that specifies a group of backend endpoints/services
+          - cloud run/app engine/function
+            - serverless neg means dno endpoints
+          Internet NEG
+            - contains single endpoint  specified by IP addr hosted outside google cloud
+
+    Qwiklab: Configuring an HTTP load balancer w/ autoscaling
+      https://googlecoursera.qwiklabs.com/focuses/34883910?parent=lti_session
+      - Google Cloud HTTP(S) load balancing is implemented at the edge of Google's network in Google's points of presence (POP) around the world. 
+        User traffic directed to an HTTP(S) load balancer enters the POP closest to the user and is then load-balanced over Google's global network to the closest backend that has sufficient available capacity.
+
+      - In this lab, you configure an HTTP load balancer as shown in the diagram below. 
+        Then, you stress test the load balancer to demonstrate global load balancing and autoscaling.
+
+      Objectives
+      In this lab, you learn how to perform the following tasks:
+
+        1. Create a health check firewall rule
+        2. Create a NAT configuration using Cloud Router
+        3. Create a custom image for a web server
+        4. Create an instance template based on the custom image
+        5. Create two managed instance groups
+        6. Configure an HTTP load balancer with IPv4 and IPv6
+        7. Stress test an HTTP load balancer
+
+      The HTTP load balancer should forward traffic to the region that is closest to you.
+        - yes
+
+      //To place a load on the load balancer, run the following command:
+      ab -n 500000 -c 1000 http://$LB_IP/
+    
+  Cloud CDN(Content Delivery Network)
+    - cached content at CDN nodes/Edge PoPs near to your users for faster response
+
+    Cloud CDN cache modes
+      - control the factors that determine whether or not Cloud CDN caches your content
+
+      Three chache modes:
+        1. USE_ORIGIN_HEADERS
+          - requires origin responses to set valid cache directives and valid caching headers
+        
+        2. CACHE_ALL_STATIC
+          - auto caches static content that doesn't have no-store,private or no cache directive
+        
+        3. FORCE_CACHE_ALL
+          - unconditionally caches responses, overriding any cache directives set by the origin
+
+      Note:
+        - not to cache:
+          - private data
+          - per user content such as dynamic HTML or API responses
+
+  SSL Proxy/TCP Proxy Load Balancing
+    SSL Proxy Load Balancing
+      - global load balancing for encrypted non HTTP traffic
+      - terminates ssl session at load balancing layer
+      - multi region and auto directs traffic to closest region that has capacity
+      - supports ipv4 and ipv6 addr for client traffic
+      
+      Benefits:
+        - Intelligent routing
+          - route req to backend loc where there is capacity
+        - Certificate mngmt
+          - you only need to update customer facing cert in one place when you need to switch those certificates
+          - can reduce mngmt overhead by using self-signed cert on your instances
+        - security patching
+          - auto apply patches with SSL/TCP stack is vulnerable
+        - SSL policies
+          - https://cloud.google.com/load-balancing/docs/tcp#overview
+
+    TCP Proxy Load Balancing
+      - global load balancing for encrypted non HTTP traffic
+      - terminates ssl session at load balancing layer
+      - supports ipv4/ipv6 clients
+
+      Benefits:
+        - Intelligent routing
+          - route req to backend loc where there is capacity
+        - security patching
+          - auto apply patches with SSL/TCP stack is vulnerable
+
+  Network Load Balancing
+    - a regional non-proxied LB.
+      - traffic can only be balanced bet VM instances in same region
+    - only supports ipv4 clients
+    - Forwarding rules(IP protocol data)
+      - balance load of your sys based on the incoming IP protocol data
+        - addr
+        - port
+        - protocol type
+    - Traffic:
+      - UDP
+      - TCP/SSL ports
+    - Architecture:
+      - Backend service-based
+        - regional backend service
+        - defines the behavior of the load balancer and how it distributes traffic to its backend instance groups
+        - enables new features not supported w/ legacy target pools
+          - non-legacy health checks
+            - TCP
+            - SSL
+            - HTTP
+            - HTTPS
+            - HTTP/2
+          - auto-scaling w/ managed instance groups
+          - connection draining
+          - configurable failover policy
+      - Target pool-based
+        - defines a group of instances that receive incoming traffic from forwarding rules
+          - TCP and UDP traffic only
+        - balance traffic based on a hash of the source IP and port and the dest IP and port
+        - up to 50 target pools per project in the same region
+        - one health check
+
+  Internal Load Balancing
+    Internal TCP/UDP  LB
+      - regional private LB
+        - VM instance in same region
+        - private IP add/internal IP addr
+      - TCP/UDP traffic
+      - reduced latency, simpler configuration
+      - software-defined fully distributed LB
+        - directly delivers the traffic from client isntance to a backend instance using oogle network virtualizaiton  stack Andromeda
+
+    Internal HTTP(S) LB
+      - proxy based regional layer 7 private LB
+        - VM instances in same region
+        - private IP addr
+      - Backend services supports HTTP/HTTPS/HTTP/2 products
+      - Based on open source envoy proxy
+        - manage and balance incoming network traffic
+
+    
+    Qwilkab: Configuring and Internal Load balancer
+      - https://googlecoursera.qwiklabs.com/focuses/34907383?parent=lti_session
+      - Google Cloud offers Internal Load Balancing for your TCP/UDP-based traffic. 
+        Internal Load Balancing enables you to run and scale your services behind a private load balancing IP address that is accessible only to your internal virtual machine instances.
+      
+      Objectives
+      In this lab, you will learn how to perform the following tasks:
+
+        1. Create internal traffic and health check firewall rules.
+        2. Create a NAT configuration using Cloud Router.
+        3. Configure two instance templates.
+        4. Create two managed instance groups.
+        5. Configure and test an internal load balancer
+
+      Which of these fields identify the location of the backend?
+        -Server Hostname
+        -Server Location
+
+
+  Choosing a load balancer
+    1. Application LB
+      - use for applications w/ HTTP(S) traffic.
+
+      a. external
+      b. Internal
+    2. Network LB
+      - - use for applications w/ TCP/UDP/SSL/TLS/Layer 4 protocols
+      a. Proxy network LB
+        - implement SSL/TLS offload, TC/UDP proxy or support external LB to backends in multiple regions
+      b. Passthrough network LB
+        - preserve clietn source IP addr, avoid overhead of proxies and supoort UDP/ESP/ICMP.
+          - use UDP if you need to expose client IP addr to your applications
+  
+  Quiz
+  1. Which of the following is not a Google Cloud load balancing service?
+    - hardware-defined LB
+      - cloud LB is managed service for all traffic and not device based sol'm
+  2. Which three Google Cloud load balancing services support IPv6 clients?
+    - HTTP(S) LB
+    - SSL/TCP proxy LB
+    - 
+  3. Which of the following are applicable autoscaling policies for managed instance groups?
+    - Load balancing capacity
+    - Queue-based workload
+    - Monitoring metrics
+    - CPU utilization
+
+  Review
+    - combine external and internal LV to support 3 tier web services
+
+Module 3 - Infrastructure Automation
+  - Automate the deployment of Google Cloud infrastruc
+
+  Learning Objectives
+    1. Automate the deployment of Google Cloud services using Terraform
+    2. Outline the Google Cloud Marketplace
+
+  Terraform
+    - allows quick provisioning and removing infra safely
+    - uses a sys of highly structured templates and configuration files to document the infra in an easily readabale and understandable format
+    - conceals the actual cloud API calls
+      - don't need to write api calls only infra code
+    - enables you to safely and predicatably create, change and improve infra
+    - an open-source tool that codifies APIs into declarative configuration files that can be shared among team members, treated as code, edited, reviewed, and versioned
+    - management tool for serveral resources that needs repeatable way to deploy, update and destroy uniformly.
+      - build infra when needed/repeatable deployment Process
+      - declarive language
+      - parallel deployment
+      - template driven
+      - destroy infra when not in use
+      - create identical ifnra for dev/staging/pro
+      - can be part of CI/CD pipeline
+    - templates are building blocks for DR procedures
+    -  fully managed resource dependencies and complexity
+    
+    Terraform language
+      - hashicorp Configuration language(HCL)
+      - interface to declare resources
+
+      Components
+        Block type
+        Block Label resource name
+          - defines resource/services name
+        Block Label name
+          - defines custom pointer name of created resources
+        Block Body
+          - contains variable and argument
+            - identifier name
+            - expression
+
+    Qwiklab: Automating the infrastructure of networks using Terraform
+      https://googlecoursera.qwiklabs.com/focuses/34926833?parent=lti_session
+
+      Objectives
+      In this lab, you learn how to perform the following tasks:
+
+        1. Create a configuration for an auto mode network
+        2. Create a configuration for a firewall rule
+        3. Create a module for VM instances
+        4. Create and deploy a configuration
+        5. Verify the deployment of a configuration
+  
+  Google Cloud Marketplace
+    - quicly deploy functional software packages that run on Google Cloud
+    - production-grade solutions from third-party vendors who have already created their own deployment configurations based on Terraform
+    - single bill for google cloud and third party services
+    - notif when a security update is available
+    - direct access to partner support
+
+  Quiz
+    1. What’s the benefit of writing templates for your Terraform configuration?
+      - Allows you to abstract part of your configuration into individual building blocks that you can reuse
+      - reusable code across deployments
+    2. What does Google Cloud Marketplace offer?
+      - Production-grade solutions from third-party vendors who have already created their own deployment configurations based on Terraform
+
+Module 4 - Managed Services
+  - Leverage managed services in Google Cloud
+  - exist between PaaS and SaaS
+
+  Learning Objectives
+    1. Describe the managed services for data processing in Google Cloud
+
+  BigQuery/AWS Redshift
+    - serverless highly scalable cost-effective cloud entreprise data warehouse
+      - fully managed by google
+        - you can focus analyzing your data
+      - up to petabyte scale
+      - SQL interface
+      - very fast queries
+    - designed to help you ingest, store, analyze and visualize data w/ ease
+    
+    Features
+      - Ingest Data
+        - upload in batch
+        - streaming direclty as in real time insights
+      
+      - built-in AI/Vertex AI/Generative AI
+        - turn complex data into compelling understandable stories
+
+    how to use
+      - Cloud console
+      - CLI
+      - REST API
+        - Java
+        - nodejs
+        - python
+
+    Pricing
+      - pay for data storage, streaming inserts and querying data
+        Storage data
+          - amt of storage
+        Querying data
+          - flat rate for dedicated resources
+          - pay per query
+      Free of charge:
+        - loading and exporting data
+
+    How to find out more?
+      https://cloud.google.com/bigquery?hl=en
+  
+  Dataflow/AWS cloud dataflow
+    - a serverless, fast and cost effective data-processing service for stream and batch data.
+      - removes operational overhead by automating infra provisioning and auto scaling as your data grows.
+    - a fully managed streaming analytics service that minimizes latency, processing time and cost rhough autoscaling and batch processing.
+    - process, enrich,  stream and batch data 
+    - open source programming using Beam
+    - intelligently scale to millions of QPS
+
+    Integrates with:
+      - stackdriver
+
+    Process:
+      - Read Data Source as input -> Transform -> write it back into a Data Sink
+      - ingest -> process -> analyze
+      - extract -> trasnform -> load
+  
+    Usecase
+      - real-time AI
+      - data warehousing
+      - stream analysis
+
+  Dataprep by Trifecta
+    - transforms raw data into ready-to-use data pipelines for your analytics or machine learning.
+    - can discover data structure and patterns surfaces data quality issues and provides guidance to resolve it
+    - serverless intelligent data service for visually exploring, cleaning and preparing structured/unstructured data for analysis reporting and machine learning
+      - auto scaling
+      - suggests ideal data transformation
+      - focus on data analysis
+      - integrated partner service oeprated by trifecta
+
+    More info
+      https://cloud.google.com/dataprep
+
+    Dataprep Architecture
+      Ingestion -> preparation & storage -> analysis & ML
+  
+  Dataproc
+    - a service for running apache spack and apache hadoop clusters
+      - low cost(per-second, preemptible)
+      - super fast to start, scale and shut down
+        - 90 seconds each operations
+      - integrated w/ google cloud
+        - bigquery
+        - cloud storage
+        - cloud bigtable
+        - stackdriver logging and monitoring
+    - managed data processing service for any open source data tools like:
+      - apache spark
+      - apache hadoop clusters
+      - flink
+      - presto
+      - pig
+      - hive
+    
+    Usecase
+      - batch processing
+      - SQL
+      - streaming
+      - Machine learning
+      - move on premise OSS clusters to the cloud
+      - to maximize efficiency and enable scale
+      - can use w/ cloud ai notebook/bigquery to build data science environment
+      - spin up an IT governed, auto scaling cluster in 90 seconds
+
+    Pricing
+      - pay what you use
+
+    Dataflow vs Dataproc
+      Choose Dataflow
+        - not dependent on apache hadoop/spark
+        - auto provisioning of clusters
+        - serverless approach
+      Choose Dataproc
+        - manual provisioning clusters
+        - devops approach
+        - either dependent not dependent on apache hadoop/spark
+
+    Quiz
+    1. How are Managed Services useful?
+      - Managed Services may be an alternative to creating and managing infrastructure solutions.
+        - possible alternative to building your own infrastructure data processing solution.
+
+    2. Which of the following is a feature of Dataproc?
+      - It typically takes less than 90 seconds to start a cluster.
+

@@ -849,7 +849,24 @@ Module 2 - Load Balancing and Autoscaling
         - one health check
 
   Internal Load Balancing
+    Internal TCP/UDP  LB
+      - regional private LB
+        - VM instance in same region
+        - private IP add/internal IP addr
+      - TCP/UDP traffic
+      - reduced latency, simpler configuration
+      - software-defined fully distributed LB
+        - directly delivers the traffic from client isntance to a backend instance using oogle network virtualizaiton  stack Andromeda
 
+    Internal HTTP(S) LB
+      - proxy based regional layer 7 private LB
+        - VM instances in same region
+        - private IP addr
+      - Backend services supports HTTP/HTTPS/HTTP/2 products
+      - Based on open source envoy proxy
+        - manage and balance incoming network traffic
+
+    
     Qwilkab: Configuring and Internal Load balancer
       - https://googlecoursera.qwiklabs.com/focuses/34907383?parent=lti_session
       - Google Cloud offers Internal Load Balancing for your TCP/UDP-based traffic. 
@@ -870,7 +887,19 @@ Module 2 - Load Balancing and Autoscaling
 
 
   Choosing a load balancer
+    1. Application LB
+      - use for applications w/ HTTP(S) traffic.
 
+      a. external
+      b. Internal
+    2. Network LB
+      - - use for applications w/ TCP/UDP/SSL/TLS/Layer 4 protocols
+      a. Proxy network LB
+        - implement SSL/TLS offload, TC/UDP proxy or support external LB to backends in multiple regions
+      b. Passthrough network LB
+        - preserve clietn source IP addr, avoid overhead of proxies and supoort UDP/ESP/ICMP.
+          - use UDP if you need to expose client IP addr to your applications
+  
   Quiz
   1. Which of the following is not a Google Cloud load balancing service?
     - hardware-defined LB
@@ -889,5 +918,201 @@ Module 2 - Load Balancing and Autoscaling
     - combine external and internal LV to support 3 tier web services
 
 Module 3 - Infrastructure Automation
+  - Automate the deployment of Google Cloud infrastruc
+
+  Learning Objectives
+    1. Automate the deployment of Google Cloud services using Terraform
+    2. Outline the Google Cloud Marketplace
+
+  Terraform
+    - allows quick provisioning and removing infra safely
+    - uses a sys of highly structured templates and configuration files to document the infra in an easily readabale and understandable format
+    - conceals the actual cloud API calls
+      - don't need to write api calls only infra code
+    - enables you to safely and predicatably create, change and improve infra
+    - an open-source tool that codifies APIs into declarative configuration files that can be shared among team members, treated as code, edited, reviewed, and versioned
+    - management tool for serveral resources that needs repeatable way to deploy, update and destroy uniformly.
+      - build infra when needed/repeatable deployment Process
+      - declarive language
+      - parallel deployment
+      - template driven
+      - destroy infra when not in use
+      - create identical ifnra for dev/staging/pro
+      - can be part of CI/CD pipeline
+    - templates are building blocks for DR procedures
+    -  fully managed resource dependencies and complexity
+    
+    Terraform language
+      - hashicorp Configuration language(HCL)
+      - interface to declare resources
+
+      Components
+        Block type
+        Block Label resource name
+          - defines resource/services name
+        Block Label name
+          - defines custom pointer name of created resources
+        Block Body
+          - contains variable and argument
+            - identifier name
+            - expression
+
+    Qwiklab: Automating the infrastructure of networks using Terraform
+      https://googlecoursera.qwiklabs.com/focuses/34926833?parent=lti_session
+
+      Objectives
+      In this lab, you learn how to perform the following tasks:
+
+        1. Create a configuration for an auto mode network
+        2. Create a configuration for a firewall rule
+        3. Create a module for VM instances
+        4. Create and deploy a configuration
+        5. Verify the deployment of a configuration
+  
+  Google Cloud Marketplace
+    - quicly deploy functional software packages that run on Google Cloud
+    - production-grade solutions from third-party vendors who have already created their own deployment configurations based on Terraform
+    - single bill for google cloud and third party services
+    - notif when a security update is available
+    - direct access to partner support
+
+  Quiz
+    1. What’s the benefit of writing templates for your Terraform configuration?
+      - Allows you to abstract part of your configuration into individual building blocks that you can reuse
+      - reusable code across deployments
+    2. What does Google Cloud Marketplace offer?
+      - Production-grade solutions from third-party vendors who have already created their own deployment configurations based on Terraform
 
 Module 4 - Managed Services
+  - Leverage managed services in Google Cloud
+  - exist between PaaS and SaaS
+
+  Learning Objectives
+    1. Describe the managed services for data processing in Google Cloud
+
+  BigQuery/AWS Redshift
+    - serverless highly scalable cost-effective cloud entreprise data warehouse
+      - fully managed by google
+        - you can focus analyzing your data
+      - up to petabyte scale
+      - SQL interface
+      - very fast queries
+    - designed to help you ingest, store, analyze and visualize data w/ ease
+    
+    Features
+      - Ingest Data
+        - upload in batch
+        - streaming direclty as in real time insights
+      
+      - built-in AI/Vertex AI/Generative AI
+        - turn complex data into compelling understandable stories
+
+    how to use
+      - Cloud console
+      - CLI
+      - REST API
+        - Java
+        - nodejs
+        - python
+
+    Pricing
+      - pay for data storage, streaming inserts and querying data
+        Storage data
+          - amt of storage
+        Querying data
+          - flat rate for dedicated resources
+          - pay per query
+      Free of charge:
+        - loading and exporting data
+
+    How to find out more?
+      https://cloud.google.com/bigquery?hl=en
+  
+  Dataflow/AWS cloud dataflow
+    - a serverless, fast and cost effective data-processing service for stream and batch data.
+      - removes operational overhead by automating infra provisioning and auto scaling as your data grows.
+    - a fully managed streaming analytics service that minimizes latency, processing time and cost rhough autoscaling and batch processing.
+    - process, enrich,  stream and batch data 
+    - open source programming using Beam
+    - intelligently scale to millions of QPS
+
+    Integrates with:
+      - stackdriver
+
+    Process:
+      - Read Data Source as input -> Transform -> write it back into a Data Sink
+      - ingest -> process -> analyze
+      - extract -> trasnform -> load
+  
+    Usecase
+      - real-time AI
+      - data warehousing
+      - stream analysis
+
+  Dataprep by Trifecta
+    - transforms raw data into ready-to-use data pipelines for your analytics or machine learning.
+    - can discover data structure and patterns surfaces data quality issues and provides guidance to resolve it
+    - serverless intelligent data service for visually exploring, cleaning and preparing structured/unstructured data for analysis reporting and machine learning
+      - auto scaling
+      - suggests ideal data transformation
+      - focus on data analysis
+      - integrated partner service oeprated by trifecta
+
+    More info
+      https://cloud.google.com/dataprep
+
+    Dataprep Architecture
+      Ingestion -> preparation & storage -> analysis & ML
+  
+  Dataproc
+    - a service for running apache spack and apache hadoop clusters
+      - low cost(per-second, preemptible)
+      - super fast to start, scale and shut down
+        - 90 seconds each operations
+      - integrated w/ google cloud
+        - bigquery
+        - cloud storage
+        - cloud bigtable
+        - stackdriver logging and monitoring
+    - managed data processing service for any open source data tools like:
+      - apache spark
+      - apache hadoop clusters
+      - flink
+      - presto
+      - pig
+      - hive
+    
+    Usecase
+      - batch processing
+      - SQL
+      - streaming
+      - Machine learning
+      - move on premise OSS clusters to the cloud
+      - to maximize efficiency and enable scale
+      - can use w/ cloud ai notebook/bigquery to build data science environment
+      - spin up an IT governed, auto scaling cluster in 90 seconds
+
+    Pricing
+      - pay what you use
+
+    Dataflow vs Dataproc
+      Choose Dataflow
+        - not dependent on apache hadoop/spark
+        - auto provisioning of clusters
+        - serverless approach
+      Choose Dataproc
+        - manual provisioning clusters
+        - devops approach
+        - either dependent not dependent on apache hadoop/spark
+
+    Quiz
+    1. How are Managed Services useful?
+      - Managed Services may be an alternative to creating and managing infrastructure solutions.
+        - possible alternative to building your own infrastructure data processing solution.
+
+    2. Which of the following is a feature of Dataproc?
+      - It typically takes less than 90 seconds to start a cluster.
+
+
+
+
