@@ -10,15 +10,23 @@ Reliable Google Cloud Infrastructure: Design and Process
       - Cost
       - Disaster Recovery
     - Verify by maintenance
-      - monitoring
+      - monitoring  q
       - logging
   
   Activity 1: Defining your Case Study
     - Come up w/ an interestinc case Study
-      - Trello clone app
+      - InvityCard  
     - Write a short description
+      - InvityCard is a global AI generated wedding design card that wants 
+      to build scalable platform to serve global customer base
     - list some main features
+      - User can generate 10 designs at once for a minimum price
+      - Strong social media integration w/ reviews, posts and analytics
+      - App can recommend nearest printer shop
+      - You can buy printer device too through the app
     - list user roles/Typical users
+      - Wedding couple
+      - Wedding card shop
 
   Agenda
     - Defining services
@@ -32,22 +40,134 @@ Reliable Google Cloud Infrastructure: Design and Process
     - Maintenance and monitoring
 
   Defining services
+    In this module, you will learn to describe users of a system in terms of the roles and personas they take. You will learn how to measure success using Key performance indicators (KPIs) and you will examine service level objectives (SLOs), service level indicators (SLIs), and service level agreements (SLAs).
     Learning Objectives
       1. Describe users in terms of roles and personas.
       2. Evaluate KPIs using SLOs and SLIs.
       3. Determine the quality of application requirements using SMART crite
-        
+      
   Requirements, Analysis and Design
+    Qualitative requirements from user's point of view
+      Who
+        - build full picture of who the sys will affect both directly and inderectly
+        Who are the users?
+        Who are the developers?
+        Who are the stakeholders?
+      What
+        - What is the problem the sys aims to solve?
+        What does the system do?
+        What are the main features?
+      Why
+        - Helps defines KPIs, SLO's and SLA's
+        Why is the system needed?
+      When
+        - determine realistic timeloine and help contain the scope
+        When do the users need and/or want the solution?
+        When can the developers be done?
+      How
+        - Determines a lot of the non functional requirements such as 
+          - How many users need to support?
+          - What is the ave payload size of service requests?
+          - Are there latency requirements?
+        How will the system work?
+        How many users will there be?
+        How much data will there be?
+    
+    Roles represent the goal of a user at some point
+      Role are not people or job titles
+        - people can play multiple roles
+        - a single role can be played by multiple people
+
+      Roles should describe a users objective
+        - what does the user want to do?
+        - "User" is not a good role(everyone is a user)
+
+      Examples of Roles
+        - shopper
+        - account holder
+        - customer
+        - administrator
+        - manager
+
+    Personas describe a typical person who plays a role
+      - in a real world app, go find your users and talk to them
+      - personas tell a stroy of who they are
+      - personas are not a list of a job functions
+      - for each role, there could be many personas
+
+      Example persona of requirements for a banking app:
+        Jocelyn
+          - busy working mom who wants access bank to check her balance
+          - uses webstie to automate payment bills and view her credit account balances
+          - wants to save time and money
+          - wants credit card that givers her cash back
+
+      User stories describe a feature from the user's point of view
+       - give each story a title that describes its purpose
+       - write a short, one sentence description
+       - specify the user role, what they want to do, and why
+       - use the template: As a [role], I want to...., so that I can ...
+
+        Format:
+          As a role, I want to action (so that benefit)
+            - role is who
+            - action is what
+            - why is benefit
+        
+        Example user story:
+          Balance Inquiry
+            - As an account holder, I want to check my available balance at anyme
+            of the day so I am sure not to overdraw my account
+
+      Evaluate user stories with the INVEST criteria
+        Independent
+          - self-contained to prevent problems w/ prioritization and planning.
+        Negotiable
+          - not written like contract
+          - stimulate discussion between customer and developers until clear agreement
+        Valuable
+          - provide value to end user
+        Estimatable
+          - must be estimatable so it can be properly prioritized
+        Small
+          - small so it can be completed in about 3 to 4 days
+        Testable
+          - user story can be confirmed/verified via pre written acceptance criteria
+  
+    Activity 2: Analyzing your case Study
+      - refine the roles you listed in activity 1
+      - write personas for each role
+      - write user stories for the main feaures of your case Study
 
   SLOs, SLIs and SLAs
 
+  Quiz
+    1. Which best describes an SLO?
+      - It is a target measure you want your service to achieve.
+        - an SLO 
+          is the agreed-upon target for a measurement or range of values for a service. Reliability could be one of these.
+    2. Using SMART criteria, which below would be the least effective KPI?
+      - User experience design
+        - user experience design is not measurable or time bound and so would not make a relevant KPI.
+    3. Which most accurately describes a user story?
+      - It is a short description of a feature written from the user's point of view.
+        - describes a feature from the user's point of view
   Review
+   
 
   Microservices
 
   REST and APIs
 
   DevOps Automation
+    -This module introduces DevOps automation, a key factor in achieving consistency, reliability, and speed of deployment.
+
+    Learning Objectives
+      1. Discuss the automation of service deployment using CI/CD pipelines.
+      2. Explain how to leverage Cloud Source Repositories for source and version control.
+      3. Automate builds with Cloud Build and build triggers.
+      4. Manage container images with Container Registry.
+
     Cotinuous Integration Pipelines
 
     Infrastructure as Code
@@ -90,3 +210,160 @@ Reliable Google Cloud Infrastructure: Design and Process
   Designing Google Cloud Networks
 
   Connecting Networks
+
+  Deploying Applications to Google Cloud
+    -  this module, we discuss the different options of deploying applications to Google Cloud. Google Cloud offers many possible deployment platforms, and the choice is not always immediately obvious.
+
+    Learning Objectives
+      - Choose the appropriate Google Cloud deployment service for your applications.
+      - Configure scalable, resilient infrastructure using Instance Templates and Groups.
+      - Orchestrate microservice deployments using Kubernetes and GKE.
+      - Leverage App Engine for a completely automated platform as a service (PaaS)
+
+    Google Cloud Infrastructure as a service
+
+    Google Cloud Deployment platforms
+
+    Lab and review:
+    
+      Qwiklab: Deploying Apps to Google Cloud
+        https://googlecoursera.qwiklabs.com/focuses/34983825?parent=lti_session
+        - deploy applications to the Google Cloud services App Engine, Kubernetes Engine, and Cloud Run.
+
+        Objectives
+        In this lab, you will learn how to perform the following tasks:
+
+          - Download a sample app from GitHub
+          - Deploy to App Engine
+          - Deploy to Kubernetes Engine
+          - Deploy to Cloud Run
+
+        Deploy App Engine
+          //Create app engine app
+            gcloud app create --region=us-west1
+
+          //deploy your app
+            gcloud app deploy --version=one --quiet
+
+          //deploy secon version after modifying main.py
+            gcloud app deploy --version=two --no-promote --quiet
+
+            //--no-promote parameter tells App Engine to continue serving requests with the old version. 
+            This allows you to test the new version before putting it into production.
+
+        Deploy to Kubernetes Engine
+          Kubernetes Engine
+            allows you to create a cluster of machines and deploy any number of applications to it. Kubernetes abstracts the details of managing machines and allows you to automate the deployment of your applications with simple CLI commands
+
+          //test your connection
+            kubectl get nodes
+
+          kubernetes-config.yaml sample
+            https://googlecoursera.qwiklabs.com/focuses/34983825?parent=lti_session
+
+            Note: 
+              In the first section of the YAML file above, you are configuring a deployment. In this case, you are deploying 3 instances of your Python web app. 
+              Notice the image attribute. You will update this value with your image in a minute after you build it. 
+              In the second section, you are configuring a service of the type "load balancer". The load balancer will have a public IP address. 
+              Users will access your application through the load balancer.
+          
+          //create an Artifact Registry repository named devops-demo
+            gcloud artifacts repositories create devops-demo \
+    --repository-format=docker \
+    --location=us-west1
+
+          //configure Docker to authenticate to the Artifact Registry Docker repository
+            gcloud auth configure-docker us-west1-docker.pkg.dev
+
+          //you need to build a Docker image
+            cd ~/gcp-course/training-data-analyst/courses/design-process/deploying-apps-to-gcp
+            gcloud builds submit --tag us-west1-docker.pkg.dev/$DEVSHELL_PROJECT_ID/devops-demo/devops-image:v0.2 .
+
+          //Image name
+            us-west1-docker.pkg.dev/qwiklabs-gcp-00-08f264cdc96d/devops-demo/devops-image:v0.2
+          
+          //Paste it to kubernetes-config.yaml
+            spec:
+              containers:
+              - name: devops-demo
+                image: us-west1-docker.pkg.dev/qwiklabs-gcp-00-08f264cdc96d/devops-demo/devops-image:v0.2
+                ports:
+
+          //connect to kubectl instances
+            https://console.cloud.google.com/kubernetes/clusters/details/us-west1/autopilot-cluster-1/details?project=qwiklabs-gcp-00-08f264cdc96d
+
+          // check if connected
+            kubectl get nodes
+
+          //deploy your application in kubernetes
+            kubectl apply -f kubernetes-config.yaml
+
+          //confirm if three replicas of the app have been created
+            kubectl get pods
+
+          //confirm if load balancer is also created
+            kubectl get services
+          
+  Design Reliable systems
+    - we talk about how to design reliable systems.
+
+    Learning Objectives
+      - Discuss the design of services to meet requirements for availability, durability, and scalability.
+      - Identify the failures to be avoided to implement a fault-tolerant system.
+
+    Key Performance Metrics
+
+    Designing for Reliability
+
+      Activity: Designing Reliable Scalable Applications
+
+    Disaster planning
+      Activity: Disaster planning
+
+  Security
+    - in this module, we cover security. Google has been operating securely in the cloud for 20 years. There is a strong belief that security empowers innovation. The approach of the cloud architect should be that security should be put first; everything else will follow from this.
+
+    Learning Objectives
+      - Identify the best practices for designing secure systems.
+      - Discuss the use of organizational policies and folders to simplify cloud governance.
+      - Identify Google Cloud services that can be leveraged for access management.
+      - Identify Google Cloud services that can be leveraged to mitigate DDoS attacks.
+
+    Security Concepts
+
+    Securing People and Machine access
+      Secring People
+
+      Securing Machine access
+
+    Network Securit and Encryption
+      Network Security
+
+      Encryption
+
+      Activity: Modeling secure google cloud services
+
+    Review
+
+  Maintenance and monitoring
+    - application maintenance and monitoring.
+
+    Learning Objectives
+      - Discuss different ways to manage new service versions.
+      - Describe how to forecast, monitor, and optimize service costs.
+      - Observe whether your services are meeting their SLOs using Cloud Monitoring and Dashboards.
+      - Use Uptime Checks to determine service availability.
+      - Respond to service outages using Cloud Monitoring Alerts.
+
+    Managing Versions and Cost planning
+      Managing Versions
+
+      Cost planning
+
+    Monitoring Dashboards
+
+      Activity: cost estimating and planning
+      
+    Lab and Review
+      
+      Qwiklab: Deploying Apps to Google Cloud
