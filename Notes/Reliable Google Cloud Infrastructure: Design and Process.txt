@@ -2,6 +2,7 @@ Reliable Google Cloud Infrastructure: Design and Process
   - architecting and designing sys
     - architect your app using microservices
 
+Defining Services
   Steps
     - Requirements
       - security
@@ -139,7 +140,166 @@ Reliable Google Cloud Infrastructure: Design and Process
       - write personas for each role
       - write user stories for the main feaures of your case Study
 
+      sample  
+        - andrew is a student who likes to travel home to cisit parents and also takes vacations twice yearly.
+        His primary concern is cost, and he will alwasy book the lowest price travel regardless of convenience.
+        Andrew has no loyalty and will use whichever retailer can provide the best deal
+
   SLOs, SLIs and SLAs
+    -  to mange a service well:
+      - which behaviors matter
+      - how to measure and evaluate these behaviors
+
+    Quantitative requirements are things that are measurable
+      Example:
+        Constraints:
+          - time
+          - finance
+          - people
+
+        What can be achieved: 
+          - how many users are there?
+          - how much data is there?
+          - what are the rewards and risks?
+          - which features and launched?
+
+          durability  
+            - for data storage sys, if there's a failure, do we lose any data
+
+          throughput
+            - for user facing sys, how many reqeusts can be handled
+          availibility
+            - for data storage sys, is data there when we need it
+            - for user facing sys, was a request responded to
+
+          latency 
+            - for data storage sys, how long does it take to read and write data
+            - for user facing sys, how long did it take to responsd? 
+
+    KPIs and SLIs
+      Key performance indicators
+        - metrics that can be used to measure success
+        - metric that indicates whether you are on track to achieve the goal
+        - must be specific rather than general
+        - not the same thing as a goal or objective
+          - goal  
+            - outcome/result you want to achieve
+
+      sample:
+        goal: increase turnover for an online store
+        KPI: the percentage of conversions on the webstie
+
+      In business:
+        - ROI
+        - earnings before interesta and taxes(EBIT)
+        - employee turnover
+        - cusotmer churn
+
+      In software:
+        - page views
+        - user registrations
+        - clickthroughs
+        - checkouts
+
+      how:
+        for each goal
+          - define KPIs that will allow to monitor and measure progress
+        for each KPI
+          - define targets for what success looks like
+
+      For KPIs to be effective, they must be SMART
+        Specific  
+          "Section 508 Accessible" is more specific than "User Friendly"
+        Measurable
+          - find objectivie way tot est whether you're meeting KPIs
+        Achievavle
+          - Be realistic and define only possible
+        Relevant
+          - valuable to enduser
+        Time-bound
+          - per day/month/year
+
+      SLI(service levle indicators)
+        - measurable attribute of a service KPI
+        - quantitative measure of some aspect of the level of service being provided
+        - understanding what users want from a service will help inform the selection of indicators
+        sample
+          - availability, throughput, latency and error rate
+          - http get reqests respond w/in 400ms aggregated per minute
+          - percentage of successful requests over all requests aggregated per minute
+
+        Tips
+          - consider requests per second to a service
+          - how is the value calculated
+          - by measurements obtained once per second
+          - use percentiles 
+        
+    SLOS abd SLAs
+      - defines quantitative requirements
+      
+      SLOs(service level objectives)
+        - must be achievable and relevant
+        - number or the goal you want to achieve for a given SLI for a given duration
+        - agreed-upon target or range of values for a service level that is measured by an SLI.
+        format
+          - SLI is smaller than equal to target or lower bound smaller and equal to SLI, smaller or equal to upper bound
+
+        sample 
+          - do you want 95% or 99% availability?
+          SLI  
+          - average latency of HTTP requests for our service should be less than 100 milliseconds
+          - HTTP POST photo uploads complete within 100ms aggregated per minute
+            - 80%
+              - this might be good enough
+          - available as measured with an uptime check every 10 seconds aggregated per minute
+            - 99%
+              - maybe good enougha nd easier and more cost-effective
+
+        Tips
+          - understand users to make them happy
+            - make SLO as low as you can get away while making users happy
+          - the higher you set SLO, the higher the cost in compute resources(redundancy) and operations effor(people time)
+          - applications should not signigicantlhy outperform their SLOs
+            because users come to expect the level of reliability you usually give them
+
+      SLAs(service level aggreements)
+        - binding contract providing the customer compensation if  service doesn't meet specific expectations
+        - business contract between the provider and the customer
+        - more restrictive version of SLO
+        - architect a solution and maintain an agreed SLO so that we provide ourselves spare capacity against the SLA.
+
+        SLA stipulates that:
+          - penalty will apply to the provider if the service does not maintain certain availability
+          and/or performance thresholds
+          - if SLA is broken, customer will receive compensation from the provider
+
+        Note:
+          - SLA shoulad have a threshold that is lower than the SLO
+          - not all services have an SLA but all services should have an SLO
+          - SLO thresholds should be stricter than your SLA
+
+        Example
+          KPI
+            - End-to-end latency of the successful HTTP responses averaged over one minute
+          SLI
+            - the latency of successful HTTP responses(HTTP-200)
+          SLO
+            - The latency of 99% of the responses must be <= 200 ms
+          SLA
+            - the user is compensated if 99th percentile latency exceeds 300 ms
+    
+    Activity 3: Defining SLIs and SLOs
+      - Write SLIs and SLOs for your case study features
+
+      sample
+        User story
+          1. search hotel and flight
+        
+        SLO
+          - available 99.95%
+
+        SLI
+          - fraction of 200 vs 500 HTTP responses from API endpoint measured per month
 
   Quiz
     1. Which best describes an SLO?
@@ -152,15 +312,242 @@ Reliable Google Cloud Infrastructure: Design and Process
     3. Which most accurately describes a user story?
       - It is a short description of a feature written from the user's point of view.
         - describes a feature from the user's point of view
+  
   Review
-   
+    Qualitative requirements
+      - users cares about
+        - features
+      - user stories
+        - write personas to understand users better
+
+    Quantitative requirements
+      - measurables
+        - KPIs
+          - sign-ups
+          - clicks per sessiong
+          - completed purchases
+          - customer retention
+        - SLI -> SLO -> SLA
+          - latency
+          - availability
+          - response time
+
+Microservice Design and Architecture
+  - Introduce application architecture and microservice design.
+
+  Learning Objectives
+    1. Decompose monolithic applications into microservices.
+    2. Recognize appropriate microservice boundaries.
+    3. Identify the 12-factor best practices for implementing services.
+    4. Design consistent, standard RESTful service APIs.
+    5. Architect stateful and stateless services to optimize salability and reliability
+    6. Build loosely coupled services by implementing a well designed REST architecture
 
   Microservices
+    - divide a large program into multiple smaller, independent services
+
+    Why?
+      - enable teams to wokr independently and delivered through to production at their own cadence
+        - supports scaling the organization
+        - adding more teams increases speed
+      - individuals components are deployable
+
+    Pros
+      - easier to develop and maintain
+      - reduced risk when deploying new versions
+      - services scale independently to optimize use of infrastructure
+      - faster to innovate and add new features
+      - can use different languages and frameworks for different services
+      - choose runtime appropriate to each service
+    Cons
+      - increase complexity when communicating bet services
+      - increased latency across service boundaries
+      - concerns about securing inter-service traffic
+      - multiple deployments
+      - need to ensure that you don't break clients as version changes
+      - must maintain backward compatibility with clients as the  microservices evolves
+    
+    Transforming app to microservices  architecture service boundaries
+      Decompose applications by feature to minimize dependencies
+        - reviews service
+        - orders service
+        - products service
+        - etc.
+
+      Organize services by architectural layer
+        - web, android, and IOS user interfaces
+        - data access services
+
+      Isolate services that provide shared functionality
+        - authentication service
+        - reporting service
+        - etc.
+
+    Types of Microservices
+      Stateful services
+        - managed stored data over time
+          - harder to scale
+          - harder to upgrade
+          - need to backup
+          sample
+            - reviews service + reviews DB
+
+      Stateless services
+        - get their data from the environment or other stateful services
+          - easy to scale by adding instances
+          - easy to migrate to new versions
+          - easy to administer
+          sample
+            - web ui
+
+    Best practices
+      https://cloud.google.com/architecture/twelve-factor-app-development-on-gcp
+      1. Avoid storing shared state in-memory on your servers
+        - requires sticky sessions/sessions affinity to be set up in the load balancers
+        - hinders elastic autoscaling
+
+      2. Store state using backend storage services shared by the frontend server
+        - cache state data for faster access
+        - take advantage of google cloud-managed data services
+          - firstore, cloud sql for state
+          - memorstore for Redis for caching
+
+      Twelve factor App
+        - a set of best practices for building web or SaaS app
+          - maximize portability
+          - deploy to the cloud
+          - enable conitnuous deployment
+          - scale easily
+
+        1. Codebase
+          - source code tracked in version control for many deploys
+          - use version control sys like Git
+          - each microservice app has one code repo
+          - each env has one code repo
+        
+        2. dependencies
+          - explicitly declare and isolate dependencies
+          - use package manager like maven/npm/pip/rye to install dependencies
+          - declare dependencies in your code base
+        
+        3. Config
+          - store config in the environment
+          - don't put secrets, connection strings, endpoints, etc. in source code
+          - store those as environment variables
+        
+        4. Backing Services
+          - treat backing services as attached resources
+          - DB, caches, queues, and other services are accessed via URLs.
+          - aim is should be easy to swap one implementation for another
+        
+        5. Build, release, run
+          - strictly separate build and run stages
+          - build creates a deployment package from the source code
+          - release combines the deployment w/ configuration in the runtime env
+          - run exec the app
+
+        6. Processes
+          - execute the app as one or more stateless Processes
+          - apps run in one or more Processes
+          - each instance of the app gets its data from a separate DB service
+
+        7. Port binding
+          - export services via port binding
+          - apps are self-contained and expose a port and protocol internally
+          - apps are not injected into a separate server like APache
+        
+        8. Concurrency
+          - scale out via the process model
+          - because apps are self-contained and run in separate process, they scale easily by adding instances
+        
+        9. Disposability
+          - maximize robustness w/ fast startup and graceful shutdown
+          - app instances should scale quickly when needed
+          - if an instance is not needed, you should be able to turn it off w/ no side effects
+        
+        10. Dev/prod parity
+          - keep development, staging, and production as similar as possible
+          - container sys lkike docker makes this easier
+          - leverage infra as a code to make env easy to create
+        
+        11. Logs
+          - Treat logs as event streams
+          - write log messages to standard output and aggregate all logs to a single source
+        
+        12. Admin Processes
+          - run admin/mngmt tasks as one-off Processes
+          - admin tasks should be repeatable processes, not one-off manual tasks
+          - admin tasks shouldn't be a part of the application
+
+    Activity 4: Designing microservices for your application
+      - Diagram the microservices required by your case-study applicxation
+      https://www.coursera.org/learn/cloud-infrastructure-design-process/lecture/5BER9/activity-review-designing-microservices-for-your-application
 
   REST and APIs
+    - a good microservice design is loosely coupled
+    - clients shouldn't need to know too many details of services they use
+    - services comm via HTTPS using text-based payloads
+      - client makes GET, POST, PUT, or DELETE request
+      - body of the request is formatted as JSON or XML
+      - Results returned as JSON, XML or HTML
+    - serices should add functionality w/o breaking existing clients
+      - add, but don't remove, items from responses
+
+    REST(Representational State Transfer)
+      - supports loose coupling
+      - protocol independent
+        - HTTP is most common
+        - Others possible like gRPC
+          - support streaming
+      - service endpoints supporting REST are called RESTful
+      - client and server communicate w/ request = response processing
+      - communicate over the web using HTTP(S)
+      - URIs/endpoints identify resources
+        - responses return an immutable representation of the resource information
+      - REST app provide consistent, uniform interfaces
+        - representation can have links to additional resources
+      - caching of immutable representations is appropriate
+      - a client and server exchange representations of a resource
+        Resource
+          - an abstract notion of information
+
+          Sample:
+            - dog
+        
+        Representation
+          - a copy of the resource information
+            - represantations can be single items or a collections of items
+          
+          sample:
+            - Noir is a schnoodle
+            - Bree is a mutt
+      - Passing representations bet service is done using standard text- based formats:
+        - JSON
+          - for publc-facing or external-facing API
+        - gRPC
+          - internal serices and performance is priority
+
+    HTTP
+      Three parts
+        - request line
+          - verb
+            - get, put, post, delete
+          - URIs( uniform resource identifier/endpoint)
+          - protocol version
+            - http
+            - https
+        - header variables
+          - metadata about the messages
+            - preferred rep formats(JSON/XML)
+        - request body(optional)/reqeuest state
+          - preferred rep formats(JSON/XML)
+          
+    APIs
+
+    Activity 5: Designing REST APIs
 
   DevOps Automation
-    -This module introduces DevOps automation, a key factor in achieving consistency, reliability, and speed of deployment.
+    - This module introduces DevOps automation, a key factor in achieving consistency, reliability, and speed of deployment.
 
     Learning Objectives
       1. Discuss the automation of service deployment using CI/CD pipelines.
@@ -332,7 +719,7 @@ Reliable Google Cloud Infrastructure: Design and Process
     Security Concepts
 
     Securing People and Machine access
-      Secring People
+      Securing People
 
       Securing Machine access
 
@@ -366,4 +753,50 @@ Reliable Google Cloud Infrastructure: Design and Process
       
     Lab and Review
       
-      Qwiklab: Deploying Apps to Google Cloud
+      Qwiklab: Monitoring Applications in Google Cloud
+        https://googlecoursera.qwiklabs.com/focuses/35006172?parent=lti_session
+        - In this lab, you will deploy an application to Google Cloud and then use the tools provided by Google Cloud to monitor it. You will use Cloud Logging, Trace, Profiler, and dashboards and create uptime checks and alerting policies.
+
+        Objectives
+        In this lab, you will learn how to perform the following tasks:
+
+          1. Download a sample app from Github
+          2. Deploy an application to App Engine
+          3. Examine the Cloud logs
+          4. View Profiler information
+          5. Explore Cloud Trace
+          6. Monitor resources using dashboards
+          7. Create uptime checks and alerts
+
+        //Turn profiler on
+        //main.py
+          try:
+            googlecloudprofiler.start(verbose=3)
+        except (ValueError, NotImplementedError) 
+        as exc:
+            print(exc)
+
+        //requirements.txt
+          google-cloud-profiler==3.0.6
+          protobuf==3.20.1
+
+        //enable cloud profiler API 
+          gcloud services enable cloudprofiler.googleapis.com
+
+        //View Profiler information
+         The gray bar at the top represents the total amount of CPU time used by the program. 
+         The bars below represent the amount of CPU time used by the program's functions relative 
+         to the total. At this point, there is no traffic, so the chart is not very interesting. 
+         Throw some load at the application.
+
+        //web testing tool called apache bench
+          sudo apt update
+          sudo apt install apache2-utils -y
+
+        //generate some traffic to your App Engine application:
+          ab -n 1000 -c 10 https://qwiklabs-gcp-03-d95cfb2e5f5c.uk.r.appspot.com/
+
+        //cloud Trace
+          The chart in the upper-left plots requests and how long they took. 
+          The table to the right shows a list of requests. 
+          If you select a request, more detail will be displayed at the bottom of the screen.
