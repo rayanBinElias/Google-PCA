@@ -11,7 +11,7 @@ Defining Services
       - Cost
       - Disaster Recovery
     - Verify by maintenance
-      - monitoring  q
+      - monitoring  
       - logging
   
   Activity 1: Defining your Case Study
@@ -478,6 +478,7 @@ Microservice Design and Architecture
           - run admin/mngmt tasks as one-off Processes
           - admin tasks should be repeatable processes, not one-off manual tasks
           - admin tasks shouldn't be a part of the application
+.
 
     Activity 4: Designing microservices for your application
       - Diagram the microservices required by your case-study applicxation
@@ -536,267 +537,851 @@ Microservice Design and Architecture
           - protocol version
             - http
             - https
-        - header variables
+        - response header variables
           - metadata about the messages
             - preferred rep formats(JSON/XML)
         - request body(optional)/reqeuest state
           - preferred rep formats(JSON/XML)
           
-    APIs
+    APIs design
+      https://cloud.google.com/apis/design/
+      https://apistylebook.com/design/guidelines/google-api-design-guide
+
+      Google APIs 
+        - each google cloud service exposes a REST API
+          - functions are in the form:
+            service.collection.verb
+          - parameters are passed either in the URL or in the request body in JSON format
+        - compute engine API has
+          - a service endpoint at: https://compute.googleapis.com
+          - collections include instances, instanceGroups, instanceTemplates, etc.
+          - verbs include insert, list, get, etc.
+        - so to see all your instances, make a GET request to:
+          https://compute.googleapis.com/compute/v1/projects/{project}/zones/{zone}/instances
+
+      OpenAPI
+        - an indusry standard for exposing APIs to clients
+
+        Swagger
+          - an opens source tools Open APi w/ tooling, supports designing, building, consuming and documenting APIs
+
+        - Standard interface description format for REST APIs
+          - language independent
+          - open source based on Swagger
+
+        - Allows tools and humans to understand how to use a service w/o needing its source code
+
+      gRPC
+        - developed at google
+          - supports many languages
+          - easy to implement
+        - binary protocol that is useful for internal microservice communication
+        - a lightweight protocol for fast, binary communication between services or devices
+        - supported by google services:
+          - global load balancer(HTTP/2)
+          - cloud endpoints
+          - can expose gRPC services using an ENvoy Proxy in GKE
+
+      Google CLoud managing APIs Tools:
+        - provide tools for:
+          - user authentication
+          - monitoring
+          - securing APIs
+        - support openAPIa nd gRPC
+          
+        1. Cloud Endpoints
+          - API mngmt gateway which help you develop, deploy and manage APIs on any google cloud backend
+        2. Apigee API Platform
+          - API mngmt platform built for enterprises w deployment options for cloud/on-premise/hybrid
+        3. API Gateway
+          - feature of Apigee
+          - a customizable portal for onboarding partners and developers, monetization and depp analytics around APIs
+          - provide secure access to your backend services through a well defined REST API that is consistent across all of your services regardless of service implementation
+          
 
     Activity 5: Designing REST APIs
+      - design APIs for your case study microservices
 
-  DevOps Automation
-    - This module introduces DevOps automation, a key factor in achieving consistency, reliability, and speed of deployment.
+      Format
+        Service name
+          product
+       
+        collection
+          inventory
 
-    Learning Objectives
-      1. Discuss the automation of service deployment using CI/CD pipelines.
-      2. Explain how to leverage Cloud Source Repositories for source and version control.
-      3. Automate builds with Cloud Build and build triggers.
-      4. Manage container images with Container Registry.
+        Method
+          add
+          get
+          update
+          delete
+          search
 
-    Cotinuous Integration Pipelines
+      Sample(online travel portal)
+        Service name
+          1. search
+          2. inventory
+          3. analytics
+          4. order processing
+        collection
+          1. trips(flights + hotel combination)
+          2. items(flights + hotels)
+          3. sales
+          4. orders
+        Method
+          1. find
+            save
+          2. add
+            search
+            get
+            remove
+          3. analyze
+            get
+            list
+          4. add
+            get
+            list
+            update
 
-    Infrastructure as Code
+    Quiz
+      1. You’re building a RESTful microservice. Which would be a valid data format for returning data to the client?
+        - JSON, HTML, XML
+          - text-based format and can be set content-type
+      2. You’re writing a service, and you need to handle a client sending you invalid data in the request. What should you return from the service?
+        - A 400 error code
+      3. Which below would violate12-factor app best practices?
+        - Store configuration information in your source repository for easy versioning.
+      4. You’ve re-architected a monolithic web application so state is not stored in memory on 
+      the web servers, but in a database instead. This has caused slow performance when retrieving user sessions though. 
+      What might be the best way to fix this?
+        - Use a caching service like Memorystore for Redis.
 
-    Qwiklabs: Building a DevOps Pipelines
-      https://googlecoursera.qwiklabs.com/focuses/34929270?parent=lti_session
+
+DevOps Automation
+  - This module introduces DevOps automation, a key factor in achieving consistency, reliability, and speed of deployment.
+
+  Learning Objectives
+    1. Discuss the automation of service deployment using CI/CD pipelines.
+    2. Explain how to leverage Cloud Source Repositories for source and version control.
+    3. Automate builds with Cloud Build and build triggers.
+    4. Manage container images with Container Registry.
+
+  Continuous Integration Pipelines
+    - automate building applications
+
+    Flow/Process
+      Developers check-in code: Use git repo for each microservice and branches for versions
+        -> Run unit tests: if the tests don't pass, stop
+          -> Build deployment: create a docker image
+              -> Deploy: Save your new Docker image in an artifact registry
+
+    Google Cloud CI pipeline
+      Cloud Source Repo -> Cloud Build -> Build triggers -> Artifact Registry
       
-      Overview
-      In this lab, you will build a continuous integration pipeline using Cloud Source Repositories, Cloud Build, build triggers, and Artifact Registry.
+      Cloud build
+        - build software quickly across all languages
+        - google hosted docker build service called cloud builder
+          - alternative to using docker build command
+        - import source code from git repo -> exec build docker image -> produce docker container stored in artifacts
+
+        How:
+          - write build config to provide instructions to cloud build on what tasks to perform
+          - CLI:
+            gcloud builds submit --tag gcr.io/your-project-id/image-name
+
+      Cloud Build triggers
+        - like github actions
+        - automatically starts build whenever you make any changes to your source code in your git repo
+  
+      Artifact Registry
+        - a universal package manager for build artifacts and dependencies
+        - single place to manage docker images/deployment packages, perform vulnerability analysis, and access control
+        - can store docker and OCI container images in a docker repo
+        - images built using cloud build are automatically saved in artifact registry
+          - tag images w/ prefix docker tag SOURCE-IMAGE LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:tag
+        - can use docker push and pull commands w/ artifact registry
+          - docker push LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:tag
+          - docker pull LOCATION-docker.pkg.dev/PROJECT-ID/REPOSITORY/IMAGE:TAG
+
+        Binary authorization
+          - allows you to enforce deploying only trusted containers into GKE
+          - a google cloud service and is based on the kritis specification
+
+          how
+            - enable binary authorization on GKE cluster
+            - add a policy that requires signed images
+
+          - when an image is built by cloud build an "attestor" verifies that it was
+          from a trusted repository
+          - artifact registry includes a vulnerability scanner that scans containers
+
+  Why cloud?
+    - no more capex but monthly expendatures w/ pay per use
+    - don't fix broken machines
+    - don't install patches
+    - don't upgrade machines
+    - if you need to fix machine, delete it and recreate a new one
+    - to make infra disposable, automate everything w/ code:
+      - can automate using scripts
+      - can use declartive tools to define infra
+
+  Infrastructure as Code
+    - allows quick provisioning and removing infra
+    - build infra when needed
+    - destroy infra when not in use
+    - create identical infra for dev, test and prod
+    - can be part of CI/CD pipeline
+    - templates are building blocks for DR procedures
+    - manage resource dependencies and complexity
+    - google cloud supports many IAC tools
+      - terraform
+      - chef
+      - ansible
+      - puppet
+      - packer
+
+    Terraform
+      - repeatable deployment process
+      - declarative language
+      - focus on the app
+      - parallel deployment
+      - template-driven
+
+    Terraform language
+      - HCL
+      - interface to declare resources
+      - sntax includes block that represent objects and can have zero or more labels
+        - block has a body that enables one to declare arguments and nested blocks
+          - arguments are used to assign value to name and expressions
+            - used to assign values to various identifiers
+
+  Qwiklabs: Building a DevOps Pipelines
+    https://googlecoursera.qwiklabs.com/focuses/34929270?parent=lti_session
+    
+    Overview
+    In this lab, you will build a continuous integration pipeline using Cloud Source Repositories, Cloud Build, build triggers, and Artifact Registry.
+
+    Objectives
+    In this lab, you will learn how to perform the following tasks:
+
+      1. Create a Git repository
+      2. Create a simple Python application
+      3. Test Your web application in Cloud Shell
+      4. Define a Docker build
+      5. Manage Docker images with Cloud Build and Artifact Registry
+      6. Automate builds with triggers
+      7. Test your build changes
+
+    //clone the gcloud source repos clone devops-repoe empty repository from cloud source repository
+      gcloud source repos clone devops-repo
+    
+    //create an Artifact Registry repository named devops-repo:
+      gcloud artifacts repositories create devops-repo \
+  --repository-format=docker \
+  --location=us-west1
+
+    //To configure Docker to authenticate to the Artifact Registry Docker repository, enter the following command:
+      gcloud auth configure-docker us-west1-docker.pkg.dev
+
+    //To use Cloud Build to create the image and store it in Artifact Registry, type the following command:
+      gcloud builds submit --tag us-west1-docker.pkg.dev/$DEVSHELL_PROJECT_ID/devops-repo/devops-image:v0.1 .
+
+    //Automate builds w/ triggers
+      Create trigger and specify the following:
+        Property	    Value
+        Name	        devops-trigger
+        Repository	  devops-repo(Cloud Source Repositories)
+        Branch	      .*(any branch)
+        Configuration	 Dockerfile
+        Image name	   Lab Region-docker.pkg.dev/insert-your-project-id-here/devops-repo/devops-image:$COMMIT_SHA (change the project ID where indicated)
+
+  Quiz
+    1. What Google Cloud feature would be easiest to use to automate a build in response to code being checked into your source code repository?
+      - buil triggers
+    2. Which Google Cloud tools can be used to build a continuous integration pipeline?
+      - cloud source repositories
+      - cloud build
+      - artifact registry
+
+Choosing Storage solutions
+  - discuss Google Cloud storage and data solutions and how to select the most suitable one 
+  to meet your business and technical requirements.
+ 
+  Learning Objectives
+    1. Identify the use cases for Spanner
+    2. Identify the use cases for Cloud SQL
+    3. Identify the use cases for Firestore
+    4. Identify the use cases for Memorystore
+    5. choose appropriate GC data storage service based on use case, durability, availability, scalability and cost
+    6. store binary data w/ cloud storage
+    7. store relation data using Cloud SQL and Spanner
+    8. store nosql data using firestore and cloud bigtable
+    9. cache data for fast access using Memorystore
+    10. aggregate data for queries and repost using bigquery as a data warehouse
+
+
+  Key Storage Characteristics
+
+    relational DB
+      - cloud SQL
+      - cloud spanner
+      - alloyDB
+
+    nosql
+      - firestore
+      - cloud bigtable
+
+    File strorage
+      - filestore
+
+    Object storage
+      - GCS
+    block storage
+      - persistent disk
+
+    warehouse
+      - bigquery
+
+    in memory
+      - memorystore
+
+    Availability SLA
+      GCS
+        multiple region
+          99.95
+        single reg
+          99.9
+        coldline
+          99
+      Spanner
+        multiple region
+          99.999
+        single reg
+      Firestore
+        multiple region
+          99.999
+        single region
+          99.99
+    monthly uptime percerntage
+      = (Total month in min - Downtime month in minutes) divided by Month total minutes
+    
+    durability
+      - represents the odds of losing data
+      - preventing data loss is a shared responsibility
+
+      How?
+        Cloud Storage
+          - 11 9'S
+          - turn versioning on(you)
+
+        Disks
+          schedule snapshot jobs(you)
+
+        Cloud SQL
+          - automated machine backups, point in time recovery and failover server
+          - run SQL DB backups(you)
+
+        Spanner
+          - automatic replication
+          - run export jobs(you)
+
+        Firestore
+          - automatic replication
+          - run export jobs(you)
+
+    Amt of data and number of reads and writes
+      - service scale horizontally by adding nodes
+        - bigtable
+        - Spanner
+      - service scale vertically by making machines larger
+        - cloud sql
+        - Memorystore
+      - services scale automatically w/ no limits
+        - GCS
+        - bigquery
+        - firstore
+
+    Do you need strong consistency?
+      - strongly consistend DB update all copies of data w/in a transaction
+        - ensures everyone gets the latest copy of the data on reads
+          - storage
+          - cloud sql
+          - Spanner
+          - firestore
+      - eventually consistent DB update one copy of the data and the rest asynchronously
+        - can handle a large volume of writes
+          - bigtable
+          - memorystore replicas
+
+    Calculate the total cost per GB when choosing a storage service
+      - bigtable and spanner would be too expensive for storing smaller amounts of data
+      - firestore is less expensive per GB, but you also pay for reads and writes
+      - cloud storage is relatively cheap, but you can't run DB in storage
+      - bigquery storage is relatively cheap, but doesn't provide fast access and records and you have to pay for running queries
+    
+    Activity 6: Defining storage characteristics
+      - determine storage characteristics for each of your case-study services
+
+      Sample: (online travel portal)
+        Account service
+          structured
+            SQL
+              Strong
+                GB size
+                  Read/write
+        
+        inventory
+          structured
+            noSQL
+              Strong
+                GB size
+                  Read/write
+        
+        inventory uploads
+          uistructured
+            n/a
+              n/a
+                GB size
+                  Read only
+
+        orders
+          structured
+            SQL
+              Strong
+                TB size
+                  Read/write
+        Analytics
+          structured
+            SQL
+              Eventual
+                TB size
+                  Read only
+
+    Choosing Google Cloud Storage and Data Solution
+      Portfolio
+
+      Decision characteristics
+
+      latency
+
+      for smaller or scheduled data uploads use Cloud Storage transfer service
+        import online data to cloud storage
+          S3
+          http/https location
+          transfer between Cloud storage buckets
+
+        scheduled jobs
+          - one time or recurring, import at a scheduled time of day
+          - options for delete objects not in source or after transfer
+          - filter on file name, creation date
+
+      use the storage transfer service for on-premises data for large-scale uploads from your data center
+        - install on-premise agent ony our servers
+        - agent runs in a docker container
+        - setup conn to google cloud
+        - req a minimum of 300 Mbps BW
+        - scales to billions of files and 100s of TBs
+        - secure
+        - automatic retires
+        - logged
+        - easy to monitor via the google cloud console
+    
+     Use Transfer Appliance for large amt of data
+      - rackable device upto 1PB shipped to Google
+      - use Transfer Appliance if uploading your data would take too long
+
+      Secure:
+        - you control the encryption key
+        - google securely erases the appliance after use
+
+      Steps
+        1. Request transfer appliance
+        2. encrypt and copy your data
+        3. ship it back to google
+        4. google loads the data
+        5. you decrypt your data
+
+    Activity 7: Choosing GCS and data services  
+      - choose the storage services for each of your case-study services
+
+      Sample
+        accoutn service
+          - cloud SQL
+        inventory
+          - firestore
+        inventory uploads
+          - cloud storage
+        orders
+          - cloud SQL
+        analytics
+          - bigquery
+
+    Quiz
+      1. Currently, you are using Firestore to store information about products, reviews, and user sessions. You'd like to speed up data access in a simple, cost-effective way. What would you recommend?
+        - Cache the data using Memorystore.
+          - 
+      2. You want to analyze sales trends. To help achieve this, you want to combine data from your on-premises Oracle database with Google Analytics data and your web server logs. Where might you store the data so it is both easy to query and cost-effective?
+        - BigQuery
+          - provides infra to ingest data from many different sources
+
+      3. You are a global financial services company with users all over the world. You need a database service that can provide low latency worldwide with strong consistency. Which service might you choose?
+        - Spanner
+
+      4. You need to store user preferences, product information, and reviews for a website you are building. There won't be a huge amount of data. What would be a simple, cost-effective, managed solution?
+        - Firestore
+
+Google Cloud and Hybrid network Architecture
+  - discuss Google Cloud network architectures, including hybrid architectures.
+
+  Learning Objectives
+    1. Discuss the design of VPC networks to optimize for cost, security, and performance.
+    2. Describe/configure how global and regional load balancers provide access to services.
+    3. Leverage Cloud CDN to provide lower latency and decrease network egress
+    4. evaluate network architecture using network intelligence center
+    5. Connect networks using peering, VPNS and Cloud Interconect
+    6. Define hybrid networks between Google Cloud and on-premises data centers using Cloud Interconnect.
+  
+  Designing Google Cloud Networks
+    Points of presence(PoPs)
+      - where google network is connected to the rest of the internet
+
+    VPC networks 
+      - global
+    
+      Subnet
+        - regional
+
+        custom subnets
+          - ip add cannot overlap
+          - same vpc network can comm via internal IP regardless of subnet region
+          - subnets don't need to be derived from a single CIDR block
+          - subnets are expandable w/o down time
+          - ip aliasing or secondary rance can be set on the subnet
+
+    Shared VPC
+      - created in one project but can be shared and used by other projects
+      - requires an organization
+        - create the VPC in the host project
+        - shared VPC admin shares the VPC w/ other service projects
+      - allows centralized control over network configuration
+        - network admins configure subnets, firewall rules, routes, etc
+        - remove network admin rights from developers
+        - developers focus on machine creation and configuration in the shared network
+        - disable the creation of the default network using an organizational policy
+    Tips
+      - design your networks based on location, number of users, scalability, fault tolerance and other service requirements
+      - if global company choose regions around the world
+      - if users are close together, choose region closest to them plus a backup region
+      - a project can have multiple network
+      - a single VM can have multiple network interfaces connected to diff networks
+        - each network must have a subnet in the same region the VM is created in
+        - each interface must be attached to different VPC
+        - max of 8 interfaces per VM
+          - more vCPUs, more network interfaces are possible
+      - use shared VPC  for multi project networking to connect each instance in diff proj securely.
+    
+    Designing Google Cloud Load balancers
+      Types
+        1. Global: frontend for globally distributed users using single anycast IP addr
+          - global external http(s) LB
+          - external Http(s) LB(classic)
+          - external SSL proxy LB
+          - external TCP proxy LB
+        2. Regional
+          - regional external HTTP(S) LB
+          - internal HTTP(s) LB
+          - internal TCP proxy LB
+          - Internal TCP/UDP LB
+          - External TCP/UDP Network LB
+          - External Regional TCP Proxy LB
+      
+      Note
+        - internal LB
+          - andromeda software
+        - network LB
+          - maglev software
+      
+      Tips:
+        - use Cloud CDN for lower latency and decreased egress cost
+          -cache in cloud edge caching locations
+
+      Decision tree
+        - application LB
+          - HTTP traffic
+        - proxy network LB
+          - TLS offload, TCP proxy, support external LB to backends in multiple regions
+        - passthrough netwokr LB
+          - preserve client source IP add
+          - avoutd overhead proxies
+          - support add protocols like UDP, ESP, and ICMP
+        - UDP
+          - expose client IP addr to your app
+
+      Network Intelligence center
+        - can be used to visualize VPC network topology and test network connectivity
+
+    Activity 8: Defining network characteristics
+      - specify network characteristics for your case study VPC
+      - choose the type of LB required for each service
+
+      Sample
+        account service
+          internal only
+            tcp
+              not multiregional
+                so TCP LB
+        search
+          internet facing  
+            http
+             multi-regional
+              so HTTP LB
+
+        inventory
+          internal 
+            tcp
+             not multi-regional
+              so TCP LB
+
+        analytics
+          internet facing  
+            http
+             not multi-regional
+              so HTTP LB
+
+        web ui
+          internet facing  
+            http
+             multi-regional
+              so HTTP LB
+
+        orders
+          internal  
+            tcp
+              not multi-regional
+                so TCP LB
+
+  Connecting Networks
+    Activity 9: Diagramming your network
+
+  
+  Quiz: Google Cloud and Hybrid network Architecture
+    1. You want a secure, private connection between your network and a Google Cloud network. There is not a lot of volume, but the connection needs to be extremely reliable. Which configuration below would you choose? 
+      - VPN with high availability and Cloud Router.
+        - cost effective thatn Cloud interconnect cuz not a lot of volume
+        - VPN with Ipsec for private secure conn
+        - HA for reliability
+
+    2. You have a contract with a service provider to manage your Google VPC networks. You want to connect a network they own to your VPC. Both networks are in Google Cloud. Which Connection option should you choose?
+      - VPC peering
+        - both network in google cloud that's why vpc peering allows connets across two vpc networks whether they belong to same project/org
+    
+    3. You are a large bank deploying an online banking service to Google Cloud. The service needs high volume access to mainframe data on-premises. Which connectivity option would likely be most suitable?
+      - Cloud Interconnect
+        - provides high BW and lpw latency. it doesn't need encryption at the app layer
+
+    4. You are deploying a large-scale web application with users all over the world and a lot of static content. Which load balancer configuration would likely be the most suitable?
+      - HTTP load balancer with SSL configured and the CDN enabled.
+    
+
+
+Deploying Applications to Google Cloud
+  -  this module, we discuss the different options of deploying applications to Google Cloud. Google Cloud offers many possible deployment platforms, and the choice is not always immediately obvious.
+
+  Learning Objectives
+    - Choose the appropriate Google Cloud deployment service for your applications.
+    - Configure scalable, resilient infrastructure using Instance Templates and Groups.
+    - Orchestrate microservice deployments using Kubernetes and GKE.
+    - Leverage App Engine for a completely automated platform as a service (PaaS)
+
+  Google Cloud Infrastructure as a service
+
+  Google Cloud Deployment platforms
+
+  Lab and review:
+  
+    Qwiklab: Deploying Apps to Google Cloud
+      https://googlecoursera.qwiklabs.com/focuses/34983825?parent=lti_session
+      - deploy applications to the Google Cloud services App Engine, Kubernetes Engine, and Cloud Run.
 
       Objectives
       In this lab, you will learn how to perform the following tasks:
 
-        1. Create a Git repository
-        2. Create a simple Python application
-        3. Test Your web application in Cloud Shell
-        4. Define a Docker build
-        5. Manage Docker images with Cloud Build and Artifact Registry
-        6. Automate builds with triggers
-        7. Test your build changes
+        - Download a sample app from GitHub
+        - Deploy to App Engine
+        - Deploy to Kubernetes Engine
+        - Deploy to Cloud Run
 
-      //clone the gcloud source repos clone devops-repoe empty repository from cloud source repository
-        gcloud source repos clone devops-repo
-      
-      //create an Artifact Registry repository named devops-repo:
-        gcloud artifacts repositories create devops-repo \
-    --repository-format=docker \
-    --location=us-west1
+      Deploy App Engine
+        //Create app engine app
+          gcloud app create --region=us-west1
 
-      //To configure Docker to authenticate to the Artifact Registry Docker repository, enter the following command:
-        gcloud auth configure-docker us-west1-docker.pkg.dev
+        //deploy your app
+          gcloud app deploy --version=one --quiet
 
-      //To use Cloud Build to create the image and store it in Artifact Registry, type the following command:
-        gcloud builds submit --tag us-west1-docker.pkg.dev/$DEVSHELL_PROJECT_ID/devops-repo/devops-image:v0.1 .
+        //deploy secon version after modifying main.py
+          gcloud app deploy --version=two --no-promote --quiet
 
-  Key Storage Characteristics
+          //--no-promote parameter tells App Engine to continue serving requests with the old version. 
+          This allows you to test the new version before putting it into production.
 
-  Choosing Google Cloud Storage and Data Solution
+      Deploy to Kubernetes Engine
+        Kubernetes Engine
+          allows you to create a cluster of machines and deploy any number of applications to it. Kubernetes abstracts the details of managing machines and allows you to automate the deployment of your applications with simple CLI commands
 
-  Designing Google Cloud Networks
+        //test your connection
+          kubectl get nodes
 
-  Connecting Networks
+        kubernetes-config.yaml sample
+          https://googlecoursera.qwiklabs.com/focuses/34983825?parent=lti_session
 
-  Deploying Applications to Google Cloud
-    -  this module, we discuss the different options of deploying applications to Google Cloud. Google Cloud offers many possible deployment platforms, and the choice is not always immediately obvious.
+          Note: 
+            In the first section of the YAML file above, you are configuring a deployment. In this case, you are deploying 3 instances of your Python web app. 
+            Notice the image attribute. You will update this value with your image in a minute after you build it. 
+            In the second section, you are configuring a service of the type "load balancer". The load balancer will have a public IP address. 
+            Users will access your application through the load balancer.
+        
+        //create an Artifact Registry repository named devops-demo
+          gcloud artifacts repositories create devops-demo \
+  --repository-format=docker \
+  --location=us-west1
 
-    Learning Objectives
-      - Choose the appropriate Google Cloud deployment service for your applications.
-      - Configure scalable, resilient infrastructure using Instance Templates and Groups.
-      - Orchestrate microservice deployments using Kubernetes and GKE.
-      - Leverage App Engine for a completely automated platform as a service (PaaS)
+        //configure Docker to authenticate to the Artifact Registry Docker repository
+          gcloud auth configure-docker us-west1-docker.pkg.dev
 
-    Google Cloud Infrastructure as a service
+        //you need to build a Docker image
+          cd ~/gcp-course/training-data-analyst/courses/design-process/deploying-apps-to-gcp
+          gcloud builds submit --tag us-west1-docker.pkg.dev/$DEVSHELL_PROJECT_ID/devops-demo/devops-image:v0.2 .
 
-    Google Cloud Deployment platforms
+        //Image name
+          us-west1-docker.pkg.dev/qwiklabs-gcp-00-08f264cdc96d/devops-demo/devops-image:v0.2
+        
+        //Paste it to kubernetes-config.yaml
+          spec:
+            containers:
+            - name: devops-demo
+              image: us-west1-docker.pkg.dev/qwiklabs-gcp-00-08f264cdc96d/devops-demo/devops-image:v0.2
+              ports:
 
-    Lab and review:
+        //connect to kubectl instances
+          https://console.cloud.google.com/kubernetes/clusters/details/us-west1/autopilot-cluster-1/details?project=qwiklabs-gcp-00-08f264cdc96d
+
+        // check if connected
+          kubectl get nodes
+
+        //deploy your application in kubernetes
+          kubectl apply -f kubernetes-config.yaml
+
+        //confirm if three replicas of the app have been created
+          kubectl get pods
+
+        //confirm if load balancer is also created
+          kubectl get services
+        
+Design Reliable systems
+  - we talk about how to design reliable systems.
+
+  Learning Objectives
+    - Discuss the design of services to meet requirements for availability, durability, and scalability.
+    - Identify the failures to be avoided to implement a fault-tolerant system.
+
+  Key Performance Metrics
+
+  Designing for Reliability
+
+    Activity: Designing Reliable Scalable Applications
+
+  Disaster planning
+    Activity: Disaster planning
+
+Security
+  - in this module, we cover security. Google has been operating securely in the cloud for 20 years. There is a strong belief that security empowers innovation. The approach of the cloud architect should be that security should be put first; everything else will follow from this.
+
+  Learning Objectives
+    - Identify the best practices for designing secure systems.
+    - Discuss the use of organizational policies and folders to simplify cloud governance.
+    - Identify Google Cloud services that can be leveraged for access management.
+    - Identify Google Cloud services that can be leveraged to mitigate DDoS attacks.
+
+  Security Concepts
+
+  Securing People and Machine access
+    Securing People
+
+    Securing Machine access
+
+  Network Securit and Encryption
+    Network Security
+
+    Encryption
+
+    Activity: Modeling secure google cloud services
+
+  Review
+
+Maintenance and monitoring
+  - application maintenance and monitoring.
+
+  Learning Objectives
+    - Discuss different ways to manage new service versions.
+    - Describe how to forecast, monitor, and optimize service costs.
+    - Observe whether your services are meeting their SLOs using Cloud Monitoring and Dashboards.
+    - Use Uptime Checks to determine service availability.
+    - Respond to service outages using Cloud Monitoring Alerts.
+
+  Managing Versions and Cost planning
+    Managing Versions
+
+    Cost planning
+
+  Monitoring Dashboards
+
+    Activity: cost estimating and planning
     
-      Qwiklab: Deploying Apps to Google Cloud
-        https://googlecoursera.qwiklabs.com/focuses/34983825?parent=lti_session
-        - deploy applications to the Google Cloud services App Engine, Kubernetes Engine, and Cloud Run.
+  Lab and Review
+    
+    Qwiklab: Monitoring Applications in Google Cloud
+      https://googlecoursera.qwiklabs.com/focuses/35006172?parent=lti_session
+      - In this lab, you will deploy an application to Google Cloud and then use the tools provided by Google Cloud to monitor it. You will use Cloud Logging, Trace, Profiler, and dashboards and create uptime checks and alerting policies.
 
-        Objectives
-        In this lab, you will learn how to perform the following tasks:
+      Objectives
+      In this lab, you will learn how to perform the following tasks:
 
-          - Download a sample app from GitHub
-          - Deploy to App Engine
-          - Deploy to Kubernetes Engine
-          - Deploy to Cloud Run
+        1. Download a sample app from Github
+        2. Deploy an application to App Engine
+        3. Examine the Cloud logs
+        4. View Profiler information
+        5. Explore Cloud Trace
+        6. Monitor resources using dashboards
+        7. Create uptime checks and alerts
 
-        Deploy App Engine
-          //Create app engine app
-            gcloud app create --region=us-west1
+      //Turn profiler on
+      //main.py
+        try:
+          googlecloudprofiler.start(verbose=3)
+      except (ValueError, NotImplementedError) 
+      as exc:
+          print(exc)
 
-          //deploy your app
-            gcloud app deploy --version=one --quiet
+      //requirements.txt
+        google-cloud-profiler==3.0.6
+        protobuf==3.20.1
 
-          //deploy secon version after modifying main.py
-            gcloud app deploy --version=two --no-promote --quiet
+      //enable cloud profiler API 
+        gcloud services enable cloudprofiler.googleapis.com
 
-            //--no-promote parameter tells App Engine to continue serving requests with the old version. 
-            This allows you to test the new version before putting it into production.
+      //View Profiler information
+        The gray bar at the top represents the total amount of CPU time used by the program. 
+        The bars below represent the amount of CPU time used by the program's functions relative 
+        to the total. At this point, there is no traffic, so the chart is not very interesting. 
+        Throw some load at the application.
 
-        Deploy to Kubernetes Engine
-          Kubernetes Engine
-            allows you to create a cluster of machines and deploy any number of applications to it. Kubernetes abstracts the details of managing machines and allows you to automate the deployment of your applications with simple CLI commands
+      //web testing tool called apache bench
+        sudo apt update
+        sudo apt install apache2-utils -y
 
-          //test your connection
-            kubectl get nodes
+      //generate some traffic to your App Engine application:
+        ab -n 1000 -c 10 https://qwiklabs-gcp-03-d95cfb2e5f5c.uk.r.appspot.com/
 
-          kubernetes-config.yaml sample
-            https://googlecoursera.qwiklabs.com/focuses/34983825?parent=lti_session
-
-            Note: 
-              In the first section of the YAML file above, you are configuring a deployment. In this case, you are deploying 3 instances of your Python web app. 
-              Notice the image attribute. You will update this value with your image in a minute after you build it. 
-              In the second section, you are configuring a service of the type "load balancer". The load balancer will have a public IP address. 
-              Users will access your application through the load balancer.
-          
-          //create an Artifact Registry repository named devops-demo
-            gcloud artifacts repositories create devops-demo \
-    --repository-format=docker \
-    --location=us-west1
-
-          //configure Docker to authenticate to the Artifact Registry Docker repository
-            gcloud auth configure-docker us-west1-docker.pkg.dev
-
-          //you need to build a Docker image
-            cd ~/gcp-course/training-data-analyst/courses/design-process/deploying-apps-to-gcp
-            gcloud builds submit --tag us-west1-docker.pkg.dev/$DEVSHELL_PROJECT_ID/devops-demo/devops-image:v0.2 .
-
-          //Image name
-            us-west1-docker.pkg.dev/qwiklabs-gcp-00-08f264cdc96d/devops-demo/devops-image:v0.2
-          
-          //Paste it to kubernetes-config.yaml
-            spec:
-              containers:
-              - name: devops-demo
-                image: us-west1-docker.pkg.dev/qwiklabs-gcp-00-08f264cdc96d/devops-demo/devops-image:v0.2
-                ports:
-
-          //connect to kubectl instances
-            https://console.cloud.google.com/kubernetes/clusters/details/us-west1/autopilot-cluster-1/details?project=qwiklabs-gcp-00-08f264cdc96d
-
-          // check if connected
-            kubectl get nodes
-
-          //deploy your application in kubernetes
-            kubectl apply -f kubernetes-config.yaml
-
-          //confirm if three replicas of the app have been created
-            kubectl get pods
-
-          //confirm if load balancer is also created
-            kubectl get services
-          
-  Design Reliable systems
-    - we talk about how to design reliable systems.
-
-    Learning Objectives
-      - Discuss the design of services to meet requirements for availability, durability, and scalability.
-      - Identify the failures to be avoided to implement a fault-tolerant system.
-
-    Key Performance Metrics
-
-    Designing for Reliability
-
-      Activity: Designing Reliable Scalable Applications
-
-    Disaster planning
-      Activity: Disaster planning
-
-  Security
-    - in this module, we cover security. Google has been operating securely in the cloud for 20 years. There is a strong belief that security empowers innovation. The approach of the cloud architect should be that security should be put first; everything else will follow from this.
-
-    Learning Objectives
-      - Identify the best practices for designing secure systems.
-      - Discuss the use of organizational policies and folders to simplify cloud governance.
-      - Identify Google Cloud services that can be leveraged for access management.
-      - Identify Google Cloud services that can be leveraged to mitigate DDoS attacks.
-
-    Security Concepts
-
-    Securing People and Machine access
-      Securing People
-
-      Securing Machine access
-
-    Network Securit and Encryption
-      Network Security
-
-      Encryption
-
-      Activity: Modeling secure google cloud services
-
-    Review
-
-  Maintenance and monitoring
-    - application maintenance and monitoring.
-
-    Learning Objectives
-      - Discuss different ways to manage new service versions.
-      - Describe how to forecast, monitor, and optimize service costs.
-      - Observe whether your services are meeting their SLOs using Cloud Monitoring and Dashboards.
-      - Use Uptime Checks to determine service availability.
-      - Respond to service outages using Cloud Monitoring Alerts.
-
-    Managing Versions and Cost planning
-      Managing Versions
-
-      Cost planning
-
-    Monitoring Dashboards
-
-      Activity: cost estimating and planning
-      
-    Lab and Review
-      
-      Qwiklab: Monitoring Applications in Google Cloud
-        https://googlecoursera.qwiklabs.com/focuses/35006172?parent=lti_session
-        - In this lab, you will deploy an application to Google Cloud and then use the tools provided by Google Cloud to monitor it. You will use Cloud Logging, Trace, Profiler, and dashboards and create uptime checks and alerting policies.
-
-        Objectives
-        In this lab, you will learn how to perform the following tasks:
-
-          1. Download a sample app from Github
-          2. Deploy an application to App Engine
-          3. Examine the Cloud logs
-          4. View Profiler information
-          5. Explore Cloud Trace
-          6. Monitor resources using dashboards
-          7. Create uptime checks and alerts
-
-        //Turn profiler on
-        //main.py
-          try:
-            googlecloudprofiler.start(verbose=3)
-        except (ValueError, NotImplementedError) 
-        as exc:
-            print(exc)
-
-        //requirements.txt
-          google-cloud-profiler==3.0.6
-          protobuf==3.20.1
-
-        //enable cloud profiler API 
-          gcloud services enable cloudprofiler.googleapis.com
-
-        //View Profiler information
-         The gray bar at the top represents the total amount of CPU time used by the program. 
-         The bars below represent the amount of CPU time used by the program's functions relative 
-         to the total. At this point, there is no traffic, so the chart is not very interesting. 
-         Throw some load at the application.
-
-        //web testing tool called apache bench
-          sudo apt update
-          sudo apt install apache2-utils -y
-
-        //generate some traffic to your App Engine application:
-          ab -n 1000 -c 10 https://qwiklabs-gcp-03-d95cfb2e5f5c.uk.r.appspot.com/
-
-        //cloud Trace
-          The chart in the upper-left plots requests and how long they took. 
-          The table to the right shows a list of requests. 
-          If you select a request, more detail will be displayed at the bottom of the screen.
+      //cloud Trace
+        The chart in the upper-left plots requests and how long they took. 
+        The table to the right shows a list of requests. 
+        If you select a request, more detail will be displayed at the bottom of the screen.
